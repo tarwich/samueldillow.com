@@ -29,6 +29,21 @@ const skillGroups = [
 
 const currentExperience = [
   {
+    company: "ENG Aviation",
+    dates: "2025 - Present",
+    role: "Senior Software Engineer",
+    summary:
+      "Build the AI and aviation-operations platform behind a private-aviation SaaS, with a focus on LLM-driven workflows, pilot safety, regulatory exports, and scheduling correctness.",
+    bullets: [
+      "Built the pilot training tracking and currency system end-to-end. It alerts flight operations when pilots have training due or need additional takeoffs and landings to stay current, directly affecting safety, and lets coordinators see at a glance which pilots are actually available at the time of a planned flight versus which ones would lose currency before then.",
+      "Designed and shipped a unified AI Conversation Engine on LangChain that powers the assistant, inbox email parsing, and flight-log OCR through a single agent flow with shared token tracking and per-feature model routing.",
+      "Implemented RAG, conversation summarization for long contexts, and a one-shot extraction mode so structured AI work (OCR, inbox) can finish in a single model pass.",
+      "Built the TSA passenger secure vetting (eSF) export, including legacy `.xls` / BIFF8 generation, screening-state tracking, and CI guards on the bundled airport list so bookings produce uploads the TSA portal accepts.",
+      "Delivered scheduling and pricing features: drag-to-reorder pricing profile line items and trip legs, schedule-violation handling, and a demo-data generation system for sales and conferences.",
+    ],
+    tags: ["TypeScript", "React", "LangChain", "PostgreSQL", "AWS", "AI/LLM"],
+  },
+  {
     company: "CBWE Communications",
     dates: "2023 - Present",
     role: "Network Engineer",

@@ -418,10 +418,185 @@ a {
   color: var(--muted);
 }
 
+.resume-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 56px;
+  align-items: end;
+  padding: 76px 0 42px;
+}
+
+.resume-hero h1 {
+  max-width: 820px;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(3.6rem, 7vw, 7.2rem);
+  font-weight: 500;
+  line-height: 0.9;
+}
+
+.resume-snapshot,
+.resume-panel,
+.experience-card,
+.timeline-item {
+  border: 1px solid var(--line);
+  background: rgba(255, 253, 248, 0.78);
+}
+
+.resume-snapshot {
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.resume-snapshot dl {
+  display: grid;
+  gap: 18px;
+  margin: 18px 0 0;
+}
+
+.resume-snapshot div {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.resume-snapshot dt {
+  color: var(--rust);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.resume-snapshot dd {
+  margin: 5px 0 0;
+  color: var(--ink);
+}
+
+.resume-layout {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  padding: 32px 0 72px;
+}
+
+.resume-sidebar {
+  position: sticky;
+  top: 100px;
+  display: grid;
+  gap: 14px;
+}
+
+.resume-panel {
+  padding: 20px;
+}
+
+.resume-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resume-chip-list li {
+  border: 1px solid var(--line);
+  padding: 5px 8px;
+  background: rgba(247, 243, 234, 0.72);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+
+.resume-main {
+  display: grid;
+  gap: 56px;
+}
+
+.resume-section-heading span {
+  color: var(--steel);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+}
+
+.experience-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.experience-card {
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+
+.experience-card h3,
+.timeline-item h3 {
+  margin: 8px 0 0;
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.experience-card header p,
+.timeline-role {
+  margin: 8px 0 0;
+  color: var(--steel);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+}
+
+.experience-summary {
+  max-width: 780px;
+  margin: 20px 0 0;
+  color: #3e3932;
+  font-size: 1.04rem;
+}
+
+.experience-card ul {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.timeline-item {
+  padding: 22px;
+}
+
+.timeline-item h3 {
+  font-size: 1.55rem;
+}
+
+.timeline-item p:last-child {
+  color: var(--muted);
+}
+
+.print-button {
+  cursor: pointer;
+}
+
 @media (max-width: 900px) {
   .hero,
   .work-grid,
-  .resume-card {
+  .resume-card,
+  .resume-hero,
+  .resume-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .resume-sidebar {
+    position: static;
+  }
+
+  .timeline {
     grid-template-columns: 1fr;
   }
 
@@ -463,5 +638,71 @@ a {
 
   .writing-item {
     grid-template-columns: 1fr;
+  }
+
+  .resume-hero {
+    gap: 28px;
+    padding-top: 44px;
+  }
+
+  .resume-hero h1 {
+    font-size: clamp(3rem, 16vw, 4.2rem);
+  }
+
+  .resume-snapshot,
+  .resume-panel,
+  .experience-card,
+  .timeline-item {
+    padding: 18px;
+  }
+
+  .resume-layout {
+    gap: 24px;
+    padding-top: 16px;
+  }
+
+  .experience-card ul {
+    padding-left: 18px;
+  }
+}
+
+@media print {
+  .site-header,
+  .site-footer,
+  .actions,
+  .resume-sidebar {
+    display: none;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .site-shell {
+    width: 100%;
+  }
+
+  .resume-hero,
+  .resume-layout {
+    display: block;
+    padding: 0;
+  }
+
+  .resume-hero h1 {
+    font-size: 42px;
+  }
+
+  .lead,
+  .experience-summary {
+    font-size: 14px;
+  }
+
+  .experience-card,
+  .timeline-item,
+  .resume-snapshot {
+    break-inside: avoid;
+    border-color: #bbb;
+    box-shadow: none;
   }
 }

@@ -1,31 +1,261 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const highlights = [
+  "SaaS product engineering",
+  "Hosting and network operations",
+  "Defense and security systems",
+  "Team leadership and teaching",
+];
+
+const skillGroups = [
+  {
+    title: "Languages",
+    items: ["TypeScript", "JavaScript", "C#", "C++", "Java", "Python"],
+  },
+  {
+    title: "Product",
+    items: ["React", "Next.js", "Node.js", ".NET", "PostgreSQL", "Docker"],
+  },
+  {
+    title: "Infrastructure",
+    items: ["AWS", "Azure", "CI/CD", "Ubiquiti", "Microwave links", "Network monitoring"],
+  },
+  {
+    title: "Leadership",
+    items: ["Technical direction", "Teaching", "Mediation", "Conflict resolution"],
+  },
+];
+
+const currentExperience = [
+  {
+    company: "CBWE Communications",
+    dates: "2023 - Present",
+    role: "Network Engineer",
+    summary:
+      "Operate high-capacity wireless network infrastructure, maintain security and uptime standards, and build internal tooling for proactive network visibility.",
+    bullets: [
+      "Deploy and maintain point-to-point microwave systems using UniFi and Ubiquiti equipment, including links capable of multi-gigabit throughput.",
+      "Manage backbone monitoring, traffic filtering, and security-oriented operations against a 99.99% uptime target.",
+      "Built a full-stack network monitoring system with React, Next.js, and PostgreSQL for node health, performance metrics, and early degradation signals.",
+      "Maintain tower climber and rescue certifications for elevated infrastructure work.",
+    ],
+    tags: ["network", "hosting", "React", "PostgreSQL"],
+  },
+  {
+    company: "SammyD LLC",
+    dates: "2020 - Present",
+    role: "Owner and Principal Developer",
+    summary:
+      "Deliver custom software, cybersecurity education platforms, and cloud-hosted lab environments for practical technical training.",
+    bullets: [
+      "Designed and shipped a cybersecurity curriculum platform aligned with Texas education standards.",
+      "Built browser-accessible AWS lab environments where students can safely analyze malware behavior in isolated networks.",
+      "Created containerized hands-on training environments for threat analysis while preserving strong safety boundaries.",
+      "Contracted with Coherent Cyber to build an e-learning platform for cybersecurity instruction.",
+    ],
+    tags: ["SaaS", "AWS", "cybersecurity", "education"],
+  },
+  {
+    company: "Botisimo / OpTic Gaming",
+    dates: "2021 - 2023",
+    role: "Software Engineer",
+    summary:
+      "Built cross-platform creator tools, stream overlays, engagement workflows, and analytics for live-streaming communities.",
+    bullets: [
+      "Implemented chatbot and engagement systems across Twitch, Trovo, YouTube, Facebook, and Discord.",
+      "Developed polls, giveaways, synchronized multi-platform chat, rewards, donation goals, and OBS-compatible browser overlays.",
+      "Engineered customer analytics and marketing data workflows using Twilio Segment.",
+    ],
+    tags: ["streaming", "analytics", "overlays", "integrations"],
+  },
+  {
+    company: "LakePointe Church",
+    dates: "2021 - 2023",
+    role: "Dallas Pastoral Care",
+    summary:
+      "Served patients and families in Dallas hospitals through crisis care, grief support, and spiritual care coordination.",
+    bullets: [
+      "Led a spiritual care team serving across multiple hospitals.",
+      "Provided end-of-life support, crisis intervention, and grief care for patients and families.",
+      "Worked with medical staff to support holistic care across varied faith backgrounds.",
+    ],
+    tags: ["care", "leadership", "faith", "communication"],
+  },
+];
+
+const earlierExperience = [
+  {
+    company: "Focus Ministries / GoMethod",
+    dates: "2018 - 2019",
+    role: "Software Engineer",
+    note: "Built mission-trip management workflows and OCR-assisted document processing with Angular, React, C#, .NET, and cloud AI services.",
+  },
+  {
+    company: "VoidRay / Vega Studio",
+    dates: "2015 - 2018",
+    role: "Senior Technical Lead",
+    note: "Led pharmacy, security, forensic visualization, AWS network analysis, CI/CD, retail, and defense-facing software initiatives.",
+  },
+  {
+    company: "KloudNation",
+    dates: "2014 - 2015",
+    role: "Software Developer",
+    note: "Built auto-scaling web scraping, vendor analytics, and beacon-enabled mobile AR tooling.",
+  },
+  {
+    company: "VoidRay Co",
+    dates: "2012 - 2014",
+    role: "Senior Software Architect",
+    note: "Created healthcare, analytics, e-commerce migration, financial automation, and forensic visualization SaaS systems.",
+  },
+  {
+    company: "Symfono Corporation",
+    dates: "2009 - 2012",
+    role: "Software Development Lead",
+    note: "Led a small engineering/design team across early mobile AR, synchronization, iOS prototyping, C++ data streaming, and analytics products.",
+  },
+  {
+    company: "Odyssey Communications Group",
+    dates: "2009 - 2011",
+    role: "Software Developer",
+    note: "Built scoreboard, media streaming, migration, and server stability systems for customer-facing operations.",
+  },
+  {
+    company: "Pursuant Group",
+    dates: "2008 - 2009",
+    role: "Software Developer",
+    note: "Contributed to a flagship rich internet application and helped spread Flex/PureMVC knowledge across a large development team.",
+  },
+  {
+    company: "United States Air Force",
+    dates: "2002 - 2008",
+    role: "C4ISR Project Manager",
+    note: "Managed mission-critical communications, airfield security, aircraft monitoring, telecom records, IPv6 preparation, and technical instruction.",
+  },
+  {
+    company: "Cantex Management",
+    dates: "2000 - 2008",
+    role: "Information Technology Specialist",
+    note: "Administered Windows Server infrastructure, surveillance systems, and training tools across multi-state retail operations.",
+  },
+  {
+    company: "Nortel Networks",
+    dates: "1999 - 2000",
+    role: "Training and Documentation Intern",
+    note: "Automated document conversion, internal tools, SGML workflows, print operations, and help-desk support systems.",
+  },
+];
 ---
 
-<BaseLayout title="Resume | Samuel Dillow">
-  <section class="site-shell page-title">
-    <h1>Resume</h1>
-    <p>
-      A dedicated page for the formal version: experience, technical strengths,
-      product work, infrastructure work, and relevant links.
-    </p>
+<BaseLayout
+  title="Resume | Samuel Dillow"
+  description="Resume for Samuel Dillow: software, SaaS, hosting, network operations, leadership, and Christian care."
+>
+  <section class="site-shell resume-hero">
+    <div>
+      <div class="identity-line">// Resume</div>
+      <h1>Builder of useful systems.</h1>
+      <p class="lead">
+        Senior software engineer, SaaS builder, hosting operator, and technical
+        lead with experience spanning defense systems, cybersecurity education,
+        creator tools, network infrastructure, pastoral care, and practical
+        product delivery.
+      </p>
+      <div class="actions">
+        <a class="button" href="https://github.com/tarwich">GitHub</a>
+        <a class="button" href="mailto:samuel@samueldillow.com">Contact</a>
+        <button class="button print-button" type="button" onclick="window.print()">Print</button>
+      </div>
+    </div>
+    <aside class="resume-snapshot" aria-label="Resume snapshot">
+      <div class="mono-label">Snapshot</div>
+      <dl>
+        <div>
+          <dt>Focus</dt>
+          <dd>SaaS, infrastructure, security, teaching</dd>
+        </div>
+        <div>
+          <dt>Current</dt>
+          <dd>Network engineering and custom software</dd>
+        </div>
+        <div>
+          <dt>Languages</dt>
+          <dd>English, Spanish</dd>
+        </div>
+      </dl>
+    </aside>
   </section>
-  <section class="site-shell list-page">
-    <article class="list-card">
-      <div class="mono-label">Current</div>
-      <h2>Software, SaaS, and Hosting</h2>
-      <p>
-        Replace this with the current resume content from the existing site or a
-        canonical PDF once you decide what should be public.
-      </p>
-    </article>
-    <article class="list-card">
-      <div class="mono-label">Skills</div>
-      <h2>Engineering Focus</h2>
-      <p>
-        Product engineering, backend systems, hosting operations, infrastructure,
-        automation, data modeling, and pragmatic software delivery.
-      </p>
-    </article>
+
+  <section class="site-shell resume-layout">
+    <aside class="resume-sidebar">
+      <section class="resume-panel">
+        <div class="mono-label">Highlights</div>
+        <ul class="resume-chip-list">
+          {highlights.map((highlight) => <li>{highlight}</li>)}
+        </ul>
+      </section>
+
+      {
+        skillGroups.map((group) => (
+          <section class="resume-panel">
+            <div class="mono-label">{group.title}</div>
+            <ul class="resume-chip-list">
+              {group.items.map((item) => <li>{item}</li>)}
+            </ul>
+          </section>
+        ))
+      }
+    </aside>
+
+    <div class="resume-main">
+      <section>
+        <div class="section-heading resume-section-heading">
+          <h2>Current Work</h2>
+          <span>2020 - Present</span>
+        </div>
+        <div class="experience-stack">
+          {
+            currentExperience.map((job) => (
+              <article class="experience-card">
+                <header>
+                  <div>
+                    <div class="mono-label">{job.dates}</div>
+                    <h3>{job.company}</h3>
+                    <p>{job.role}</p>
+                  </div>
+                </header>
+                <p class="experience-summary">{job.summary}</p>
+                <ul>
+                  {job.bullets.map((bullet) => <li>{bullet}</li>)}
+                </ul>
+                <div class="tag-row">
+                  {job.tags.map((tag) => <span class="tag">{tag}</span>)}
+                </div>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="resume-history">
+        <div class="section-heading resume-section-heading">
+          <h2>Earlier Experience</h2>
+          <span>1999 - 2019</span>
+        </div>
+        <div class="timeline">
+          {
+            earlierExperience.map((job) => (
+              <article class="timeline-item">
+                <div class="mono-label">{job.dates}</div>
+                <h3>{job.company}</h3>
+                <p class="timeline-role">{job.role}</p>
+                <p>{job.note}</p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+    </div>
   </section>
 </BaseLayout>

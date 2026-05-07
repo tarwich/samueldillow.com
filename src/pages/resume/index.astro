@@ -3,10 +3,76 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const highlights = [
-  "SaaS product engineering",
-  "Hosting and network operations",
-  "Defense and security systems",
-  "Team leadership and teaching",
+  "Part-time and freelance availability",
+  "Senior product engineering",
+  "AI workflow implementation",
+  "Infrastructure and hosting operations",
+];
+
+const recruiterStats = [
+  { value: "20+", label: "years across software, infrastructure, and security" },
+  { value: "0->1", label: "SaaS products, internal tools, and training platforms" },
+  { value: "AI", label: "LangChain assistants, OCR workflows, and data-grounded chat" },
+];
+
+const showcaseSkills = ["Full stack", "Node.js", "PostgreSQL", "AWS", "AI"];
+
+const skillFilters = [
+  {
+    label: "Full stack",
+    terms: [
+      "full stack",
+      "React",
+      "Next.js",
+      "Node.js",
+      ".NET",
+      "PostgreSQL",
+      "backend",
+      "frontend",
+    ],
+  },
+  { label: "TypeScript", terms: ["TypeScript", "JavaScript"] },
+  { label: "JavaScript", terms: ["JavaScript", "Node.js", "React", "Next.js"] },
+  { label: "C#", terms: ["C#", ".NET"] },
+  { label: "C++", terms: ["C++", "PTAM", "binary data"] },
+  { label: "Java", terms: ["Java", "programming classes"] },
+  { label: "Python", terms: ["Python"] },
+  { label: "React", terms: ["React", "Next.js"] },
+  { label: "Next.js", terms: ["Next.js"] },
+  { label: "Node.js", terms: ["Node.js", "JavaScript"] },
+  { label: ".NET", terms: [".NET", "C#"] },
+  { label: "PostgreSQL", terms: ["PostgreSQL"] },
+  { label: "Docker", terms: ["Docker"] },
+  { label: "AWS", terms: ["AWS", "cloud"] },
+  { label: "Azure", terms: ["Azure"] },
+  { label: "CI/CD", terms: ["CI/CD", "automated testing", "weekly releases"] },
+  { label: "Ubiquiti", terms: ["Ubiquiti", "wireless links"] },
+  { label: "Microwave links", terms: ["microwave", "wireless links", "long-range wireless"] },
+  { label: "Network monitoring", terms: ["network monitoring", "node health", "performance metrics"] },
+  { label: "AI", terms: ["AI", "LangChain", "OCR", "LLM", "natural-language"] },
+  { label: "SaaS", terms: ["SaaS", "platform", "subscription"] },
+  { label: "Infrastructure", terms: ["infrastructure", "network", "hosting", "CI/CD", "server"] },
+  { label: "Security", terms: ["security", "DoD", "forensic", "threat", "cybersecurity", "HIPAA"] },
+  { label: "Leadership", terms: ["lead", "leadership", "team", "teaching", "trained", "training"] },
+  { label: "Technical direction", terms: ["architecture", "architect", "technical lead", "lead"] },
+  { label: "Teaching", terms: ["teaching", "trained", "training", "classes", "curriculum"] },
+  { label: "Mediation", terms: ["mediation", "pastoral care", "crisis care"] },
+  { label: "Conflict resolution", terms: ["conflict", "crisis", "care"] },
+];
+
+const engagementTypes = [
+  {
+    title: "Fractional senior engineer",
+    body: "Part-time product delivery, code review, architecture direction, and execution support for small teams.",
+  },
+  {
+    title: "Freelance builds",
+    body: "Focused web apps, SaaS features, automation, dashboards, integrations, and internal tools.",
+  },
+  {
+    title: "Operations cleanup",
+    body: "Hosting, CI/CD, observability, network troubleshooting, AWS deployments, and reliability work.",
+  },
 ];
 
 const skillGroups = [
@@ -16,7 +82,7 @@ const skillGroups = [
   },
   {
     title: "Product",
-    items: ["React", "Next.js", "Node.js", ".NET", "PostgreSQL", "Docker"],
+    items: ["Full stack", "React", "Next.js", "Node.js", ".NET", "PostgreSQL", "Docker"],
   },
   {
     title: "Infrastructure",
@@ -30,6 +96,41 @@ const skillGroups = [
 
 const allEntries = await getCollection("resume");
 
+const normalize = (value: string) =>
+  value.toLowerCase().replace(/[^a-z0-9+#.]+/g, " ").trim();
+
+const jobText = (job: {
+  company: string;
+  role: string;
+  summary: string;
+  bullets: string[];
+  tags: string[];
+}) =>
+  normalize([
+    job.company,
+    job.role,
+    job.summary,
+    ...job.bullets,
+    ...job.tags,
+  ].join(" "));
+
+const getMatchingSkills = (job: {
+  company: string;
+  role: string;
+  summary: string;
+  bullets: string[];
+  tags: string[];
+}) => {
+  const text = jobText(job);
+  const searchableText = ` ${text} `;
+
+  return skillFilters
+    .filter((skill) =>
+      skill.terms.some((term) => searchableText.includes(` ${normalize(term)} `)),
+    )
+    .map((skill) => skill.label);
+};
+
 const formatDateRange = (start: Date, end?: Date) => {
   const startYear = start.getFullYear();
   const endYear = end ? end.getFullYear() : null;
@@ -41,6 +142,7 @@ const sorted = allEntries
     ...entry.data,
     id: entry.id,
     dateLabel: entry.data.dateLabel ?? formatDateRange(entry.data.startDate, entry.data.endDate),
+    matchingSkills: getMatchingSkills(entry.data),
   }))
   .sort((a, b) => b.startDate.valueOf() - a.startDate.valueOf());
 
@@ -52,6 +154,9 @@ const isCurrent = (job: (typeof sorted)[number]) => {
 
 const currentExperience = sorted.filter(isCurrent);
 const earlierExperience = sorted.filter((job) => !isCurrent(job));
+
+const isShowcased = (job: (typeof sorted)[number]) =>
+  showcaseSkills.some((skill) => job.matchingSkills.includes(skill));
 
 const earlierStartYear = earlierExperience.length
   ? Math.min(...earlierExperience.map((j) => j.startDate.getFullYear()))
@@ -77,41 +182,66 @@ const currentRange = currentStartYear ? `${currentStartYear} - Present` : "";
 
 <BaseLayout
   title="Resume | Samuel Dillow"
-  description="Resume for Samuel Dillow: software, SaaS, hosting, network operations, leadership, and Christian care."
+  description="Resume for Samuel Dillow: senior software engineer available for part-time and freelance product engineering, AI workflows, SaaS, hosting, and infrastructure work."
 >
   <section class="site-shell resume-hero">
     <div>
-      <div class="identity-line">// Resume</div>
-      <h1>Builder of useful systems.</h1>
+      <div class="identity-line">// Available for part-time and freelance tech work</div>
+      <h1>Senior engineer for practical systems.</h1>
       <p class="lead">
-        Senior software engineer, SaaS builder, hosting operator, and technical
-        lead with experience spanning defense systems, cybersecurity education,
-        creator tools, network infrastructure, pastoral care, and practical
-        product delivery.
+        I help small teams ship practical software, AI workflows, SaaS features,
+        automation, and infrastructure fixes without needing a full-time hire.
+      </p>
+      <p class="resume-brief">
+        Most useful when the work crosses product code, backend systems, hosting,
+        and real operational constraints.
       </p>
       <div class="actions">
+        <a class="button primary-button" href="mailto:samuel@samueldillow.com">Start a conversation</a>
         <a class="button" href="https://github.com/tarwich">GitHub</a>
-        <a class="button" href="mailto:samuel@samueldillow.com">Contact</a>
+        <a class="button" href="/portfolio/">Portfolio</a>
         <button class="button print-button" type="button" onclick="window.print()">Print</button>
       </div>
     </div>
     <aside class="resume-snapshot" aria-label="Resume snapshot">
-      <div class="mono-label">Snapshot</div>
+      <div class="mono-label">Recruiter Snapshot</div>
       <dl>
         <div>
-          <dt>Focus</dt>
-          <dd>SaaS, infrastructure, security, teaching</dd>
+          <dt>Looking for</dt>
+          <dd>Part-time, freelance, and fractional senior engineering work</dd>
         </div>
         <div>
-          <dt>Current</dt>
-          <dd>Network engineering and custom software</dd>
+          <dt>Best fit</dt>
+          <dd>SaaS, AI workflows, internal tools, infrastructure, security-minded products</dd>
         </div>
         <div>
-          <dt>Languages</dt>
-          <dd>English, Spanish</dd>
+          <dt>Work style</dt>
+          <dd>Independent builder who can also lead, teach, and unblock teams</dd>
         </div>
       </dl>
     </aside>
+  </section>
+
+  <section class="site-shell resume-proof" aria-label="Recruiter proof points">
+    {
+      recruiterStats.map((stat) => (
+        <div class="resume-stat">
+          <strong>{stat.value}</strong>
+          <span>{stat.label}</span>
+        </div>
+      ))
+    }
+  </section>
+
+  <section class="site-shell engagement-grid" aria-label="Engagement types">
+    {
+      engagementTypes.map((type) => (
+        <article>
+          <div class="mono-label">{type.title}</div>
+          <p>{type.body}</p>
+        </article>
+      ))
+    }
   </section>
 
   <section class="site-shell resume-layout">
@@ -125,10 +255,18 @@ const currentRange = currentStartYear ? `${currentStartYear} - Present` : "";
 
       {
         skillGroups.map((group) => (
-          <section class="resume-panel">
+          <section class="resume-panel resume-filter-group">
             <div class="mono-label">{group.title}</div>
             <ul class="resume-chip-list">
-              {group.items.map((item) => <li>{item}</li>)}
+              {
+                group.items.map((item) => (
+                  <li>
+                    <button class="skill-filter" type="button" data-skill={item}>
+                      {item}
+                    </button>
+                  </li>
+                ))
+              }
             </ul>
           </section>
         ))
@@ -144,7 +282,10 @@ const currentRange = currentStartYear ? `${currentStartYear} - Present` : "";
         <div class="experience-stack">
           {
             currentExperience.map((job) => (
-              <article class="experience-card">
+              <article
+                class="experience-card filterable-experience"
+                data-skills={job.matchingSkills.join("|")}
+              >
                 <header>
                   <div>
                     <div class="mono-label">{job.dateLabel}</div>
@@ -176,17 +317,75 @@ const currentRange = currentStartYear ? `${currentStartYear} - Present` : "";
         </div>
         <div class="timeline">
           {
-            earlierExperience.map((job) => (
-              <article class="timeline-item">
-                <div class="mono-label">{job.dateLabel}</div>
-                <h3>{job.company}</h3>
-                <p class="timeline-role">{job.role}</p>
-                <p>{job.summary}</p>
-              </article>
-            ))
+            earlierExperience.map((job) => {
+              const showcased = isShowcased(job);
+
+              return (
+                <article
+                  class:list={[
+                    "timeline-item",
+                    "filterable-experience",
+                    { "timeline-item--showcase": showcased },
+                  ]}
+                  data-skills={job.matchingSkills.join("|")}
+                >
+                  <div class="timeline-item-topline">
+                    <div class="mono-label">{job.dateLabel}</div>
+                    {showcased && <span>Relevant depth</span>}
+                  </div>
+                  <h3>{job.company}</h3>
+                  <p class="timeline-role">{job.role}</p>
+                  <p>{job.summary}</p>
+                  {showcased && job.bullets.length > 0 && (
+                    <ul>
+                      {job.bullets.map((bullet) => <li>{bullet}</li>)}
+                    </ul>
+                  )}
+                  {showcased && job.tags.length > 0 && (
+                    <div class="tag-row">
+                      {job.tags.map((tag) => <span class="tag">{tag}</span>)}
+                    </div>
+                  )}
+                </article>
+              );
+            })
           }
         </div>
       </section>
     </div>
   </section>
+
+  <script>
+    const filterButtons = document.querySelectorAll<HTMLButtonElement>(".skill-filter");
+    const experiences = document.querySelectorAll<HTMLElement>(".filterable-experience");
+
+    const setActiveSkill = (skill: string | null) => {
+      document.body.dataset.activeSkill = skill ?? "";
+
+      filterButtons.forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.skill === skill);
+        button.setAttribute("aria-pressed", String(button.dataset.skill === skill));
+      });
+
+      experiences.forEach((experience) => {
+        const skills = experience.dataset.skills?.split("|") ?? [];
+        experience.classList.toggle(
+          "is-filter-dim",
+          Boolean(skill && !skills.includes(skill)),
+        );
+      });
+    };
+
+    filterButtons.forEach((button) => {
+      button.setAttribute("aria-pressed", "false");
+      button.addEventListener("click", () => {
+        const nextSkill =
+          document.body.dataset.activeSkill === button.dataset.skill
+            ? null
+            : button.dataset.skill ?? null;
+
+        setActiveSkill(nextSkill);
+      });
+    });
+  </script>
 </BaseLayout>

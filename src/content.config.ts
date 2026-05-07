@@ -34,4 +34,20 @@ const portfolio = defineCollection({
   }),
 });
 
-export const collections = { writing, projects, portfolio };
+const resume = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/resume" }),
+  schema: z.object({
+    company: z.string(),
+    role: z.string(),
+    startDate: z.date(),
+    endDate: z.date().optional(),
+    dateLabel: z.string().optional(),
+    summary: z.string(),
+    bullets: z.array(z.string()).default([]),
+    tags: z.array(z.string()).default([]),
+    emphasis: z.enum(["promoted", "normal", "subdued"]).default("normal"),
+    location: z.string().optional(),
+  }),
+});
+
+export const collections = { writing, projects, portfolio, resume };

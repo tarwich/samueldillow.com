@@ -1,0 +1,48 @@
+---
+import "../styles/site.css";
+
+const {
+  title = "Samuel Dillow",
+  description = "Software, SaaS, hosting infrastructure, writing, and faith.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-shell header-inner">
+        <a class="mark" href="/" aria-label="Samuel Dillow home">SD</a>
+        <nav class="nav" aria-label="Primary navigation">
+          <a href="/">Home</a>
+          <a href="/writing/">Writing</a>
+          <a href="/projects/">Projects</a>
+          <a href="/portfolio/">Portfolio</a>
+          <a href="/resume/">Resume</a>
+          <a href="mailto:samuel@samueldillow.com">Contact</a>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="site-shell">
+        <p>Samuel Dillow. Software, hosting, writing, and Christian thought.</p>
+      </div>
+    </footer>
+  </body>
+</html>

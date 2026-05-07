@@ -1,0 +1,141 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const writing = (await getCollection("writing"))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 4);
+
+const projects = (await getCollection("projects"))
+  .filter((entry) => entry.data.featured)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+---
+
+<BaseLayout>
+  <section class="site-shell hero">
+    <div>
+      <div class="identity-line">// Engineer. Builder. Writer. Believer.</div>
+      <h1>Samuel Dillow</h1>
+      <p class="lead">
+        I build SaaS products, run hosting infrastructure, write software, and
+        think seriously about faith, Scripture, and technology.
+      </p>
+      <div class="actions">
+        <a class="button" href="/writing/">Read writing</a>
+        <a class="button" href="/projects/">View projects</a>
+        <a class="button" href="/resume/">Resume</a>
+      </div>
+    </div>
+    <aside class="status-panel" aria-label="Site orientation">
+      <ol class="code-list">
+        <li><span>name:</span> Samuel Dillow</li>
+        <li><span>builder:</span> SaaS, Hosting, Infrastructure</li>
+        <li><span>writer:</span> Christian, Technical</li>
+        <li><span>focus:</span> Build useful things. Serve faithfully.</li>
+      </ol>
+    </aside>
+  </section>
+
+  <section class="site-shell section">
+    <div class="lanes">
+      <article class="lane">
+        <div class="mono-label">01</div>
+        <h2>Build</h2>
+        <p>
+          SaaS products, hosting operations, infrastructure, data systems, and
+          the practical work of making software reliable.
+        </p>
+        <div class="tag-row">
+          <span class="tag">product</span>
+          <span class="tag">infra</span>
+          <span class="tag">systems</span>
+        </div>
+      </article>
+      <article class="lane">
+        <div class="mono-label">02</div>
+        <h2>Write</h2>
+        <p>
+          Technical comments, business lessons, Christian essays, and Bible
+          reflections kept in a durable, database-free archive.
+        </p>
+        <div class="tag-row">
+          <span class="tag">tech</span>
+          <span class="tag">faith</span>
+          <span class="tag">Bible</span>
+        </div>
+      </article>
+      <article class="lane">
+        <div class="mono-label">03</div>
+        <h2>Play</h2>
+        <p>
+          Toy projects, little games, experiments, and the kind of work that is
+          useful because it keeps the edges sharp.
+        </p>
+        <div class="tag-row">
+          <span class="tag">games</span>
+          <span class="tag">experiments</span>
+          <span class="tag">notes</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="site-shell section">
+    <div class="section-heading">
+      <h2>Featured Work</h2>
+      <a href="/projects/">All projects</a>
+    </div>
+    <div class="work-grid">
+      <div class="card-grid">
+        {
+          projects.map((project) => (
+            <a class="entry-card" href={`/projects/${project.id}/`}>
+              <div class="thumb" aria-hidden="true" />
+              <div class="entry-body">
+                <h3>{project.data.title}</h3>
+                <p>{project.data.description}</p>
+                <div class="tag-row">
+                  {project.data.tags.slice(0, 3).map((tag) => <span class="tag">{tag}</span>)}
+                </div>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+      <aside>
+        <div class="section-heading">
+          <h2>Latest Writing</h2>
+          <a href="/writing/">Archive</a>
+        </div>
+        <div class="writing-list">
+          {
+            writing.map((post) => (
+              <a class="writing-item" href={`/writing/${post.id}/`}>
+                <span>{post.data.category}</span>
+                <div>
+                  <h3>{post.data.title}</h3>
+                  <p>{post.data.description}</p>
+                </div>
+              </a>
+            ))
+          }
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="site-shell section">
+    <div class="resume-card">
+      <div>
+        <div class="mono-label">Formal version</div>
+        <h2>Resume</h2>
+        <p>
+          Experience, skills, and professional history live on their own page so
+          the homepage can stay useful for more than recruiters.
+        </p>
+      </div>
+      <a class="button" href="/resume/">Open resume</a>
+    </div>
+  </section>
+</BaseLayout>

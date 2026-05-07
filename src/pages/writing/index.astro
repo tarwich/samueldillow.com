@@ -1,0 +1,29 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const posts = (await getCollection("writing")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<BaseLayout title="Writing | Samuel Dillow">
+  <section class="site-shell page-title">
+    <h1>Writing</h1>
+    <p>Technical notes, Christian essays, Bible reflections, and project write-ups.</p>
+  </section>
+  <section class="site-shell list-page">
+    {
+      posts.map((post) => (
+        <a class="list-card" href={`/writing/${post.id}/`}>
+          <div class="mono-label">{post.data.category}</div>
+          <h2>{post.data.title}</h2>
+          <p>{post.data.description}</p>
+          <div class="tag-row">
+            {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+        </a>
+      ))
+    }
+  </section>
+</BaseLayout>

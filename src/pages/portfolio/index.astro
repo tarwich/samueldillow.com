@@ -1,0 +1,30 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const work = (await getCollection("portfolio")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<BaseLayout title="Portfolio | Samuel Dillow">
+  <section class="site-shell page-title">
+    <h1>Portfolio</h1>
+    <p>Selected professional work, product decisions, and shipped outcomes.</p>
+  </section>
+  <section class="site-shell list-page">
+    {
+      work.map((item) => (
+        <article class="list-card">
+          <div class="mono-label">{item.data.role}</div>
+          <h2>{item.data.title}</h2>
+          <p>{item.data.description}</p>
+          <p><strong>Outcome:</strong> {item.data.outcome}</p>
+          <div class="tag-row">
+            {item.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+        </article>
+      ))
+    }
+  </section>
+</BaseLayout>

@@ -17,6 +17,24 @@ const recruiterStats = [
 
 const showcaseSkills = ["Full stack", "Node.js", "PostgreSQL", "AWS", "AI"];
 
+// Skill/tool click-to-filter is temporarily disabled.
+//
+// The feature lets readers click a chip in the sidebar to dim resume entries
+// that don't list that skill. Matching is text-based via skillFilters[].terms
+// against each entry's company/role/summary/bullets/tags.
+//
+// Why disabled: most resume entries don't carry enough tech-stack specificity
+// in their bullets/tags for this matching to be useful. Generic terms like
+// "team" or "lead" produce false positives on unrelated roles (e.g. pastoral
+// care matches "Leadership"), while real tech roles often don't explicitly
+// name the frameworks/languages used, producing false negatives. The result
+// is that any chip click dims either too much or too little of the page.
+//
+// To re-enable: set SKILL_FILTER_ENABLED to true once resume entries are
+// backfilled with per-role tech specifics (frameworks, languages, infra) and
+// the skillFilters terms are tightened to avoid generic-word collisions.
+const SKILL_FILTER_ENABLED = false;
+
 const skillFilters = [
   {
     label: "Full stack",
@@ -261,9 +279,13 @@ const currentRange = currentStartYear ? `${currentStartYear} - Present` : "";
               {
                 group.items.map((item) => (
                   <li>
-                    <button class="skill-filter" type="button" data-skill={item}>
-                      {item}
-                    </button>
+                    {SKILL_FILTER_ENABLED ? (
+                      <button class="skill-filter" type="button" data-skill={item}>
+                        {item}
+                      </button>
+                    ) : (
+                      item
+                    )}
                   </li>
                 ))
               }
@@ -355,37 +377,39 @@ const currentRange = currentStartYear ? `${currentStartYear} - Present` : "";
     </div>
   </section>
 
-  <script>
-    const filterButtons = document.querySelectorAll<HTMLButtonElement>(".skill-filter");
-    const experiences = document.querySelectorAll<HTMLElement>(".filterable-experience");
+  {SKILL_FILTER_ENABLED && (
+    <script>
+      const filterButtons = document.querySelectorAll<HTMLButtonElement>(".skill-filter");
+      const experiences = document.querySelectorAll<HTMLElement>(".filterable-experience");
 
-    const setActiveSkill = (skill: string | null) => {
-      document.body.dataset.activeSkill = skill ?? "";
+      const setActiveSkill = (skill: string | null) => {
+        document.body.dataset.activeSkill = skill ?? "";
+
+        filterButtons.forEach((button) => {
+          button.classList.toggle("is-active", button.dataset.skill === skill);
+          button.setAttribute("aria-pressed", String(button.dataset.skill === skill));
+        });
+
+        experiences.forEach((experience) => {
+          const skills = experience.dataset.skills?.split("|") ?? [];
+          experience.classList.toggle(
+            "is-filter-dim",
+            Boolean(skill && !skills.includes(skill)),
+          );
+        });
+      };
 
       filterButtons.forEach((button) => {
-        button.classList.toggle("is-active", button.dataset.skill === skill);
-        button.setAttribute("aria-pressed", String(button.dataset.skill === skill));
-      });
+        button.setAttribute("aria-pressed", "false");
+        button.addEventListener("click", () => {
+          const nextSkill =
+            document.body.dataset.activeSkill === button.dataset.skill
+              ? null
+              : button.dataset.skill ?? null;
 
-      experiences.forEach((experience) => {
-        const skills = experience.dataset.skills?.split("|") ?? [];
-        experience.classList.toggle(
-          "is-filter-dim",
-          Boolean(skill && !skills.includes(skill)),
-        );
+          setActiveSkill(nextSkill);
+        });
       });
-    };
-
-    filterButtons.forEach((button) => {
-      button.setAttribute("aria-pressed", "false");
-      button.addEventListener("click", () => {
-        const nextSkill =
-          document.body.dataset.activeSkill === button.dataset.skill
-            ? null
-            : button.dataset.skill ?? null;
-
-        setActiveSkill(nextSkill);
-      });
-    });
-  </script>
+    </script>
+  )}
 </BaseLayout>

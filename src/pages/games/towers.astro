@@ -1,0 +1,78 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import "../../styles/towers.css";
+---
+
+<BaseLayout
+  title="Towers | Samuel Dillow"
+  description="A small Towers (Skyscrapers) puzzle in the browser."
+>
+  <section class="site-shell page-title">
+    <div class="mono-label">Play</div>
+    <h1>Towers</h1>
+    <p>
+      Each row and column must contain 1&ndash;5 once. Edge numbers say how many
+      towers are visible from that side &mdash; a taller tower hides any shorter
+      one behind it.
+    </p>
+  </section>
+
+  <section class="site-shell">
+    <div class="towers-app">
+      <div
+        id="towers-board"
+        class="towers-board"
+        role="grid"
+        aria-label="Towers board"
+      >
+      </div>
+      <div id="towers-status" class="towers-status"></div>
+      <div class="towers-controls">
+        <select id="towers-difficulty" title="Difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <input
+          id="towers-seed-input"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Seed"
+          title="Type a seed and press Enter to load it"
+        />
+        <button id="towers-newgame" title="Start a new game (random seed)">
+          New Game
+        </button>
+        <button id="towers-share" title="Copy a link to this puzzle">
+          Share
+        </button>
+        <button id="towers-undo" title="Undo (Ctrl+Z)">Undo</button>
+        <button id="towers-redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
+        <button id="towers-clear" title="Erase your entries">Clear</button>
+      </div>
+      <div class="towers-toggles">
+        <label class="towers-toggle">
+          <input type="checkbox" id="towers-auto-clues" />
+          Auto pencil-marks
+        </label>
+        <label class="towers-toggle">
+          <input type="checkbox" id="towers-auto-answer" checked />
+          Auto-answer singles
+        </label>
+      </div>
+      <p class="towers-hint">
+        Click a cell, then <kbd>1</kbd>&ndash;<kbd>5</kbd> to fill,
+        <kbd>Shift</kbd>+<kbd>1</kbd>&ndash;<kbd>5</kbd> to toggle a pencil-mark.
+        <kbd>0</kbd>/<kbd>Backspace</kbd> erases the answer (or candidates when the
+        cell is empty).
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { initTowers } from "../../scripts/towers/main";
+  initTowers();
+</script>

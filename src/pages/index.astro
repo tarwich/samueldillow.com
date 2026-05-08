@@ -10,6 +10,19 @@ const projects = (await getCollection("projects"))
   .filter((entry) => entry.data.featured)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 3);
+
+const isDst = new Date().getTimezoneOffset() < new Date("2024-11-03").getTimezoneOffset();
+const timezone = isDst ? "CDT" : "CST";
+
+const statusItems: { label: string; value: string }[] = [
+  { label: "name", value: "Samuel Dillow" },
+  { label: "role", value: "Senior Software Engineer" },
+  { label: "builder", value: "AI, SaaS, Early Teams" },
+  { label: "writer", value: "Technical, Chaplaincy" },
+  { label: "location", value: "Norman, Arkansas" },
+  { label: "timezone", value: timezone },
+  { label: "focus", value: "Help teams start well. Guide transition." },
+];
 ---
 
 <BaseLayout>
@@ -29,10 +42,13 @@ const projects = (await getCollection("projects"))
     </div>
     <aside class="status-panel" aria-label="Site orientation">
       <ol class="code-list">
-        <li><span>name:</span> Samuel Dillow</li>
-        <li><span>builder:</span> SaaS, Hosting, Infrastructure</li>
-        <li><span>writer:</span> Christian, Technical</li>
-        <li><span>focus:</span> Build useful things. Serve faithfully.</li>
+        {
+          statusItems.map(({ label, value }) => (
+            <li style={`--hang: ${label.length + 2}ch`}>
+              <span>{label}:</span> {value}
+            </li>
+          ))
+        }
       </ol>
     </aside>
   </section>

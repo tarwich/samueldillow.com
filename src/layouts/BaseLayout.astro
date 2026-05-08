@@ -27,8 +27,9 @@ const {
       <div class="site-shell header-inner">
         <a class="mark" href="/" aria-label="Samuel Dillow home">SD</a>
         <nav class="nav" aria-label="Primary navigation">
-          <a href="/">Home</a>
+          <a class="is-active" href="/">Home</a>
           <a href="/writing/">Writing</a>
+          <a href="/#projects">Projects</a>
           <a href="/portfolio/">Portfolio</a>
           <a href="/resume/">Resume</a>
           <a href="mailto:samuel@samueldillow.com">Contact</a>
@@ -39,8 +40,12 @@ const {
       <slot />
     </main>
     <footer class="site-footer">
-      <div class="site-shell">
-        <p>Samuel Dillow. Software, hosting, writing, and Christian thought.</p>
+      <div class="site-shell footer-inner">
+        <span>$ whoami</span>
+        <a href="mailto:samuel@samueldillow.com">samuel@samueldillow.com</a>
+        <span>~</span>
+        <span>builder • writer • operator</span>
+        <span class="footer-motto">Soli Deo Gloria.</span>
       </div>
     </footer>
   </body>

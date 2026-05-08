@@ -11,7 +11,6 @@ tags:
   - browser
   - puzzle
 featured: true
-status: Live
 playUrl: /games/towers/
 ---
 

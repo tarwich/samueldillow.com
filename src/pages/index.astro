@@ -1,11 +1,24 @@
 ---
 import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const entries = (await getCollection("entries"))
+type Entry = CollectionEntry<"entries">;
+type WritingEntry = Entry & { data: Extract<Entry["data"], { type: "writing" }> };
+
+function isWritingEntry(entry: Entry): entry is WritingEntry {
+  return entry.data.type === "writing";
+}
+
+const allEntries = (await getCollection("entries"))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const entries = allEntries
   .filter((entry) => entry.data.featured)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 6);
+
+const featuredProjects = entries.filter((entry) => entry.data.type !== "writing").slice(0, 3);
+const latestWriting = allEntries.filter(isWritingEntry).slice(0, 5);
 
 function entryLabel(entry: (typeof entries)[number]) {
   if (entry.data.type === "writing") return entry.data.category;
@@ -18,6 +31,13 @@ function entryHref(entry: (typeof entries)[number]) {
   if (entry.data.type === "portfolio") return entry.data.caseStudyUrl ?? "/portfolio/";
   return entry.data.playUrl;
 }
+
+const dateFormatter = new Intl.DateTimeFormat("en", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
 
 const isDst = new Date().getTimezoneOffset() < new Date("2024-11-03").getTimezoneOffset();
 const timezone = isDst ? "CDT" : "CST";
@@ -43,9 +63,18 @@ const statusItems: { label: string; value: string }[] = [
         think seriously about faith, Scripture, and technology.
       </p>
       <div class="actions">
-        <a class="button" href="/writing/">Read writing</a>
-        <a class="button" href="/portfolio/">View portfolio</a>
-        <a class="button" href="/resume/">Resume</a>
+        <a class="button button--sage" href="/writing/">
+          <span aria-hidden="true">□</span>
+          Read writing
+        </a>
+        <a class="button button--steel" href="/#projects">
+          <span aria-hidden="true">&lt;/&gt;</span>
+          View projects
+        </a>
+        <a class="button button--rust" href="/resume/">
+          <span aria-hidden="true">▤</span>
+          Resume
+        </a>
       </div>
     </div>
     <aside class="status-panel" aria-label="Site orientation">
@@ -63,84 +92,82 @@ const statusItems: { label: string; value: string }[] = [
 
   <section class="site-shell section">
     <div class="lanes">
-      <article class="lane">
-        <div class="mono-label">01</div>
+      <article class="lane lane--build">
+        <div class="lane-icon" aria-hidden="true">□</div>
         <h2>Build</h2>
         <p>
-          SaaS products, hosting operations, infrastructure, data systems, and
-          the practical work of making software reliable.
+          I build SaaS products and operate hosting infrastructure. Systems,
+          performance, reliability.
         </p>
-        <div class="tag-row">
-          <span class="tag">product</span>
-          <span class="tag">infra</span>
-          <span class="tag">systems</span>
-        </div>
+        <p class="lane-command">&gt; ship. scale. sustain.</p>
       </article>
-      <article class="lane">
-        <div class="mono-label">02</div>
+      <article class="lane lane--write">
+        <div class="lane-icon" aria-hidden="true">✎</div>
         <h2>Write</h2>
         <p>
-          Technical comments, business lessons, Christian essays, and Bible
-          reflections kept in a durable, database-free archive.
+          Technical notes, Christian essays, and Bible reflections on the
+          intersection of faith and technology.
         </p>
-        <div class="tag-row">
-          <span class="tag">tech</span>
-          <span class="tag">faith</span>
-          <span class="tag">Bible</span>
-        </div>
+        <p class="lane-command">&gt; think. read. articulate.</p>
       </article>
-      <article class="lane">
-        <div class="mono-label">03</div>
+      <article class="lane lane--play">
+        <div class="lane-icon" aria-hidden="true">⌘</div>
         <h2>Play</h2>
         <p>
-          Small games, experiments, and playful work that keeps the archive from
-          becoming only prose and resume material.
+          Small games, experiments, and toy projects to explore ideas and have
+          fun.
         </p>
-        <div class="tag-row">
-          <span class="tag">games</span>
-          <span class="tag">experiments</span>
-          <span class="tag">notes</span>
-        </div>
+        <p class="lane-command">&gt; explore. experiment. enjoy.</p>
       </article>
     </div>
   </section>
 
-  <section class="site-shell section">
-    <div class="section-heading">
-      <h2>Featured Entries</h2>
-      <a href="/writing/">Writing archive</a>
-    </div>
-    <div class="card-grid entry-grid">
-      {
-        entries.map((entry) => (
-          <a class="entry-card" href={entryHref(entry)}>
-            <img class="thumb" src={entry.data.image.src} alt={entry.data.image.alt} loading="lazy" />
-            <div class="entry-body">
-              <div class="mono-label">{entry.data.type}</div>
-              <h3>{entry.data.title}</h3>
-              <p>{entry.data.description}</p>
-              <div class="tag-row">
-                <span class="tag">{entryLabel(entry)}</span>
-                {entry.data.tags.slice(0, 2).map((tag) => <span class="tag">{tag}</span>)}
-              </div>
-            </div>
-          </a>
-        ))
-      }
-    </div>
-  </section>
-
-  <section class="site-shell section">
-    <div class="resume-card">
-      <div>
-        <div class="mono-label">Formal version</div>
-        <h2>Resume</h2>
-        <p>
-          Experience, skills, and professional history live on their own page so
-          the homepage can stay useful for more than recruiters.
-        </p>
+  <section id="projects" class="site-shell section home-work">
+    <div class="project-column">
+      <div class="section-heading section-heading--compact">
+        <h2>Featured projects</h2>
+        <a href="/portfolio/">View all projects →</a>
       </div>
-      <a class="button" href="/resume/">Open resume</a>
+      <div class="card-grid entry-grid">
+        {
+          featuredProjects.map((entry) => (
+            <a class="entry-card" href={entryHref(entry)}>
+              <img class="thumb" src={entry.data.image.src} alt={entry.data.image.alt} loading="lazy" />
+              <div class="entry-body">
+                <h3>{entry.data.title}</h3>
+                <p>{entry.data.description}</p>
+                <div class="tag-row">
+                  <span class="tag">{entryLabel(entry)}</span>
+                  {entry.data.tags.slice(0, 2).map((tag) => <span class="tag">{tag}</span>)}
+                </div>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="writing-column">
+      <div class="section-heading section-heading--compact">
+        <h2>Latest writing</h2>
+        <a href="/writing/">View all writing →</a>
+      </div>
+      <div class="home-writing-list">
+        {
+          latestWriting.map((entry) => (
+            <a class="home-writing-item" href={entryHref(entry)}>
+              <span>{entry.data.category}</span>
+              <div>
+                <h3>{entry.data.title}</h3>
+                <p>{entry.data.description}</p>
+              </div>
+              <time datetime={entry.data.pubDate.toISOString()}>
+                {dateFormatter.format(entry.data.pubDate)}
+              </time>
+            </a>
+          ))
+        }
+      </div>
     </div>
   </section>
 </BaseLayout>

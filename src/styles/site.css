@@ -230,13 +230,14 @@ a {
     padding-inline-start: calc(var(--hang, 0) + 1rem);
     text-indent: calc(-1 * var(--hang, 0));
     margin-left: -1.5rem;
+    list-style-type: decimal-leading-zero;
 
     span {
       color: var(--sage);
     }
   }
 
-  li::marker {
+  ::marker {
     color: var(--line-strong);
     font-size: 0.72rem;
   }

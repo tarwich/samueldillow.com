@@ -1,6 +1,14 @@
 ---
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
+import {
+  BookOpen,
+  CodeXml,
+  FileText,
+  Gamepad2,
+  Hammer,
+  Pencil,
+} from "lucide-static";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 type Entry = CollectionEntry<"entries">;
@@ -64,15 +72,15 @@ const statusItems: { label: string; value: string }[] = [
       </p>
       <div class="actions">
         <a class="button button--sage" href="/writing/">
-          <span aria-hidden="true">□</span>
+          <Fragment set:html={BookOpen.replace('<svg', '<svg class="button-icon" aria-hidden="true"')} />
           Read writing
         </a>
         <a class="button button--steel" href="/#projects">
-          <span aria-hidden="true">&lt;/&gt;</span>
+          <Fragment set:html={CodeXml.replace('<svg', '<svg class="button-icon" aria-hidden="true"')} />
           View projects
         </a>
         <a class="button button--rust" href="/resume/">
-          <span aria-hidden="true">▤</span>
+          <Fragment set:html={FileText.replace('<svg', '<svg class="button-icon" aria-hidden="true"')} />
           Resume
         </a>
       </div>
@@ -93,7 +101,7 @@ const statusItems: { label: string; value: string }[] = [
   <section class="site-shell section">
     <div class="lanes">
       <article class="lane lane--build">
-        <div class="lane-icon" aria-hidden="true">□</div>
+        <div class="lane-icon" aria-hidden="true" set:html={Hammer} />
         <h2>Build</h2>
         <p>
           I build SaaS products and operate hosting infrastructure. Systems,
@@ -102,7 +110,7 @@ const statusItems: { label: string; value: string }[] = [
         <p class="lane-command">&gt; ship. scale. sustain.</p>
       </article>
       <article class="lane lane--write">
-        <div class="lane-icon" aria-hidden="true">✎</div>
+        <div class="lane-icon" aria-hidden="true" set:html={Pencil} />
         <h2>Write</h2>
         <p>
           Technical notes, Christian essays, and Bible reflections on the
@@ -111,7 +119,7 @@ const statusItems: { label: string; value: string }[] = [
         <p class="lane-command">&gt; think. read. articulate.</p>
       </article>
       <article class="lane lane--play">
-        <div class="lane-icon" aria-hidden="true">⌘</div>
+        <div class="lane-icon" aria-hidden="true" set:html={Gamepad2} />
         <h2>Play</h2>
         <p>
           Small games, experiments, and toy projects to explore ideas and have

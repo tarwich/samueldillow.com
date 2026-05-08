@@ -438,6 +438,60 @@ a {
   color: var(--muted);
 }
 
+/* Images inside long-form entries (writing, project pages) */
+.list-card img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.6em auto;
+  border-radius: 4px;
+}
+
+.list-card figure {
+  margin: 1.6em 0;
+}
+
+.list-card figure img {
+  margin: 0;
+}
+
+.list-card figcaption {
+  font-size: 0.92rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 0.6em;
+}
+
+/* `<figure class="float">` — alternating-side wrap. First float goes left,
+   next right, next left, etc. Falls back to centered on narrow screens. */
+.list-card figure.float {
+  max-width: min(48%, 360px);
+  float: left;
+  margin: 0.4em 1.6em 0.9em 0;
+  shape-margin: 0.5em;
+}
+
+.list-card figure.float:nth-child(even of figure.float) {
+  float: right;
+  margin: 0.4em 0 0.9em 1.6em;
+}
+
+/* Clear trailing floats so the footer/next section doesn't ride up */
+.list-card::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+@media (max-width: 640px) {
+  .list-card figure.float,
+  .list-card figure.float:nth-child(even of figure.float) {
+    float: none;
+    max-width: 100%;
+    margin: 1.6em auto;
+  }
+}
+
 .resume-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;

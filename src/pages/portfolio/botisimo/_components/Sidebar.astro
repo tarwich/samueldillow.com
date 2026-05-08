@@ -1,0 +1,128 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  active?: string;
+}
+const { active = "dashboard" } = Astro.props;
+
+const sections = [
+  {
+    key: "analyze",
+    title: "ANALYZE",
+    color: "var(--sec-analyze)",
+    items: [
+      { id: "dashboard", label: "Dashboard", icon: "gauge", href: "/portfolio/botisimo/" },
+      { id: "audience", label: "Audience", icon: "user" },
+      { id: "stream-reports", label: "Stream Reports", icon: "pie" },
+    ],
+  },
+  {
+    key: "manage",
+    title: "MANAGE",
+    color: "var(--sec-manage)",
+    items: [
+      { id: "profile", label: "Profile", icon: "palette" },
+      { id: "chatbot", label: "Chatbot", icon: "chat" },
+      { id: "creator-site", label: "Creator Site", icon: "card" },
+      { id: "connections", label: "Connctions", icon: "link" },
+      { id: "membership", label: "Membership", icon: "membership" },
+      { id: "import", label: "Import", icon: "import" },
+    ],
+  },
+  {
+    key: "automate",
+    title: "AUTOMATE",
+    color: "var(--sec-automate)",
+    items: [
+      { id: "commands", label: "Commands", icon: "terminal", href: "/portfolio/botisimo/commands/" },
+      { id: "timers", label: "Timers", icon: "clock" },
+      { id: "videos", label: "Videos", icon: "video" },
+      { id: "campaigns", label: "Campaigns", icon: "calendar" },
+    ],
+  },
+  {
+    key: "engage",
+    title: "ENGAGE",
+    color: "var(--sec-engage)",
+    items: [
+      { id: "stream-overlays", label: "Stream Overlays", icon: "overlay" },
+      { id: "stream-frame", label: "Stream Frame", icon: "frame", href: "/portfolio/botisimo/stream-frame/" },
+      { id: "music-player", label: "Music Player", icon: "music" },
+      { id: "polls", label: "Polls", icon: "polls" },
+      { id: "giveaways", label: "Giveaways", icon: "gift" },
+      { id: "landing-pages", label: "Landing Pages", icon: "page" },
+    ],
+  },
+  {
+    key: "loyalty",
+    title: "LOYALTY",
+    color: "var(--sec-loyalty)",
+    items: [
+      { id: "points", label: "Points", icon: "heart" },
+      { id: "shop", label: "Shop", icon: "shop" },
+      { id: "purchases", label: "Purchases", icon: "purchase" },
+      { id: "calendar", label: "Calendar", icon: "calendar-plus" },
+    ],
+  },
+  {
+    key: "monetize",
+    title: "MONETIZE",
+    color: "var(--sec-monetize)",
+    items: [
+      { id: "sponsorship", label: "Sponsorship", icon: "handshake" },
+      { id: "donation-page", label: "Donation Page", icon: "money" },
+      { id: "referrals", label: "Referrals", icon: "user-plus" },
+    ],
+  },
+  {
+    key: "moderate",
+    title: "MODERATE",
+    color: "var(--sec-moderate)",
+    items: [
+      { id: "spam-filters", label: "Spam Filters", icon: "filter" },
+      { id: "chat-logs", label: "Chat Logs", icon: "logs" },
+      { id: "chat-monitor", label: "Chat Monitor", icon: "monitor" },
+      { id: "account-activity", label: "Account Activity", icon: "history" },
+    ],
+  },
+  {
+    key: "gamify",
+    title: "GAMIFY",
+    color: "var(--sec-gamify)",
+    items: [
+      { id: "dyneops", label: "Dyneops", icon: "puzzle" },
+    ],
+  },
+];
+---
+
+<aside class="bot-sidebar" aria-label="Botisimo navigation">
+  {sections.map((section) => (
+    <div class="bot-section" style={`--sec-color: ${section.color};`}>
+      <div class="bot-section__head">
+        <span>{section.title}</span>
+        <Icon name="chevron-up" />
+      </div>
+      <ul class="bot-section__list">
+        {section.items.map((item) => {
+          const isActive = item.id === active;
+          const isSoft = section.key === "automate" && isActive;
+          const cls = isActive
+            ? isSoft
+              ? "is-active is-active--soft"
+              : "is-active"
+            : "";
+          return (
+            <li>
+              <a href={item.href ?? "#"} class={cls}>
+                <Icon name={item.icon} />
+                <span>{item.label}</span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  ))}
+</aside>

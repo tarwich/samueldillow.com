@@ -1,0 +1,101 @@
+---
+import BotisimoLayout from "./_layout.astro";
+import Icon from "./_components/Icon.astro";
+import CommandModal from "./_components/CommandModal.astro";
+
+const rows = [
+  { name: "!hello", uses: 10, response: "Hello World!", platforms: ["twitch", "youtube", "discord"], modal: "edit-hello" },
+  { name: "!enter", uses: 1104, response: "You are entered into the giveaway", platforms: ["twitch", "youtube", "discord"], modal: "edit-enter" },
+];
+---
+
+<BotisimoLayout title="Botisimo Commands | Samuel Dillow" active="commands">
+  <h1 class="bot-page-title">Commands</h1>
+
+  <div class="bot-toolbar">
+    <button class="bot-pill" type="button" data-open="create-command">
+      <Icon name="plus" /> CREATE COMMAND
+    </button>
+    <input class="bot-search" type="text" placeholder="SEARCH COMMAND" />
+    <button class="bot-pill bot-pill--icon" type="button" aria-label="Refresh"><Icon name="refresh" /></button>
+    <button class="bot-pill bot-pill--icon" type="button" aria-label="Download"><Icon name="download" /></button>
+    <button class="bot-pill bot-pill--ghost" type="button">VIEW COMMANDS <Icon name="external" /></button>
+    <button class="bot-pill bot-pill--ghost" type="button">DEFAULT COMMANDS</button>
+  </div>
+
+  <div class="bot-divider"></div>
+
+  <label class="bot-check" style="margin: 0 0 22px;">
+    <input type="checkbox" checked />
+    <span>Show disabled commands</span>
+  </label>
+
+  <table class="bot-table">
+    <thead>
+      <tr>
+        <th>NAME</th>
+        <th>USES</th>
+        <th>RESPONSE</th>
+        <th>PLATFORMS</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row) => (
+        <tr>
+          <td style="color: var(--bot-text);">{row.name}</td>
+          <td>{row.uses}</td>
+          <td>{row.response}</td>
+          <td>
+            <span class="bot-platform-icons">
+              {row.platforms.includes("twitch") && <Icon name="twitch" />}
+              {row.platforms.includes("youtube") && <Icon name="youtube" />}
+              {row.platforms.includes("discord") && <Icon name="discord" />}
+            </span>
+          </td>
+          <td>
+            <span class="bot-row-actions">
+              <button type="button" aria-label="Reset uses"><Icon name="refresh" /></button>
+              <button type="button" aria-label="Edit" data-open={row.modal}><Icon name="edit" /></button>
+              <button type="button" aria-label="Delete"><Icon name="trash" /></button>
+            </span>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <section class="bot-case-note">
+    <p>
+      Click <strong>Create Command</strong> or any row's edit pencil to open the live modal —
+      the same dialog Botisimo creators used to wire chat triggers to text or AI-generated responses.
+      Native <code style="color: var(--bot-mint);">&lt;dialog&gt;</code> elements; no framework involved.
+    </p>
+    <p><a href="/portfolio/botisimo/">&larr; Dashboard</a> · <a href="/portfolio/botisimo/stream-frame/">Stream Frame &rarr;</a></p>
+  </section>
+
+  <CommandModal id="create-command" mode="create" />
+  <CommandModal id="edit-hello" mode="edit" command="!hello" response="Hello World!" />
+  <CommandModal id="edit-enter" mode="edit" command="!enter" response="You are entered into the giveaway" />
+
+  <script>
+    document.querySelectorAll<HTMLButtonElement>("[data-open]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-open");
+        if (!id) return;
+        const dlg = document.getElementById(id) as HTMLDialogElement | null;
+        dlg?.showModal();
+      });
+    });
+
+    document.querySelectorAll<HTMLDialogElement>(".bot-dialog").forEach((dlg) => {
+      dlg.querySelectorAll<HTMLButtonElement>("[data-toggle]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          dlg.querySelectorAll<HTMLButtonElement>("[data-toggle]").forEach((b) =>
+            b.classList.toggle("is-on", b === btn),
+          );
+        });
+      });
+    });
+  </script>
+</BotisimoLayout>

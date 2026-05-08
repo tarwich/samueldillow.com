@@ -1,0 +1,24 @@
+---
+import Icon from "./Icon.astro";
+---
+
+<header class="bot-topbar">
+  <a href="/portfolio/botisimo/" class="bot-topbar__brand">
+    <Icon name="robot" />
+    <span>BOTISIMO</span>
+  </a>
+  <div class="bot-topbar__center">
+    <span>NEED HELP?</span>
+    <span class="bot-help-icons">
+      <Icon name="book" />
+      <Icon name="x-circle" />
+      <Icon name="lightbulb" />
+    </span>
+  </div>
+  <div class="bot-topbar__right">
+    <button class="bot-bell" aria-label="Notifications" type="button">
+      <Icon name="bell" />
+    </button>
+    <span class="bot-avatar" aria-hidden="true"></span>
+  </div>
+</header>

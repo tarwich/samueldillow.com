@@ -1,0 +1,48 @@
+---
+import "./_styles.css";
+import Header from "./_components/Header.astro";
+import Sidebar from "./_components/Sidebar.astro";
+import Footer from "./_components/Footer.astro";
+import LiveSupport from "./_components/LiveSupport.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  active?: string;
+}
+
+const {
+  title = "Botisimo — Case Study | Samuel Dillow",
+  description = "Botisimo creator platform — case study reconstruction.",
+  active = "dashboard",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+  </head>
+  <body class="botisimo-app">
+    <Header />
+    <div class="bot-shell">
+      <Sidebar active={active} />
+      <main class="bot-main">
+        <slot />
+      </main>
+    </div>
+    <Footer />
+    <LiveSupport />
+  </body>
+</html>

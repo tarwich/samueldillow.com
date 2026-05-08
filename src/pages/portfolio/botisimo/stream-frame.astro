@@ -1,0 +1,110 @@
+---
+import BotisimoLayout from "./_layout.astro";
+import Icon from "./_components/Icon.astro";
+
+const chatLines = [
+  { u: "GamerGuru97", t: "Let's goo that was clean" },
+  { u: "QuickScopeQT", t: "yo, what gun is that??" },
+  { u: "NoScopeNora", t: "missed bro you're on 1" },
+  { u: "xX_F1reHexagon_Xx", t: "LMAO that whiff" },
+  { u: "BLU3BEAST", t: "tomo" },
+  { u: "CoffeeCarnage", t: "peak again I dare u" },
+  { u: "YeetMeister3000", t: "that was clutch" },
+  { u: "tryhardTimmy", t: "lil key or no balls" },
+  { u: "LunarLagoon", t: "why you ADS with a shotgun" },
+  { u: "M1dniteSnax", t: "song name??" },
+  { u: "DarkSniper420", t: "nice flick" },
+  { u: "GooseOnTheLoose", t: "FR this lobby is bots" },
+  { u: "SockAndCrocs", t: "chat we winning this" },
+  { u: "CrackedCactus", t: "bro switch off mouse" },
+  { u: "RainPlayWizard", t: "rip aim assist lol" },
+  { u: "OhAtItDefeat", t: "top 5 situation" },
+  { u: "VibeCheckPlz", t: "that nade was magical" },
+  { u: "TooTryntTrey", t: "fcl" },
+  { u: "LaggingLarry", t: "stream froze for me" },
+  { u: "TTV_HamsterLord", t: "you saw that replay?" },
+  { u: "MapleSyrupSweat", t: "can't believe that aim" },
+  { u: "TacticalToeBeans", t: "do NOT peek that angle" },
+];
+---
+
+<BotisimoLayout title="Botisimo Stream Frame | Samuel Dillow" active="stream-frame">
+  <h1 class="bot-page-title">Stream Frame</h1>
+
+  <div class="bot-toolbar">
+    <span style="color: var(--bot-muted); font-size: 12px;">
+      https://botisimo.com/overlay/M3IfLNJG/Date=8d31-bba9-3hef98feaf07/frame
+    </span>
+    <span style="flex:1"></span>
+    <button class="bot-pill bot-pill--ghost" type="button">COPY URL</button>
+    <button class="bot-pill" type="button">CHANGE THEME</button>
+  </div>
+
+  <div class="bot-stream-frame">
+    <div class="bot-stream-frame__name">SDILLOW</div>
+    <div class="bot-stream-grid">
+      <div class="bot-stream-screen"></div>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div class="bot-stream-cam"></div>
+        <div class="bot-stream-chat">
+          <div class="bot-stream-chat__title">LIVE CHAT</div>
+          {chatLines.map((line) => (
+            <div><span class="u">{line.u}:</span> {line.t}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+    <div class="bot-stream-meta">
+      <div class="bot-stream-meta__cell">
+        <span style="display:inline-flex; align-items:center; gap:6px;">
+          <Icon name="heart" /> Latest Follower
+        </span>
+        <strong>ninja</strong>
+      </div>
+      <div class="bot-stream-meta__cell">
+        <span style="display:inline-flex; align-items:center; gap:6px;">
+          <Icon name="money" /> Latest Donation
+        </span>
+        <strong>1.00 from testarossi</strong>
+      </div>
+      <div class="bot-stream-meta__cell">
+        <span style="display:inline-flex; align-items:center; gap:6px;">
+          <Icon name="user-plus" /> Latest Subscriber
+        </span>
+        <strong>michaelbei</strong>
+      </div>
+      <div class="bot-stream-meta__cell">
+        <span style="display:inline-flex; align-items:center; gap:6px;">
+          <Icon name="clock" /> Clock
+        </span>
+        <strong>06:00:50 PM</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="bot-toolbar" style="margin-top: 28px;">
+    {[
+      { i: "heart", label: "LABEL 1", v: "Latest Follower" },
+      { i: "money", label: "LABEL 2", v: "Latest Donation" },
+      { i: "user-plus", label: "LABEL 3", v: "Latest Subscriber" },
+      { i: "clock", label: "LABEL 4", v: "Clock" },
+    ].map((cell) => (
+      <div style="flex: 1 1 200px;">
+        <div style="font-size: 10px; letter-spacing: 0.3em; color: var(--bot-muted); margin-bottom: 4px;">{cell.label}</div>
+        <div style="display:flex; align-items:center; gap:8px; padding: 8px 10px; border:1px solid var(--bot-line); border-radius: 4px; color: #fff;">
+          <span style="width:16px; height:16px; display:inline-flex;"><Icon name={cell.i} /></span>
+          <span>{cell.v}</span>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <section class="bot-case-note">
+    <p>
+      Stream Frame let creators design a single broadcast layout that bundled their cam, gameplay,
+      live chat, and rotating "latest follower / donation / subscriber" labels into one OBS-ready overlay URL.
+      The right column shows real chat scrolling; labels were configurable per-cell.
+    </p>
+    <p><a href="/portfolio/botisimo/commands/">&larr; Commands</a> · <a href="/portfolio/botisimo/">Dashboard</a></p>
+  </section>
+</BotisimoLayout>

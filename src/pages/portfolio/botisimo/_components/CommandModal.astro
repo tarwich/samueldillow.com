@@ -1,0 +1,126 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  id: string;
+  mode: "create" | "edit";
+  command?: string;
+  response?: string;
+  ai?: boolean;
+  aiContext?: string;
+  aiPrompt?: string;
+}
+
+const {
+  id,
+  mode,
+  command = "",
+  response = "",
+  ai = false,
+  aiContext = "",
+  aiPrompt = "",
+} = Astro.props;
+
+const title = mode === "create" ? "CREATE COMMAND" : "EDIT COMMAND";
+const cta = mode === "create" ? "CREATE" : "SAVE";
+---
+
+<dialog class="bot-dialog" id={id}>
+  <form class="bot-dialog__inner" method="dialog">
+    <header class="bot-dialog__head">
+      <h2>{title}</h2>
+      <button type="submit" value="cancel" class="bot-dialog__close" aria-label="Close">
+        <Icon name="x" />
+      </button>
+    </header>
+
+    <div class="bot-field">
+      <label class="bot-field__label">COMMAND</label>
+      <span class="bot-field__hint">
+        This is the text you must type in chat to activate the command. Separate multiple command triggers with a comma.
+      </span>
+      <input type="text" placeholder="!hello" value={command} />
+    </div>
+
+    <div class="bot-toggle" role="tablist">
+      <button type="button" class={ai ? "" : "is-on"} data-toggle="regular">REGULAR</button>
+      <button type="button" class={ai ? "is-on" : ""} data-toggle="ai">AI</button>
+    </div>
+
+    {!ai && (
+      <div class="bot-field">
+        <label class="bot-field__label">RESPONSE</label>
+        <span class="bot-field__hint">
+          This is the text that the bot will respond with when activating this command. You can use response variables and response directives to create powerful, dynamic responses and behaviors for your command.
+        </span>
+        <textarea placeholder="ENTER COMMAND RESPONSE">{response}</textarea>
+      </div>
+    )}
+
+    {ai && (
+      <>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 16px; border:1px solid var(--bot-line); border-radius:6px;">
+          <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; line-height:1.6; color:#fff;">
+            <div>USE AI TO GENERATE RESPONSES BASED ON A CONTEXT AND PROMPT.</div>
+            <div style="color: var(--bot-muted);">CURRENT BALANCE: $4.9</div>
+          </div>
+          <button type="button" class="bot-pill bot-pill--ghost">MANAGE BALANCE</button>
+        </div>
+        <div class="bot-field">
+          <label class="bot-field__label">AI CONTEXT</label>
+          <span class="bot-field__hint">
+            The persona or context the AI will use when generating the response. Example: "writing a haiku" or "in the voice of terminator".
+          </span>
+          <input type="text" value={aiContext} />
+        </div>
+        <div class="bot-field">
+          <label class="bot-field__label">AI PROMPT</label>
+          <span class="bot-field__hint">
+            This is the text to prompt the AI to respond to. You can use response variables and response directives to create powerful, dynamic prompts and behaviors for your command.
+          </span>
+          <input type="text" value={aiPrompt} />
+        </div>
+      </>
+    )}
+
+    <div class="bot-field">
+      <label class="bot-field__label">PLATFORMS</label>
+      <span class="bot-field__hint">Limit this command to specific platforms</span>
+      <div class="bot-check-row">
+        {["Twitch", "YouTube", "Facebook", "DLive", "Trovo", "Discord", "Slack"].map((p, i) => (
+          <label class="bot-check">
+            <input type="checkbox" checked={i < 2} />
+            <span>{p}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <div class="bot-field">
+      <label class="bot-field__label">MINIMUM PERMISSION</label>
+      <span class="bot-field__hint">Select the minimum permission a viewer must have to activate this command</span>
+      <select>
+        <option>Everyone</option>
+        <option>Subscriber</option>
+        <option>Moderator</option>
+        <option>Broadcaster</option>
+      </select>
+    </div>
+
+    <div class="bot-field">
+      <label class="bot-field__label">DESCRIPTION</label>
+      <span class="bot-field__hint">Short description of what this command does. This description is displayed on your public commands page</span>
+      <textarea placeholder="ENTER COMMAND DESCRIPTION (OPTIONAL)"></textarea>
+    </div>
+
+    <div class="bot-field">
+      <label class="bot-field__label">ALIAS</label>
+      <span class="bot-field__hint">Use this if you want this command to call another command. This is an advanced setting that can usually be left blank.</span>
+      <input type="text" placeholder="OPTIONAL" />
+    </div>
+
+    <button type="submit" value="confirm" class="bot-dialog__submit">
+      <Icon name="robot" /> {cta}
+    </button>
+  </form>
+</dialog>

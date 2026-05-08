@@ -2,14 +2,22 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const writing = (await getCollection("writing"))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 4);
-
-const projects = (await getCollection("projects"))
+const entries = (await getCollection("entries"))
   .filter((entry) => entry.data.featured)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 3);
+  .slice(0, 6);
+
+function entryLabel(entry: (typeof entries)[number]) {
+  if (entry.data.type === "writing") return entry.data.category;
+  if (entry.data.type === "portfolio") return entry.data.role;
+  return entry.data.status;
+}
+
+function entryHref(entry: (typeof entries)[number]) {
+  if (entry.data.type === "writing") return `/writing/${entry.id}/`;
+  if (entry.data.type === "portfolio") return entry.data.caseStudyUrl ?? "/portfolio/";
+  return entry.data.playUrl;
+}
 
 const isDst = new Date().getTimezoneOffset() < new Date("2024-11-03").getTimezoneOffset();
 const timezone = isDst ? "CDT" : "CST";
@@ -36,7 +44,7 @@ const statusItems: { label: string; value: string }[] = [
       </p>
       <div class="actions">
         <a class="button" href="/writing/">Read writing</a>
-        <a class="button" href="/projects/">View projects</a>
+        <a class="button" href="/portfolio/">View portfolio</a>
         <a class="button" href="/resume/">Resume</a>
       </div>
     </div>
@@ -85,8 +93,8 @@ const statusItems: { label: string; value: string }[] = [
         <div class="mono-label">03</div>
         <h2>Play</h2>
         <p>
-          Toy projects, little games, experiments, and the kind of work that is
-          useful because it keeps the edges sharp.
+          Small games, experiments, and playful work that keeps the archive from
+          becoming only prose and resume material.
         </p>
         <div class="tag-row">
           <span class="tag">games</span>
@@ -99,45 +107,26 @@ const statusItems: { label: string; value: string }[] = [
 
   <section class="site-shell section">
     <div class="section-heading">
-      <h2>Featured Work</h2>
-      <a href="/projects/">All projects</a>
+      <h2>Featured Entries</h2>
+      <a href="/writing/">Writing archive</a>
     </div>
-    <div class="work-grid">
-      <div class="card-grid">
-        {
-          projects.map((project) => (
-            <a class="entry-card" href={`/projects/${project.id}/`}>
-              <div class="thumb" aria-hidden="true" />
-              <div class="entry-body">
-                <h3>{project.data.title}</h3>
-                <p>{project.data.description}</p>
-                <div class="tag-row">
-                  {project.data.tags.slice(0, 3).map((tag) => <span class="tag">{tag}</span>)}
-                </div>
+    <div class="card-grid entry-grid">
+      {
+        entries.map((entry) => (
+          <a class="entry-card" href={entryHref(entry)}>
+            <img class="thumb" src={entry.data.image.src} alt={entry.data.image.alt} loading="lazy" />
+            <div class="entry-body">
+              <div class="mono-label">{entry.data.type}</div>
+              <h3>{entry.data.title}</h3>
+              <p>{entry.data.description}</p>
+              <div class="tag-row">
+                <span class="tag">{entryLabel(entry)}</span>
+                {entry.data.tags.slice(0, 2).map((tag) => <span class="tag">{tag}</span>)}
               </div>
-            </a>
-          ))
-        }
-      </div>
-      <aside>
-        <div class="section-heading">
-          <h2>Latest Writing</h2>
-          <a href="/writing/">Archive</a>
-        </div>
-        <div class="writing-list">
-          {
-            writing.map((post) => (
-              <a class="writing-item" href={`/writing/${post.id}/`}>
-                <span>{post.data.category}</span>
-                <div>
-                  <h3>{post.data.title}</h3>
-                  <p>{post.data.description}</p>
-                </div>
-              </a>
-            ))
-          }
-        </div>
-      </aside>
+            </div>
+          </a>
+        ))
+      }
     </div>
   </section>
 

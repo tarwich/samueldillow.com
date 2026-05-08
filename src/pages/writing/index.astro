@@ -1,10 +1,18 @@
 ---
 import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
-const posts = (await getCollection("writing")).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+type Entry = CollectionEntry<"entries">;
+type WritingEntry = Entry & { data: Extract<Entry["data"], { type: "writing" }> };
+
+function isWritingEntry(entry: Entry): entry is WritingEntry {
+  return entry.data.type === "writing";
+}
+
+const posts = (await getCollection("entries"))
+  .filter(isWritingEntry)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <BaseLayout title="Writing | Samuel Dillow">
@@ -15,12 +23,15 @@ const posts = (await getCollection("writing")).sort(
   <section class="site-shell list-page">
     {
       posts.map((post) => (
-        <a class="list-card" href={`/writing/${post.id}/`}>
-          <div class="mono-label">{post.data.category}</div>
-          <h2>{post.data.title}</h2>
-          <p>{post.data.description}</p>
-          <div class="tag-row">
-            {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+        <a class="list-card list-card--with-image" href={`/writing/${post.id}/`}>
+          <img src={post.data.image.src} alt={post.data.image.alt} loading="lazy" />
+          <div>
+            <div class="mono-label">{post.data.category}</div>
+            <h2>{post.data.title}</h2>
+            <p>{post.data.description}</p>
+            <div class="tag-row">
+              {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+            </div>
           </div>
         </a>
       ))

@@ -1,10 +1,18 @@
 ---
 import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
-const work = (await getCollection("portfolio")).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+type Entry = CollectionEntry<"entries">;
+type PortfolioEntry = Entry & { data: Extract<Entry["data"], { type: "portfolio" }> };
+
+function isPortfolioEntry(entry: Entry): entry is PortfolioEntry {
+  return entry.data.type === "portfolio";
+}
+
+const work = (await getCollection("entries"))
+  .filter(isPortfolioEntry)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <BaseLayout title="Portfolio | Samuel Dillow">
@@ -15,15 +23,18 @@ const work = (await getCollection("portfolio")).sort(
   <section class="site-shell list-page">
     {
       work.map((item) => (
-        <article class="list-card">
-          <div class="mono-label">{item.data.role}</div>
-          <h2>{item.data.title}</h2>
-          <p>{item.data.description}</p>
-          <p><strong>Outcome:</strong> {item.data.outcome}</p>
-          <div class="tag-row">
-            {item.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+        <a class="list-card list-card--with-image" href={item.data.caseStudyUrl ?? "#"}>
+          <img src={item.data.image.src} alt={item.data.image.alt} loading="lazy" />
+          <div>
+            <div class="mono-label">{item.data.role}</div>
+            <h2>{item.data.title}</h2>
+            <p>{item.data.description}</p>
+            <p><strong>Outcome:</strong> {item.data.outcome}</p>
+            <div class="tag-row">
+              {item.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+            </div>
           </div>
-        </article>
+        </a>
       ))
     }
   </section>

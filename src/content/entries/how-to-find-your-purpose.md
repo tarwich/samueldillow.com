@@ -1,7 +1,11 @@
 ---
+type: writing
 title: How to Find Your Purpose
 description: Purpose lives where four things overlap — your passion, your talent, value to others, and need from others.
 pubDate: 2026-05-08
+image:
+  src: /writing/purpose-venn.png
+  alt: Hand-drawn purpose diagram with Passion, Talent, Value, and Need around the center.
 category: Business
 tags:
   - purpose
@@ -42,7 +46,7 @@ because I'm good at it and enjoy it doesn't mean it's my purpose.
 
 This is your day job. Most of the people I speak with do a day job they don't
 like. It's the intersection of their talent and a value to others. It's
-possible, however, that your talent–passion intersection provides value, and
+possible, however, that your talent-passion intersection provides value, and
 you don't realize it. I'm blown away that Tyler Blevins found a way to play a
 video game well and make money doing it.
 
@@ -62,7 +66,7 @@ Start by looking at what's needed in the world, and finding things you're
 passionate about. From there, it's easy to find profitable skills and apply
 them to the current need.
 
-![Hand-drawn diagram showing Purpose at the center, with Passion, Talent, Value, and Need in the four quadrants — mapped against axes of Self vs. Others and Personal vs. Economical.](/writing/purpose-venn.png)
+![Hand-drawn diagram showing Purpose at the center, with Passion, Talent, Value, and Need in the four quadrants mapped against axes of Self vs. Others and Personal vs. Economical.](/writing/purpose-venn.png)
 
 ## Pivot
 

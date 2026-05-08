@@ -12,7 +12,7 @@ const baseEntry = z.object({
 const writing = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/writing" }),
   schema: baseEntry.extend({
-    category: z.enum(["Tech", "Faith", "Bible", "Business", "Projects"]),
+    category: z.enum(["Tech", "Faith", "Bible", "Business", "Projects", "Play"]),
   }),
 });
 

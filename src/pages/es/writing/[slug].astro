@@ -1,29 +1,29 @@
 ---
 import { getCollection, render } from "astro:content";
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
 import {
   findTranslation,
   isWritingEntry,
   writingHref,
   writingLocale,
   writingSlug,
-} from "../../lib/writing";
+} from "../../../lib/writing";
 
 export async function getStaticPaths() {
   const posts = (await getCollection("entries")).filter(isWritingEntry);
   return posts
-    .filter((post) => writingLocale(post) === "en")
+    .filter((post) => writingLocale(post) === "es")
     .map((post) => ({
       params: { slug: writingSlug(post) },
-      props: { post, spanishPost: findTranslation(posts, post, "es") ?? null },
+      props: { post, englishPost: findTranslation(posts, post, "en") ?? null },
     }));
 }
 
-const { post, spanishPost } = Astro.props;
+const { post, englishPost } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<BaseLayout title={`${post.data.title} | Samuel Dillow`} description={post.data.description}>
+<BaseLayout title={`${post.data.title} | Samuel Dillow`} description={post.data.description} lang="es">
   <article class="site-shell page-title page-title--with-actions">
     <div>
       <div class="mono-label">{post.data.category}</div>
@@ -31,12 +31,12 @@ const { Content } = await render(post);
       <p>{post.data.description}</p>
     </div>
     {
-      spanishPost && (
-        <nav class="language-switch" aria-label="Article language">
+      englishPost && (
+        <nav class="language-switch" aria-label="Idioma del artículo">
+          <a href={writingHref(englishPost)}>English</a>
           <a class="is-active" href={writingHref(post)} aria-current="page">
-            English
+            Español
           </a>
-          <a href={writingHref(spanishPost)}>Español</a>
         </nav>
       )
     }

@@ -1,24 +1,24 @@
 ---
 import { getCollection } from "astro:content";
-import type { CollectionEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-
-type Entry = CollectionEntry<"entries">;
-type WritingEntry = Entry & { data: Extract<Entry["data"], { type: "writing" }> };
-
-function isWritingEntry(entry: Entry): entry is WritingEntry {
-  return entry.data.type === "writing";
-}
+import { isWritingEntry, writingHref, writingLocale } from "../../lib/writing";
 
 const posts = (await getCollection("entries"))
   .filter(isWritingEntry)
+  .filter((post) => writingLocale(post) === "en")
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <BaseLayout title="Writing | Samuel Dillow">
-  <section class="site-shell page-title">
-    <h1>Writing</h1>
-    <p>Technical notes, Christian essays, Bible reflections, and project write-ups.</p>
+  <section class="site-shell page-title page-title--with-actions">
+    <div>
+      <h1>Writing</h1>
+      <p>Technical notes, Christian essays, Bible reflections, and project write-ups.</p>
+    </div>
+    <nav class="language-switch" aria-label="Writing language">
+      <a class="is-active" href="/writing/" aria-current="page">English</a>
+      <a href="/es/writing/">Español</a>
+    </nav>
   </section>
   <section class="site-shell list-page writing-book-feature">
     <a class="list-card list-card--with-image book-list-card" href="/books/why-be-happy/">
@@ -41,7 +41,7 @@ const posts = (await getCollection("entries"))
   <section class="site-shell list-page">
     {
       posts.map((post) => (
-        <a class="list-card list-card--with-image" href={`/writing/${post.id}/`}>
+        <a class="list-card list-card--with-image" href={writingHref(post)}>
           <img src={post.data.image.src} alt={post.data.image.alt} loading="lazy" />
           <div>
             <div class="mono-label">{post.data.category}</div>

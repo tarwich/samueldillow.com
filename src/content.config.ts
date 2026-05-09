@@ -5,6 +5,8 @@ const baseEntry = z.object({
   title: z.string(),
   description: z.string(),
   pubDate: z.date(),
+  locale: z.enum(["en", "es"]).default("en"),
+  translationOf: z.string().optional(),
   image: z.object({
     src: z.string(),
     alt: z.string(),
@@ -15,9 +17,8 @@ const baseEntry = z.object({
 
 const writingEntry = baseEntry.extend({
   type: z.literal("writing"),
-  category: z.enum(["Tech", "Faith", "Bible", "Business", "Play"]),
+  category: z.string(),
 });
-export type WritingEntry = z.infer<typeof writingEntry>;
 
 const portfolioEntry = baseEntry.extend({
   type: z.literal("portfolio"),
@@ -33,21 +34,32 @@ const portfolioEntry = baseEntry.extend({
     )
     .default([]),
 });
-export type PortfolioEntry = z.infer<typeof portfolioEntry>;
 
 const gameEntry = baseEntry.extend({
   type: z.literal("game"),
   status: z.enum(["Prototype", "Live", "Archived"]).default("Prototype"),
   playUrl: z.string(),
 });
-export type GameEntry = z.infer<typeof gameEntry>;
 
 const entries = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/entries" }),
   schema: z.discriminatedUnion("type", [writingEntry, portfolioEntry, gameEntry]),
 });
 
+
 export type Entry = CollectionEntry<"entries">;
+
+export type WritingEntry = Omit<Entry, "data"> & { data: Extract<Entry["data"], { type: "writing" }> };
+export const isWritingEntry = (entry: Entry): entry is WritingEntry =>
+  entry.data.type === "writing";
+
+export type PortfolioEntry = Omit<Entry, "data"> & { data: Extract<Entry["data"], { type: "portfolio" }> };
+export const isPortfolioEntry = (entry: Entry): entry is PortfolioEntry =>
+  entry.data.type === "portfolio";
+
+export type GameEntry = Omit<Entry, "data"> & { data: Extract<Entry["data"], { type: "game" }> };
+export const isGameEntry = (entry: Entry): entry is GameEntry =>
+  entry.data.type === "game";
 
 const resume = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/resume" }),

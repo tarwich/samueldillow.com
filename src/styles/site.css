@@ -634,6 +634,17 @@ a.lane:focus-visible {
   padding: 68px 0 28px;
 }
 
+.page-title--with-actions {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.page-title--with-actions > div {
+  min-width: 0;
+}
+
 .page-title h1 {
   margin: 0;
   font-family: var(--serif);
@@ -646,6 +657,32 @@ a.lane:focus-visible {
   max-width: 680px;
   color: var(--muted);
   font-size: 1.08rem;
+}
+
+.language-switch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 253, 248, 0.76);
+  font-family: var(--mono);
+  font-size: 0.76rem;
+}
+
+.language-switch a {
+  min-width: 86px;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+.language-switch a + a {
+  border-left: 1px solid var(--line-strong);
+}
+
+.language-switch a:hover,
+.language-switch a:focus-visible,
+.language-switch a.is-active {
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .list-page {
@@ -953,6 +990,19 @@ a.lane:focus-visible {
 }
 
 @media (max-width: 640px) {
+  .page-title--with-actions {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .language-switch {
+    width: 100%;
+  }
+
+  .language-switch a {
+    flex: 1 1 0;
+  }
+
   .list-card figure.float,
   .list-card figure.float:nth-child(even of figure.float) {
     float: none;

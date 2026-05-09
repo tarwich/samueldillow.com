@@ -10,33 +10,35 @@ import {
   Pencil,
 } from "lucide-static";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import type { Entry, WritingEntry } from "../content.config";
+import { isWritingEntry } from "../lib/writing";
 
-type Entry = CollectionEntry<"entries">;
-type WritingEntry = Entry & { data: Extract<Entry["data"], { type: "writing" }> };
+const sortedEntries = (await getCollection("entries")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
 
-function isWritingEntry(entry: Entry): entry is WritingEntry {
-  return entry.data.type === "writing";
-}
-
-const allEntries = (await getCollection("entries"))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-
-const entries = allEntries
+const featuredEntries = sortedEntries
   .filter((entry) => entry.data.featured)
   .slice(0, 6);
 
-const featuredProjects = entries.filter((entry) => entry.data.type !== "writing" && entry.data.featured).slice(0, 3);
-const latestWriting = allEntries.filter(isWritingEntry).slice(0, 5);
+const featuredProjects = featuredEntries
+  .filter((entry) => !isWritingEntry(entry))
+  .slice(0, 3);
+const latestWriting = sortedEntries
+  .filter((entry): entry is WritingEntry => entry.data.type === "writing")
+  .filter((entry) => entry.data.locale === "en")
+  .slice(0, 5);
 
-function entryLabel(entry: (typeof entries)[number]) {
+function entryLabel(entry: (typeof featuredEntries)[number]) {
   if (entry.data.type === "writing") return entry.data.category;
   if (entry.data.type === "portfolio") return entry.data.role;
   return entry.data.status;
 }
 
-function entryHref(entry: (typeof entries)[number]) {
+function entryHref(entry: (typeof featuredEntries)[number]) {
   if (entry.data.type === "writing") return `/writing/${entry.id}/`;
-  if (entry.data.type === "portfolio") return entry.data.caseStudyUrl ?? "/portfolio/";
+  if (entry.data.type === "portfolio")
+    return entry.data.caseStudyUrl ?? "/portfolio/";
   return entry.data.playUrl;
 }
 
@@ -47,7 +49,8 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
   timeZone: "UTC",
 });
 
-const isDst = new Date().getTimezoneOffset() < new Date("2024-11-03").getTimezoneOffset();
+const isDst =
+  new Date().getTimezoneOffset() < new Date("2024-11-03").getTimezoneOffset();
 const timezone = isDst ? "CDT" : "CST";
 
 const statusItems: { label: string; value: string }[] = [
@@ -72,15 +75,30 @@ const statusItems: { label: string; value: string }[] = [
       </p>
       <div class="actions">
         <a class="button button--sage" href="/writing/">
-          <Fragment set:html={BookOpen.replace('<svg', '<svg class="button-icon" aria-hidden="true"')} />
+          <Fragment
+            set:html={BookOpen.replace(
+              "<svg",
+              '<svg class="button-icon" aria-hidden="true"',
+            )}
+          />
           Read writing
         </a>
         <a class="button button--steel" href="/#projects">
-          <Fragment set:html={CodeXml.replace('<svg', '<svg class="button-icon" aria-hidden="true"')} />
+          <Fragment
+            set:html={CodeXml.replace(
+              "<svg",
+              '<svg class="button-icon" aria-hidden="true"',
+            )}
+          />
           View projects
         </a>
         <a class="button button--rust" href="/resume/">
-          <Fragment set:html={FileText.replace('<svg', '<svg class="button-icon" aria-hidden="true"')} />
+          <Fragment
+            set:html={FileText.replace(
+              "<svg",
+              '<svg class="button-icon" aria-hidden="true"',
+            )}
+          />
           Resume
         </a>
       </div>
@@ -139,12 +157,24 @@ const statusItems: { label: string; value: string }[] = [
         learning to work honestly with the emotional life God gave us.
       </p>
       <div class="actions">
-        <a class="button button--sage" href="/books/why-be-happy/">Read the book</a>
-        <a class="button button--steel" href="/books/why-be-happy/introduction/">Start with the introduction</a>
+        <a class="button button--sage" href="/books/why-be-happy/"
+          >Read the book</a
+        >
+        <a class="button button--steel" href="/books/why-be-happy/introduction/"
+          >Start with the introduction</a
+        >
       </div>
     </div>
-    <a class="home-book-cover" href="/books/why-be-happy/" aria-label="Read Why Be Happy?">
-      <img src="/books/why-be-happy/cover.webp" alt="Why Be Happy book cover mockup" loading="lazy" />
+    <a
+      class="home-book-cover"
+      href="/books/why-be-happy/"
+      aria-label="Read Why Be Happy?"
+    >
+      <img
+        src="/books/why-be-happy/cover.webp"
+        alt="Why Be Happy book cover mockup"
+        loading="lazy"
+      />
     </a>
   </section>
 
@@ -158,13 +188,20 @@ const statusItems: { label: string; value: string }[] = [
         {
           featuredProjects.map((entry) => (
             <a class="entry-card" href={entryHref(entry)}>
-              <img class="thumb" src={entry.data.image.src} alt={entry.data.image.alt} loading="lazy" />
+              <img
+                class="thumb"
+                src={entry.data.image.src}
+                alt={entry.data.image.alt}
+                loading="lazy"
+              />
               <div class="entry-body">
                 <h3>{entry.data.title}</h3>
                 <p>{entry.data.description}</p>
                 <div class="tag-row">
                   <span class="tag">{entryLabel(entry)}</span>
-                  {entry.data.tags.slice(0, 2).map((tag) => <span class="tag">{tag}</span>)}
+                  {entry.data.tags.slice(0, 2).map((tag) => (
+                    <span class="tag">{tag}</span>
+                  ))}
                 </div>
               </div>
             </a>

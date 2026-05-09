@@ -4,11 +4,12 @@ import "../styles/site.css";
 const {
   title = "Samuel Dillow",
   description = "Software, SaaS, hosting infrastructure, writing, and faith.",
+  lang = "en",
 } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />

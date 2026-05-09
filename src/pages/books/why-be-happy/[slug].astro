@@ -1,0 +1,73 @@
+---
+import { getCollection, render } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+type Chapter = CollectionEntry<"bookChapters">;
+
+export async function getStaticPaths() {
+  const chapters = (await getCollection("bookChapters"))
+    .filter((chapter) => chapter.data.book === "why-be-happy")
+    .sort((a, b) => a.data.order - b.data.order);
+
+  return chapters.map((chapter, index) => ({
+    params: { slug: chapter.id },
+    props: {
+      chapter,
+      previousChapter: chapters[index - 1] ?? null,
+      nextChapter: chapters[index + 1] ?? null,
+    },
+  }));
+}
+
+const {
+  chapter,
+  previousChapter,
+  nextChapter,
+}: {
+  chapter: Chapter;
+  previousChapter: Chapter | null;
+  nextChapter: Chapter | null;
+} = Astro.props;
+const { Content } = await render(chapter);
+---
+
+<BaseLayout title={`${chapter.data.title} | Why Be Happy?`} description={chapter.data.description}>
+  <article class="site-shell book-reader">
+    <header class="book-reader-header">
+      <a class="mono-label" href="/books/why-be-happy/">Why Be Happy?</a>
+      <h1>{chapter.data.title}</h1>
+      <p>{chapter.data.description}</p>
+    </header>
+
+    <div class="book-prose list-card">
+      <Content />
+    </div>
+
+    <nav class="book-pagination" aria-label="Book chapters">
+      {
+        previousChapter ? (
+          <a href={`/books/why-be-happy/${previousChapter.id}/`}>
+            <span>Previous</span>
+            {previousChapter.data.title}
+          </a>
+        ) : (
+          <span />
+        )
+      }
+      {
+        nextChapter ? (
+          <a href={`/books/why-be-happy/${nextChapter.id}/`}>
+            <span>Next</span>
+            {nextChapter.data.title}
+          </a>
+        ) : (
+          <a href="/books/why-be-happy/">
+            <span>Back</span>
+            Book overview
+          </a>
+        )
+      }
+    </nav>
+  </article>
+</BaseLayout>

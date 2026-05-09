@@ -4,7 +4,7 @@ title: How to Find Your Purpose
 description: Purpose lives where four things overlap — your passion, your talent, value to others, and need from others.
 pubDate: 2019-05-28
 image:
-  src: /writing/purpose-venn.png
+  src: /writing/how-to-find-your-purpose.svg
   alt: Hand-drawn purpose diagram with Passion, Talent, Value, and Need around the center.
 category: Mental Health
 tags:
@@ -65,8 +65,6 @@ Start from the other side.
 Start by looking at what's needed in the world, and finding things you're
 passionate about. From there, it's easy to find profitable skills and apply
 them to the current need.
-
-![Hand-drawn diagram showing Purpose at the center, with Passion, Talent, Value, and Need in the four quadrants mapped against axes of Self vs. Others and Personal vs. Economical.](/writing/purpose-venn.png)
 
 ## Pivot
 

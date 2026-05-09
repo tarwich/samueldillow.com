@@ -6,7 +6,7 @@ pubDate: 2026-05-09
 locale: es
 translationOf: thank-the-passenger
 image:
-  src: /writing/passenger.svg
+  src: /writing/thank-the-passenger.es.svg
   alt: "Un pasajero nervioso en un auto mientras el conductor mantiene la vista en el camino."
 category: Salud Mental
 tags:

@@ -6,7 +6,7 @@ pubDate: 2019-05-28
 locale: es
 translationOf: how-to-find-your-purpose
 image:
-  src: /writing/purpose-venn.png
+  src: /writing/how-to-find-your-purpose.es.svg
   alt: "Diagrama dibujado a mano del propósito, con Pasión, Talento, Valor y Necesidad alrededor del centro."
 category: Salud Mental
 tags:
@@ -69,8 +69,6 @@ Empieza por el otro lado.
 Empieza mirando lo que se necesita en el mundo, y encontrando cosas que te
 apasionen. Desde ahí, es fácil encontrar habilidades rentables y aplicarlas a la
 necesidad actual.
-
-![Diagrama dibujado a mano que muestra Propósito en el centro, con Pasión, Talento, Valor y Necesidad en los cuatro cuadrantes, trazados contra los ejes de Yo vs. Otros y Personal vs. Económico.](/writing/purpose-venn.png)
 
 ## Pivotar
 

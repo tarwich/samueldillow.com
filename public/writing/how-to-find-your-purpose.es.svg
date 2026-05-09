@@ -1,0 +1,85 @@
+<svg viewBox="0 0 1200 768" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="768" fill="white"/>
+
+  <!-- Axes -->
+  <path d="M80 365 C220 370, 320 355, 460 365" stroke="#b64a3a" stroke-width="8" fill="none"/>
+  <path d="M855 365 C960 370, 1070 360, 1160 365" stroke="#b64a3a" stroke-width="8" fill="none"/>
+  <path d="M645 30 C655 90, 650 205, 650 300" stroke="#a94e32" stroke-width="7" fill="none"/>
+  <path d="M650 430 C650 535, 635 650, 635 745" stroke="#a94e32" stroke-width="7" fill="none"/>
+
+  <!-- Center -->
+  <text x="650" y="385"
+        text-anchor="middle"
+        font-family="Bradley Hand, Comic Sans MS, cursive"
+        font-size="82"
+        fill="#172777">
+    Propósito
+  </text>
+
+  <!-- Quadrant labels -->
+  <text x="395" y="255"
+        transform="rotate(-35 395 255)"
+        text-anchor="middle"
+        font-family="Bradley Hand, Comic Sans MS, cursive"
+        font-size="58"
+        fill="#172777">
+    Pasión
+  </text>
+
+  <text x="825" y="235"
+        transform="rotate(55 825 235)"
+        text-anchor="middle"
+        font-family="Bradley Hand, Comic Sans MS, cursive"
+        font-size="48"
+        fill="#172777">
+    Talento
+  </text>
+
+  <text x="405" y="495"
+        transform="rotate(35 405 495)"
+        text-anchor="middle"
+        font-family="Bradley Hand, Comic Sans MS, cursive"
+        font-size="56"
+        fill="#172777">
+    Necesidad
+  </text>
+
+  <text x="870" y="500"
+        transform="rotate(-35 870 500)"
+        text-anchor="middle"
+        font-family="Bradley Hand, Comic Sans MS, cursive"
+        font-size="56"
+        fill="#172777">
+    Valor
+  </text>
+
+  <!-- Side labels -->
+  <text x="35" y="345"
+        font-family="Bradley Hand, Comic Sans MS, cursive"
+        font-size="56"
+        fill="#a94e32">
+    Yo
+  </text>
+
+  <text x="25" y="460"
+        font-family="Bradley Hand, Comic Sans MS, cursive"
+        font-size="56"
+        fill="#a94e32">
+    Otros
+  </text>
+
+  <!-- Bottom labels -->
+  <text x="315" y="730"
+        font-family="Bradley Hand, Comic Sans MS, cursive"
+        font-size="56"
+        fill="#a94e32">
+    Personal
+  </text>
+
+  <text x="690" y="730"
+        font-family="Bradley Hand, Comic Sans MS, cursive"
+        font-size="56"
+        fill="#a94e32">
+    Económico
+  </text>
+</svg>

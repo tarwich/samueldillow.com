@@ -4,7 +4,7 @@ title: Thank the Passenger
 description: Some anxious thoughts are trying to help. They just should not be allowed to drive.
 pubDate: 2026-05-09
 image:
-  src: /writing/passenger.svg
+  src: /writing/thank-the-passenger.svg
   alt: A nervous passenger in a car while the driver stays focused on the road.
 category: Mental Health
 tags:

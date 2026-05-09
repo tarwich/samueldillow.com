@@ -25,7 +25,7 @@ const entries = allEntries
   .filter((entry) => entry.data.featured)
   .slice(0, 6);
 
-const featuredProjects = entries.filter((entry) => entry.data.type !== "writing").slice(0, 3);
+const featuredProjects = entries.filter((entry) => entry.data.type !== "writing" && entry.data.featured).slice(0, 3);
 const latestWriting = allEntries.filter(isWritingEntry).slice(0, 5);
 
 function entryLabel(entry: (typeof entries)[number]) {
@@ -134,7 +134,7 @@ const statusItems: { label: string; value: string }[] = [
     <div class="project-column">
       <div class="section-heading section-heading--compact">
         <h2>Featured projects</h2>
-        <a href="/portfolio/">View all projects →</a>
+        <a href="/projects/">View all projects →</a>
       </div>
       <div class="card-grid entry-grid">
         {

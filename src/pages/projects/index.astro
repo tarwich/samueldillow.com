@@ -1,0 +1,61 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import type { Entry } from "../../content.config";
+
+type ProjectEntry = Entry & {
+  data: Extract<Entry["data"], { type: "portfolio" | "game" }>;
+};
+
+function isProject(entry: Entry): entry is ProjectEntry {
+  return entry.data.type !== "writing";
+}
+
+const projects = (await getCollection("entries"))
+  .filter(isProject)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title="Projects | Samuel Dillow">
+  <section class="site-shell page-title">
+    <h1>Projects</h1>
+    <p>Selected professional work, product decisions, and shipped outcomes.</p>
+  </section>
+  <section class="site-shell list-page">
+    {
+      projects.map((item) => {
+        const link =
+          item.data.type === "portfolio"
+            ? item.data.caseStudyUrl ?? `/projects/${item.id}/`
+            : item.data.playUrl;
+        const label =
+          item.data.type === "portfolio" ? item.data.role : item.data.status;
+
+        return (
+          <a class="list-card list-card--with-image" href={link}>
+            <img
+              src={item.data.image.src}
+              alt={item.data.image.alt}
+              loading="lazy"
+            />
+            <div>
+              <div class="mono-label">{label}</div>
+              <h2>{item.data.title}</h2>
+              <p>{item.data.description}</p>
+              {item.data.type === "portfolio" && (
+                <p>
+                  <strong>Outcome:</strong> {item.data.outcome}
+                </p>
+              )}
+              <div class="tag-row">
+                {item.data.tags.map((tag) => (
+                  <span class="tag">{tag}</span>
+                ))}
+              </div>
+            </div>
+          </a>
+        );
+      })
+    }
+  </section>
+</BaseLayout>

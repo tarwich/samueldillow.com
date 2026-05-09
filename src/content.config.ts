@@ -1,4 +1,4 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection, z, type CollectionEntry } from "astro:content";
 import { glob } from "astro/loaders";
 
 const baseEntry = z.object({
@@ -13,34 +13,41 @@ const baseEntry = z.object({
   featured: z.boolean().default(false),
 });
 
+const writingEntry = baseEntry.extend({
+  type: z.literal("writing"),
+  category: z.enum(["Tech", "Faith", "Bible", "Business", "Play"]),
+});
+export type WritingEntry = z.infer<typeof writingEntry>;
+
+const portfolioEntry = baseEntry.extend({
+  type: z.literal("portfolio"),
+  role: z.string(),
+  outcome: z.string(),
+  caseStudyUrl: z.string().optional(),
+  gallery: z
+    .array(
+      z.object({
+        src: z.string(),
+        alt: z.string(),
+      }),
+    )
+    .default([]),
+});
+export type PortfolioEntry = z.infer<typeof portfolioEntry>;
+
+const gameEntry = baseEntry.extend({
+  type: z.literal("game"),
+  status: z.enum(["Prototype", "Live", "Archived"]).default("Prototype"),
+  playUrl: z.string(),
+});
+export type GameEntry = z.infer<typeof gameEntry>;
+
 const entries = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/entries" }),
-  schema: z.discriminatedUnion("type", [
-    baseEntry.extend({
-      type: z.literal("writing"),
-      category: z.enum(["Tech", "Faith", "Bible", "Business", "Play"]),
-    }),
-    baseEntry.extend({
-      type: z.literal("portfolio"),
-      role: z.string(),
-      outcome: z.string(),
-      caseStudyUrl: z.string().optional(),
-      gallery: z
-        .array(
-          z.object({
-            src: z.string(),
-            alt: z.string(),
-          }),
-        )
-        .default([]),
-    }),
-    baseEntry.extend({
-      type: z.literal("game"),
-      status: z.enum(["Prototype", "Live", "Archived"]).default("Prototype"),
-      playUrl: z.string(),
-    }),
-  ]),
+  schema: z.discriminatedUnion("type", [writingEntry, portfolioEntry, gameEntry]),
 });
+
+export type Entry = CollectionEntry<"entries">;
 
 const resume = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/resume" }),

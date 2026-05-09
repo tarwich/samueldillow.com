@@ -1,0 +1,40 @@
+---
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+type Entry = CollectionEntry<"entries">;
+type GameEntry = Entry & { data: Extract<Entry["data"], { type: "game" }> };
+
+function isGameEntry(entry: Entry): entry is GameEntry {
+  return entry.data.type === "game";
+}
+
+const games = (await getCollection("entries"))
+  .filter(isGameEntry)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title="Games | Samuel Dillow">
+  <section class="site-shell page-title">
+    <h1>Games</h1>
+    <p>Small browser games, experiments, and toy projects.</p>
+  </section>
+  <section class="site-shell list-page">
+    {
+      games.map((game) => (
+        <a class="list-card list-card--with-image" href={game.data.playUrl}>
+          <img src={game.data.image.src} alt={game.data.image.alt} loading="lazy" />
+          <div>
+            <div class="mono-label">{game.data.status}</div>
+            <h2>{game.data.title}</h2>
+            <p>{game.data.description}</p>
+            <div class="tag-row">
+              {game.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+            </div>
+          </div>
+        </a>
+      ))
+    }
+  </section>
+</BaseLayout>

@@ -100,7 +100,7 @@ const statusItems: { label: string; value: string }[] = [
 
   <section class="site-shell section">
     <div class="lanes">
-      <article class="lane lane--build">
+      <a class="lane lane--build" href="/projects/">
         <div class="lane-icon" aria-hidden="true" set:html={Hammer} />
         <h2>Build</h2>
         <p>
@@ -108,8 +108,8 @@ const statusItems: { label: string; value: string }[] = [
           performance, reliability.
         </p>
         <p class="lane-command">&gt; ship. scale. sustain.</p>
-      </article>
-      <article class="lane lane--write">
+      </a>
+      <a class="lane lane--write" href="/writing/">
         <div class="lane-icon" aria-hidden="true" set:html={Pencil} />
         <h2>Write</h2>
         <p>
@@ -117,8 +117,8 @@ const statusItems: { label: string; value: string }[] = [
           intersection of faith and technology.
         </p>
         <p class="lane-command">&gt; think. read. articulate.</p>
-      </article>
-      <article class="lane lane--play">
+      </a>
+      <a class="lane lane--play" href="/games/">
         <div class="lane-icon" aria-hidden="true" set:html={Gamepad2} />
         <h2>Play</h2>
         <p>
@@ -126,7 +126,7 @@ const statusItems: { label: string; value: string }[] = [
           fun.
         </p>
         <p class="lane-command">&gt; explore. experiment. enjoy.</p>
-      </article>
+      </a>
     </div>
   </section>
 

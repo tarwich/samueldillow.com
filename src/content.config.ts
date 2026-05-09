@@ -65,4 +65,14 @@ const resume = defineCollection({
   }),
 });
 
-export const collections = { entries, resume };
+const bookChapters = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/books/why-be-happy" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    order: z.number(),
+    book: z.literal("why-be-happy"),
+  }),
+});
+
+export const collections = { entries, resume, bookChapters };

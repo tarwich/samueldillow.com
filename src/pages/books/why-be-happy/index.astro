@@ -1,0 +1,88 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+const chapters = (await getCollection("bookChapters"))
+  .filter((chapter) => chapter.data.book === "why-be-happy")
+  .sort((a, b) => a.data.order - b.data.order);
+
+const firstChapter = chapters[0];
+const chapterCount = chapters.filter((chapter) => chapter.data.order > 0 && chapter.data.order < 99).length;
+const wordCount = chapters.reduce((total, chapter) => {
+  const text = (chapter.body ?? "").replace(/<[^>]+>/g, " ").replace(/[^\w'-]+/g, " ");
+  return total + text.trim().split(/\s+/).filter(Boolean).length;
+}, 0);
+const hours = Math.max(1, Math.round(wordCount / 220 / 60));
+---
+
+<BaseLayout
+  title="Why Be Happy? | Samuel Dillow"
+  description="Read Why Be Happy?, a personal Christian book about depression, happiness, Scripture, and hope."
+>
+  <section class="site-shell book-hero">
+    <div class="book-hero-copy">
+      <div class="mono-label">Book</div>
+      <h1>Why Be Happy?</h1>
+      <p>
+        A personal Christian book about depression, happiness, Scripture, and
+        learning to work honestly with the emotional life God gave us.
+      </p>
+      <div class="actions">
+        <a class="button button--sage primary-button" href={`/books/why-be-happy/${firstChapter.id}/`}>
+          Start reading
+        </a>
+        <a class="button button--steel" href="#chapters">Chapters</a>
+      </div>
+    </div>
+    <div class="book-cover-frame">
+      <img src="/books/why-be-happy/cover.webp" alt="Why Be Happy book cover mockup" />
+    </div>
+  </section>
+
+  <section class="site-shell section book-summary-grid" aria-label="Book details">
+    <div>
+      <span class="mono-label">Online edition</span>
+      <p>
+        The book is hosted here as a quiet, chapter-based reading experience.
+        The content stays in Markdown, so individual chapters can be edited,
+        linked, indexed, and expanded without rebuilding the website structure.
+      </p>
+    </div>
+    <dl class="book-stats">
+      <div>
+        <dt>Chapters</dt>
+        <dd>{chapterCount}</dd>
+      </div>
+      <div>
+        <dt>Words</dt>
+        <dd>{wordCount.toLocaleString("en-US")}</dd>
+      </div>
+      <div>
+        <dt>Read</dt>
+        <dd>{hours} hr</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section id="chapters" class="site-shell section book-chapters">
+    <div class="section-heading">
+      <h2>Read the book</h2>
+      <a href="/books/">All books →</a>
+    </div>
+    <ol class="chapter-list">
+      {
+        chapters.map((chapter) => (
+          <li>
+            <a href={`/books/why-be-happy/${chapter.id}/`}>
+              <span>{chapter.data.order === 0 ? "Intro" : chapter.data.order === 99 ? "End" : String(chapter.data.order).padStart(2, "0")}</span>
+              <div>
+                <h3>{chapter.data.title}</h3>
+                <p>{chapter.data.description}</p>
+              </div>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+</BaseLayout>

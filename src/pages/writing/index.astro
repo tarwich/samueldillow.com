@@ -20,6 +20,24 @@ const posts = (await getCollection("entries"))
     <h1>Writing</h1>
     <p>Technical notes, Christian essays, Bible reflections, and project write-ups.</p>
   </section>
+  <section class="site-shell list-page writing-book-feature">
+    <a class="list-card list-card--with-image book-list-card" href="/books/why-be-happy/">
+      <img src="/books/why-be-happy/cover.webp" alt="Why Be Happy book cover mockup" loading="lazy" />
+      <div>
+        <div class="mono-label">Featured book</div>
+        <h2>Why Be Happy?</h2>
+        <p>
+          Read the full book online as a chapter-by-chapter experience alongside
+          the essays and Bible reflections here.
+        </p>
+        <div class="tag-row">
+          <span class="tag">Faith</span>
+          <span class="tag">Mental health</span>
+          <span class="tag">Full text online</span>
+        </div>
+      </div>
+    </a>
+  </section>
   <section class="site-shell list-page">
     {
       posts.map((post) => (

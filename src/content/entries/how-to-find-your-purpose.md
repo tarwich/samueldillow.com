@@ -2,7 +2,7 @@
 type: writing
 title: How to Find Your Purpose
 description: Purpose lives where four things overlap — your passion, your talent, value to others, and need from others.
-pubDate: 2022-05-08
+pubDate: 2019-05-28
 image:
   src: /writing/purpose-venn.png
   alt: Hand-drawn purpose diagram with Passion, Talent, Value, and Need around the center.

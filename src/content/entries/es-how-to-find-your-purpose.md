@@ -8,7 +8,7 @@ translationOf: how-to-find-your-purpose
 image:
   src: /writing/purpose-venn.png
   alt: "Diagrama dibujado a mano del propósito, con Pasión, Talento, Valor y Necesidad alrededor del centro."
-category: Negocios
+category: Salud Mental
 tags:
   - propósito
   - trabajo

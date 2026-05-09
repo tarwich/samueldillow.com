@@ -8,7 +8,7 @@ translationOf: thank-the-passenger
 image:
   src: /writing/passenger.svg
   alt: "Un pasajero nervioso en un auto mientras el conductor mantiene la vista en el camino."
-category: Fe
+category: Salud Mental
 tags:
   - ansiedad
   - rumiación

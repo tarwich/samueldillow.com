@@ -6,7 +6,7 @@ pubDate: 2019-05-28
 image:
   src: /writing/purpose-venn.png
   alt: Hand-drawn purpose diagram with Passion, Talent, Value, and Need around the center.
-category: Business
+category: Mental Health
 tags:
   - purpose
   - work

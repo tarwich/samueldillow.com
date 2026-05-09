@@ -6,7 +6,7 @@ pubDate: 2026-05-09
 image:
   src: /writing/passenger.svg
   alt: A nervous passenger in a car while the driver stays focused on the road.
-category: Faith
+category: Mental Health
 tags:
   - anxiety
   - rumination

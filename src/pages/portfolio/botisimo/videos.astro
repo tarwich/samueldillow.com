@@ -1,0 +1,503 @@
+---
+import BotisimoLayout from "./_layout.astro";
+import Icon from "./_components/Icon.astro";
+import VideoModal from "./_components/VideoModal.astro";
+
+interface Video {
+  id: string;
+  name: string;
+  file: string;
+  duration: string;
+  size: string;
+  triggerType: "command" | "event" | "timer";
+  triggerLabel: string;
+  command?: string;
+  eventName?: string;
+  timerName?: string;
+  platforms: string[];
+  modalPlatforms: string[];
+}
+
+const platformOrder = [
+  "twitch",
+  "youtube",
+  "facebook",
+  "trovo",
+  "rumble",
+  "kick",
+  "tiktok",
+  "discord",
+] as const;
+
+const rows: Video[] = [
+  {
+    id: "intro",
+    name: "Stream Intro",
+    file: "intro_v3.mp4",
+    duration: "0:18",
+    size: "12.4 MB",
+    triggerType: "event",
+    triggerLabel: "Stream start",
+    eventName: "stream_start",
+    platforms: ["twitch", "youtube"],
+    modalPlatforms: ["Twitch", "YouTube"],
+  },
+  {
+    id: "outro",
+    name: "Stream Outro",
+    file: "outro_thanks.mp4",
+    duration: "0:24",
+    size: "16.1 MB",
+    triggerType: "event",
+    triggerLabel: "Stream end",
+    eventName: "stream_end",
+    platforms: ["twitch", "youtube"],
+    modalPlatforms: ["Twitch", "YouTube"],
+  },
+  {
+    id: "brb",
+    name: "Be Right Back",
+    file: "brb_loop.webm",
+    duration: "1:30",
+    size: "28.9 MB",
+    triggerType: "command",
+    triggerLabel: "!brb",
+    command: "!brb",
+    platforms: ["twitch"],
+    modalPlatforms: ["Twitch"],
+  },
+  {
+    id: "big-win",
+    name: "Big Win",
+    file: "win_clutch.mp4",
+    duration: "0:06",
+    size: "4.2 MB",
+    triggerType: "command",
+    triggerLabel: "!win",
+    command: "!win",
+    platforms: ["twitch", "youtube"],
+    modalPlatforms: ["Twitch", "YouTube"],
+  },
+  {
+    id: "new-follow",
+    name: "New Follower Hype",
+    file: "follow_hype.mp4",
+    duration: "0:04",
+    size: "2.8 MB",
+    triggerType: "event",
+    triggerLabel: "New follower",
+    eventName: "follow",
+    platforms: ["twitch"],
+    modalPlatforms: ["Twitch"],
+  },
+  {
+    id: "sub-flex",
+    name: "Sub Flex",
+    file: "sub_celebrate.mp4",
+    duration: "0:08",
+    size: "5.1 MB",
+    triggerType: "event",
+    triggerLabel: "New subscription",
+    eventName: "subscribe",
+    platforms: ["twitch", "youtube"],
+    modalPlatforms: ["Twitch", "YouTube"],
+  },
+  {
+    id: "hydrate",
+    name: "Hydrate Reminder",
+    file: "hydrate.mp4",
+    duration: "0:05",
+    size: "3.4 MB",
+    triggerType: "timer",
+    triggerLabel: "Brand timer",
+    timerName: "Brand",
+    platforms: ["twitch"],
+    modalPlatforms: ["Twitch"],
+  },
+  {
+    id: "raid",
+    name: "Incoming Raid",
+    file: "raid_arrived.mp4",
+    duration: "0:10",
+    size: "6.7 MB",
+    triggerType: "event",
+    triggerLabel: "Incoming raid",
+    eventName: "raid",
+    platforms: ["twitch"],
+    modalPlatforms: ["Twitch"],
+  },
+];
+---
+
+<BotisimoLayout title="Botisimo Videos | Samuel Dillow" active="videos">
+  <h1 class="bot-page-title">Videos <span class="bot-help" aria-label="Help">?</span></h1>
+
+  <div class="bot-toolbar">
+    <button class="bot-pill" type="button" data-open="create-video">
+      <Icon name="upload" /> UPLOAD VIDEO
+    </button>
+    <input class="bot-search" type="text" placeholder="SEARCH NAME" />
+    <button class="bot-pill bot-pill--icon" type="button" aria-label="Refresh"><Icon name="refresh" /></button>
+    <button class="bot-pill bot-pill--icon" type="button" aria-label="Download"><Icon name="download" /></button>
+  </div>
+
+  <label class="bot-check videos-check">
+    <input type="checkbox" />
+    <span>Show Disabled Videos</span>
+  </label>
+
+  <div class="videos-table-wrap">
+    <table class="bot-table videos-table">
+      <colgroup>
+        <col class="videos-col-name" />
+        <col class="videos-col-file" />
+        <col class="videos-col-duration" />
+        <col class="videos-col-trigger" />
+        <col class="videos-col-platforms" />
+        <col class="videos-col-actions" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>NAME</th>
+          <th>FILE</th>
+          <th>DURATION</th>
+          <th>TRIGGER</th>
+          <th>PLATFORMS</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr>
+            <td class="videos-name">
+              <span class="videos-name__wrap">
+                <span class="videos-thumb"><Icon name="play" /></span>
+                <span class="videos-name__text">{row.name}</span>
+              </span>
+            </td>
+            <td class="videos-file">
+              <span class="videos-file__name">{row.file}</span>
+              <span class="videos-file__size">{row.size}</span>
+            </td>
+            <td class="videos-duration">{row.duration}</td>
+            <td>
+              <span class={`videos-trigger videos-trigger--${row.triggerType}`}>{row.triggerLabel}</span>
+            </td>
+            <td>
+              <span class="videos-platforms">
+                {platformOrder.map((p) => (
+                  <span
+                    class={`videos-platform ${row.platforms.includes(p) ? "is-on" : ""}`}
+                    aria-label={p}
+                  >
+                    <Icon name={p} />
+                  </span>
+                ))}
+              </span>
+            </td>
+            <td>
+              <span class="bot-row-actions">
+                <button type="button" aria-label={`Preview ${row.name}`}><Icon name="play" /></button>
+                <button type="button" aria-label={`Edit ${row.name}`} data-open={`edit-video-${row.id}`}><Icon name="edit" /></button>
+                <button type="button" aria-label={`Delete ${row.name}`}><Icon name="trash" /></button>
+              </span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <section class="bot-case-note">
+    <p>
+      The Videos library is the bridge between uploaded media and the rest of
+      Botisimo's automation surface. Each clip is wired to a chat command
+      (<code>!brb</code>, <code>!win</code>), a platform event (stream start, new follower,
+      incoming raid), or a recurring <a href="/portfolio/botisimo/timers/">timer</a> — and
+      the resulting playback fires through the stream overlay.
+    </p>
+    <p>
+      Click <strong>Upload Video</strong> or any row's edit pencil to open the modal.
+      The trigger toggle (Command / Event / Timer) swaps the configuration fields in
+      place, the same pattern the Commands modal uses for Regular vs AI.
+    </p>
+    <p><a href="/portfolio/botisimo/timers/">&larr; Timers</a> · <a href="/portfolio/botisimo/stream-frame/">Stream Frame &rarr;</a></p>
+  </section>
+
+  <VideoModal id="create-video" mode="create" />
+  {rows.map((row) => (
+    <VideoModal
+      id={`edit-video-${row.id}`}
+      mode="edit"
+      name={row.name}
+      file={row.file}
+      duration={row.duration}
+      triggerType={row.triggerType}
+      command={row.command}
+      eventName={row.eventName}
+      timerName={row.timerName}
+      platforms={row.modalPlatforms}
+    />
+  ))}
+
+  <script>
+    document.querySelectorAll<HTMLButtonElement>("[data-open]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-open");
+        if (!id) return;
+        const dlg = document.getElementById(id) as HTMLDialogElement | null;
+        dlg?.showModal();
+      });
+    });
+
+    document.querySelectorAll<HTMLButtonElement>(".bot-toggle [data-toggle]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const parent = btn.parentElement;
+        if (!parent) return;
+        parent.querySelectorAll<HTMLButtonElement>("[data-toggle]").forEach((b) => {
+          b.classList.toggle("is-on", b === btn);
+        });
+        const target = btn.getAttribute("data-mode-set");
+        if (target) {
+          const host = btn.closest<HTMLElement>("[data-mode]");
+          if (host) host.dataset.mode = target;
+        }
+      });
+    });
+
+    document.querySelectorAll<HTMLInputElement>(".video-volume").forEach((input) => {
+      const label = input.closest(".bot-field")?.querySelector(".bot-field__label");
+      input.addEventListener("input", () => {
+        if (label) label.textContent = `VOLUME (${input.value}%)`;
+      });
+    });
+  </script>
+</BotisimoLayout>
+
+<style>
+  .bot-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    border: 1.5px solid var(--bot-mint);
+    color: var(--bot-mint);
+    margin-left: 10px;
+    vertical-align: middle;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  .bot-search {
+    flex: 1 1 280px;
+    max-width: 320px;
+    height: 32px;
+    border-radius: 999px;
+    background: #11161e;
+    border: 1px solid var(--bot-line);
+    color: var(--bot-text);
+    padding: 0 16px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+
+    &::placeholder { color: var(--bot-muted); }
+  }
+
+  .videos-check {
+    margin: 6px 0 22px;
+  }
+
+  .videos-table-wrap {
+    overflow-x: auto;
+  }
+
+  .bot-table.videos-table {
+    width: 100%;
+    min-width: 860px;
+    border-collapse: collapse;
+    font-size: 13px;
+    table-layout: fixed;
+
+    & th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--bot-mint);
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--bot-line-soft);
+    }
+
+    & td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--bot-line-soft);
+      color: var(--bot-text);
+      vertical-align: middle;
+    }
+
+    & .videos-col-name { width: 24%; }
+    & .videos-col-file { width: 24%; }
+    & .videos-col-duration { width: 11%; }
+    & .videos-col-trigger { width: 15%; }
+    & .videos-col-platforms { width: 17%; }
+    & .videos-col-actions { width: 90px; }
+  }
+
+  .videos-name {
+    min-width: 0;
+  }
+
+  .videos-name__wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .videos-thumb {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 22px;
+    flex: 0 0 auto;
+    border: 1px solid var(--bot-line);
+    border-radius: 3px;
+    background: #11161e;
+    color: var(--bot-mint);
+
+    & :global(svg) {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  .videos-name__text,
+  .videos-file__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .videos-name__text {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .videos-file {
+    min-width: 0;
+  }
+
+  .videos-file__name {
+    display: block;
+    color: var(--bot-text);
+    font-family: var(--bot-mono);
+    font-size: 12px;
+  }
+
+  .videos-file__size {
+    color: var(--bot-muted);
+    font-size: 11px;
+  }
+
+  .videos-duration {
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .videos-trigger {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    min-height: 28px;
+    padding: 4px 10px;
+    border: 1px solid var(--bot-mint);
+    border-radius: 999px;
+    color: var(--bot-mint);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.15;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .videos-trigger--event {
+    border-color: var(--sec-engage);
+    color: var(--sec-engage);
+  }
+
+  .videos-trigger--timer {
+    border-color: var(--sec-automate);
+    color: var(--sec-automate);
+  }
+
+  .videos-platforms {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .videos-platform {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+    color: var(--bot-dim);
+
+    & :global(svg) {
+      width: 15px;
+      height: 15px;
+    }
+
+    &.is-on {
+      color: var(--bot-text);
+    }
+  }
+
+  .bot-row-actions {
+    display: inline-flex;
+    justify-content: flex-end;
+    gap: 14px;
+    color: var(--bot-muted);
+
+    & :global(svg) {
+      width: 16px;
+      height: 16px;
+    }
+
+    & button {
+      background: none;
+      border: none;
+      color: inherit;
+      padding: 0;
+
+      &:hover { color: var(--bot-mint); }
+    }
+  }
+
+  @media (max-width: 640px) {
+    .bot-search {
+      max-width: none;
+    }
+
+    .bot-toolbar {
+      align-items: stretch;
+
+      & .bot-pill:first-child,
+      & .bot-search {
+        flex-basis: 100%;
+      }
+    }
+  }
+</style>

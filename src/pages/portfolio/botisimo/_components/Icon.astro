@@ -406,6 +406,20 @@ const { name, class: className } = Astro.props;
   </svg>
 )}
 
+{name === "upload" && (
+  <svg class={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 16V4" />
+    <path d="M7 9l5-5 5 5" />
+    <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+  </svg>
+)}
+
+{name === "play" && (
+  <svg class={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M8 5v14l11-7L8 5z" />
+  </svg>
+)}
+
 {name === "user-check" && (
   <svg class={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <circle cx="9" cy="8" r="3.5" />

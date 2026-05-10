@@ -1,0 +1,219 @@
+---
+import Dialog from "./Dialog.astro";
+import Icon from "./Icon.astro";
+
+interface Props {
+  id: string;
+  mode: "create" | "edit";
+  name?: string;
+  file?: string;
+  duration?: string;
+  triggerType?: "command" | "event" | "timer";
+  command?: string;
+  eventName?: string;
+  timerName?: string;
+  volume?: number;
+  enabled?: boolean;
+  platforms?: string[];
+}
+
+const {
+  id,
+  mode,
+  name = "",
+  file = "",
+  duration = "",
+  triggerType = "command",
+  command = "",
+  eventName = "stream_start",
+  timerName = "",
+  volume = 80,
+  enabled = true,
+  platforms = ["Twitch"],
+} = Astro.props;
+
+const title = mode === "create" ? "UPLOAD VIDEO" : "EDIT VIDEO";
+const cta = mode === "create" ? "UPLOAD" : "SAVE";
+
+const platformList = ["Twitch", "YouTube", "Facebook", "Trovo", "Rumble", "Kick", "TikTok", "Discord"];
+const eventOptions = [
+  { id: "stream_start", label: "Stream start" },
+  { id: "stream_end", label: "Stream end" },
+  { id: "follow", label: "New follower" },
+  { id: "subscribe", label: "New subscription" },
+  { id: "raid", label: "Incoming raid" },
+  { id: "cheer", label: "Bits / cheer" },
+  { id: "host", label: "Host" },
+];
+---
+
+<Dialog id={id} title={title} cta={cta} ctaIcon={mode === "create" ? "upload" : "video"}>
+  <div class="video-modal" data-mode={triggerType}>
+    <div class="bot-field">
+      <label class="bot-field__label">VIDEO FILE</label>
+      <span class="bot-field__hint">Drop an MP4 or WebM here, or click to browse. Files over 30 MB are transcoded server-side.</span>
+      <label class="video-drop">
+        <Icon name="upload" />
+        <span class="video-drop__title">
+          {file ? file : "Drop file or click to upload"}
+        </span>
+        <span class="video-drop__meta">
+          {file
+            ? `${duration || "—"} · MP4`
+            : "MP4 or WebM · up to 100 MB"}
+        </span>
+        <input type="file" accept="video/mp4,video/webm" hidden />
+      </label>
+    </div>
+
+    <div class="bot-field">
+      <label class="bot-field__label">NAME</label>
+      <span class="bot-field__hint">Internal label shown in your videos list and in trigger dropdowns elsewhere.</span>
+      <input type="text" placeholder="STREAM INTRO" value={name} />
+    </div>
+
+    <div class="bot-field">
+      <label class="bot-field__label">TRIGGER</label>
+      <span class="bot-field__hint">Choose how this video should be played back.</span>
+      <div class="bot-toggle" role="tablist">
+        <button type="button" class={triggerType === "command" ? "is-on" : ""} data-toggle="command" data-mode-set="command">COMMAND</button>
+        <button type="button" class={triggerType === "event" ? "is-on" : ""} data-toggle="event" data-mode-set="event">EVENT</button>
+        <button type="button" class={triggerType === "timer" ? "is-on" : ""} data-toggle="timer" data-mode-set="timer">TIMER</button>
+      </div>
+    </div>
+
+    <div class="video-trigger video-trigger--command">
+      <div class="bot-field">
+        <label class="bot-field__label">CHAT COMMAND</label>
+        <span class="bot-field__hint">Plays whenever this command is typed in chat. Separate multiple triggers with a comma.</span>
+        <input type="text" placeholder="!intro" value={command} />
+      </div>
+    </div>
+
+    <div class="video-trigger video-trigger--event">
+      <div class="bot-field">
+        <label class="bot-field__label">EVENT</label>
+        <span class="bot-field__hint">Plays automatically whenever the selected event fires on any connected platform.</span>
+        <select>
+          {eventOptions.map((e) => (
+            <option value={e.id} selected={e.id === eventName}>{e.label}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+
+    <div class="video-trigger video-trigger--timer">
+      <div class="bot-field">
+        <label class="bot-field__label">LINKED TIMER</label>
+        <span class="bot-field__hint">Plays when a timer fires. Manage timers on the Timers page.</span>
+        <input type="text" placeholder="Brand" value={timerName} />
+      </div>
+    </div>
+
+    <div class="bot-field">
+      <label class="bot-field__label">VOLUME ({volume}%)</label>
+      <span class="bot-field__hint">Playback volume relative to your overlay's master output.</span>
+      <input type="range" min="0" max="100" value={volume} class="video-volume" />
+    </div>
+
+    <div class="bot-field">
+      <label class="bot-field__label">PLATFORMS</label>
+      <span class="bot-field__hint">Limit playback to overlays running on specific platforms.</span>
+      <div class="bot-check-row">
+        {platformList.map((p) => (
+          <label class="bot-check">
+            <input type="checkbox" checked={platforms.includes(p)} />
+            <span>{p}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <div class="bot-field">
+      <label class="bot-field__label">STATUS</label>
+      <span class="bot-field__hint">Disabled videos stay in the library but never play.</span>
+      <label class="bot-check">
+        <input type="checkbox" checked={enabled} />
+        <span>Enabled</span>
+      </label>
+    </div>
+  </div>
+</Dialog>
+
+<style>
+  .video-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .video-modal[data-mode="command"] .video-trigger:not(.video-trigger--command),
+  .video-modal[data-mode="event"] .video-trigger:not(.video-trigger--event),
+  .video-modal[data-mode="timer"] .video-trigger:not(.video-trigger--timer) {
+    display: none;
+  }
+
+  .video-drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 26px 18px;
+    border: 1px dashed var(--bot-line);
+    border-radius: 8px;
+    background: #0a0d12;
+    cursor: pointer;
+    text-align: center;
+
+    & :global(svg) {
+      width: 28px;
+      height: 28px;
+      color: var(--bot-mint);
+      opacity: 0.85;
+    }
+
+    &:hover { border-color: var(--bot-mint); }
+  }
+
+  .video-drop__title {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .video-drop__meta {
+    color: var(--bot-muted);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .video-volume {
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--bot-line);
+    border-radius: 999px;
+    outline: none;
+    margin-top: 4px;
+
+    &::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--bot-mint);
+      cursor: pointer;
+    }
+
+    &::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border: none;
+      border-radius: 50%;
+      background: var(--bot-mint);
+      cursor: pointer;
+    }
+  }
+</style>

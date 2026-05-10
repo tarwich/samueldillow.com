@@ -116,6 +116,10 @@ const {
         flex-shrink: 0;
       }
 
+      &:not([href]) {
+        opacity: 0.6;
+      }
+
       &[href]:hover:not(.is-active):not(.is-active--soft) {
         background: var(--bot-line-soft);
       }

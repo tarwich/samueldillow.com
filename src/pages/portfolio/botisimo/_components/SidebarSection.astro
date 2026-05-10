@@ -43,7 +43,7 @@ const {
           : "";
         return (
           <li>
-            <a href={item.href ?? "#"} class={cls}>
+            <a href={item.href} class={cls}>
               <Icon name={item.icon} />
               <span>{item.label}</span>
             </a>
@@ -116,7 +116,7 @@ const {
         flex-shrink: 0;
       }
 
-      &:hover:not(.is-active):not(.is-active--soft) {
+      &[href]:hover:not(.is-active):not(.is-active--soft) {
         background: var(--bot-line-soft);
       }
 

@@ -1,140 +1,148 @@
 ---
 import BotisimoLayout from "./_layout.astro";
+import Icon from "./_components/Icon.astro";
 
-const days = ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday"];
-
-function makeArea(values: number[], width: number, height: number, max: number) {
-  const points: [number, number][] = values.map((v, i) => [
-    (i * width) / (values.length - 1),
-    height - (v / max) * height,
-  ]);
-
-  const tension = 0.25;
-  let path = `M${points[0][0]},${height} L${points[0][0]},${points[0][1]} `;
-
-  for (let i = 0; i < points.length - 1; i++) {
-    const p0 = points[Math.max(0, i - 1)];
-    const p1 = points[i];
-    const p2 = points[i + 1];
-    const p3 = points[Math.min(points.length - 1, i + 2)];
-
-    const cp1x = p1[0] + (p2[0] - p0[0]) * tension;
-    const cp1y = p1[1] + (p2[1] - p0[1]) * tension;
-    const cp2x = p2[0] - (p3[0] - p1[0]) * tension;
-    const cp2y = p2[1] - (p3[1] - p1[1]) * tension;
-
-    path += `C${cp1x},${cp1y} ${cp2x},${cp2y} ${p2[0]},${p2[1]} `;
-  }
-
-  path += `L${points[points.length - 1][0]},${height} Z`;
-  return path;
-}
-
-const W = 1100;
-const H = 240;
-const MAX = 40;
-
-const newUsersTwitch = [3, 8, 8, 20, 14, 5, 0];
-const newUsersDLive = [0, 5, 10, 5, 0, 0, 0];
-const newUsersYouTube = [0, 2, 4, 10, 10, 3, 0];
-
-const chatTwitch = [3, 6, 10, 20, 12, 5, 2];
-const chatDLive = [0, 4, 8, 5, 1, 0, 0];
-const chatYouTube = [2, 4, 8, 15, 10, 3, 0];
-
-const legend = [
-  { label: "Twitch", color: "#c084fc" },
-  { label: "DLive", color: "#7eb8ff" },
-  { label: "YouTube", color: "#f5b6c4" },
+const connections = [
+  { id: "twitch", label: "Twitch", on: true },
+  { id: "youtube", label: "YouTube", on: false },
+  { id: "dlive", label: "DLive", on: false },
+  { id: "trovo", label: "Trovo", on: false },
+  { id: "discord", label: "Discord", on: false },
+  { id: "slack", label: "Slack", on: false },
 ];
+
+const pollOptions = [
+  { n: 1, label: "Overwatch", votes: 1, percent: 100, points: 0 },
+  { n: 2, label: "Valorant", votes: 0, percent: 0, points: 0 },
+  { n: 3, label: "Rocket League", votes: 0, percent: 0, points: 0 },
+];
+
+const events = [
+  { user: "SwanTheOnly", action: "followed otothea", date: "05/05/2021" },
+  { user: "ibap77", action: "redeemed Hydrate!", date: "05/05/2021" },
+  { user: "PurrFosterMama", action: "raided otothea with 27 viewers", date: "05/04/2021" },
+  { user: "ZenithRabbit", action: "subscribed for 3 months", date: "05/04/2021" },
+];
+
+const leaderboard = [
+  { name: "ibap77", points: 21117 },
+  { name: "SwanTheOnly", points: 14882 },
+  { name: "PurrFosterMama", points: 9934 },
+  { name: "ZenithRabbit", points: 6210 },
+  { name: "otothea", points: 4051 },
+];
+
+const fmt = new Intl.NumberFormat("en-US");
 ---
 
 <BotisimoLayout title="Botisimo Dashboard | Samuel Dillow" active="dashboard">
   <h1 class="bot-page-title">Dashboard</h1>
 
-  <div>
-    <p class="bot-section-label">BOT STATUS</p>
-    <div class="bot-status-row">
-      <div class="bot-status-row__item"><span class="bot-dot"></span>Twitch</div>
-      <div class="bot-status-row__item"><span class="bot-dot"></span>DLive</div>
-      <div class="bot-status-row__item"><span class="bot-dot bot-dot--off"></span>Facebook</div>
-      <div class="bot-status-row__item"><span class="bot-dot"></span>YouTube</div>
-    </div>
+  <div class="bot-connections">
+    {connections.map((c) => (
+      <button class={`bot-connection ${c.on ? "is-on" : ""}`} type="button">
+        <Icon name="power" /> {c.label}
+      </button>
+    ))}
   </div>
 
-  <div class="bot-chart-block">
-    <p class="bot-chart-block__title">NEW USERS (LAST 7 DAYS)</p>
-    <div class="bot-chart-row">
-      <svg class="bot-chart" viewBox={`0 0 ${W + 80} ${H + 60}`} role="img" aria-label="New users last 7 days">
-        {[0, 5, 10, 15, 20, 25, 30, 35, 40].map((tick) => (
-          <g>
-            <line x1="40" x2={W + 40} y1={H - (tick / MAX) * H + 20} y2={H - (tick / MAX) * H + 20} stroke="#1c222b" stroke-width="1" />
-            <line x1="40" x2="40" y1="20" y2={H + 20} stroke="#1c222b" stroke-width="1" />
-            <text x="32" y={H - (tick / MAX) * H + 24} text-anchor="end" fill="#5a6068" font-size="11">{tick}</text>
-          </g>
-        ))}
-        {days.map((_, i) => (
-          <line
-            x1={40 + (W / (days.length - 1)) * i}
-            x2={40 + (W / (days.length - 1)) * i}
-            y1="20"
-            y2={H + 20}
-            stroke="#1c222b"
-            stroke-width="1"
-          />
-        ))}
-        <g transform="translate(40, 20)">
-          <path d={makeArea(newUsersYouTube, W, H, MAX)} fill="rgba(245, 182, 196, 0.55)" stroke="#f5b6c4" stroke-width="1.25" />
-          <path d={makeArea(newUsersDLive, W, H, MAX)} fill="rgba(126, 184, 255, 0.45)" stroke="#7eb8ff" stroke-width="1.25" />
-          <path d={makeArea(newUsersTwitch, W, H, MAX)} fill="rgba(168, 85, 247, 0.45)" stroke="#c084fc" stroke-width="1.25" />
-        </g>
-        {days.map((day, i) => (
-          <text x={40 + (W / (days.length - 1)) * i} y={H + 45} fill="#8a909a" font-size="12" text-anchor="middle">{day}</text>
-        ))}
-      </svg>
-      <ul class="bot-chart-legend">
-        {legend.map((item) => (
-          <li><span class="bot-chart-legend__swatch" style={`background:${item.color}`}></span>{item.label}</li>
+  <div class="bot-cards">
+    <section class="bot-card">
+      <header class="bot-card__head">
+        <h2>Poll</h2>
+        <button type="button" class="bot-card__menu" aria-label="Poll menu"><Icon name="dots" /></button>
+      </header>
+      <p class="bot-card__sub">WHAT GAME SHOULD WE PLAY NEXT?</p>
+      <div class="bot-card__actions">
+        <button type="button"><Icon name="x-circle" /> close</button>
+        <button type="button"><Icon name="stop" /> end</button>
+        <button type="button"><Icon name="overlay" /> stream overlay</button>
+      </div>
+      <ul class="bot-poll">
+        {pollOptions.map((o) => (
+          <li>
+            <div class="bot-poll__head">
+              <span class="bot-poll__label">{o.n}. {o.label}</span>
+              <span class="bot-poll__vote">type <strong>"!vote {o.n}"</strong> in chat to vote</span>
+              <button type="button" class="bot-pillette"><Icon name="trophy" /> WINNER</button>
+            </div>
+            <div class="bot-poll__bar" style={`--p:${o.percent}%`}>
+              <span class="bot-poll__fill"></span>
+              <span class="bot-poll__meta">{o.votes} votes ({o.percent}%) ({o.points} Points bet)</span>
+            </div>
+          </li>
         ))}
       </ul>
-    </div>
+    </section>
+
+    <section class="bot-card">
+      <header class="bot-card__head">
+        <h2>Giveaway</h2>
+        <button type="button" class="bot-card__menu" aria-label="Giveaway menu"><Icon name="dots" /></button>
+      </header>
+      <p class="bot-card__sub">$15 GIFT CARD GIVEAWAY</p>
+      <div class="bot-card__actions">
+        <button type="button"><Icon name="x-circle" /> close</button>
+        <button type="button"><Icon name="stop" /> end</button>
+        <button type="button"><Icon name="overlay" /> stream overlay</button>
+      </div>
+      <p class="bot-card__line">type <strong>"!enter"</strong> in chat to enter the giveaway</p>
+      <button type="button" class="bot-pillette bot-pillette--lg"><Icon name="trophy" /> PICK WINNER</button>
+      <p class="bot-card__win">otothea wins!</p>
+      <p class="bot-card__winner">1.otothea 🏆</p>
+    </section>
+
+    <section class="bot-card">
+      <header class="bot-card__head">
+        <h2>Music</h2>
+        <button type="button" class="bot-card__menu" aria-label="Music menu"><Icon name="dots" /></button>
+      </header>
+      <div class="bot-music-empty">
+        <Icon name="music" />
+        <p>Your Music Queue is Empty</p>
+        <a href="#">manage music player</a>
+      </div>
+    </section>
   </div>
 
-  <div class="bot-chart-block">
-    <p class="bot-chart-block__title">CHAT ACTIVITY (LAST 7 DAYS)</p>
-    <div class="bot-chart-row">
-      <svg class="bot-chart" viewBox={`0 0 ${W + 80} ${H + 60}`} role="img" aria-label="Chat activity last 7 days">
-        {[0, 5, 10, 15, 20, 25, 30, 35, 40].map((tick) => (
-          <g>
-            <line x1="40" x2={W + 40} y1={H - (tick / MAX) * H + 20} y2={H - (tick / MAX) * H + 20} stroke="#1c222b" stroke-width="1" />
-            <text x="32" y={H - (tick / MAX) * H + 24} text-anchor="end" fill="#5a6068" font-size="11">{tick}</text>
-          </g>
-        ))}
-        {days.map((_, i) => (
-          <line
-            x1={40 + (W / (days.length - 1)) * i}
-            x2={40 + (W / (days.length - 1)) * i}
-            y1="20"
-            y2={H + 20}
-            stroke="#1c222b"
-            stroke-width="1"
-          />
-        ))}
-        <g transform="translate(40, 20)">
-          <path d={makeArea(chatYouTube, W, H, MAX)} fill="rgba(245, 182, 196, 0.55)" stroke="#f5b6c4" stroke-width="1.25" />
-          <path d={makeArea(chatDLive, W, H, MAX)} fill="rgba(126, 184, 255, 0.45)" stroke="#7eb8ff" stroke-width="1.25" />
-          <path d={makeArea(chatTwitch, W, H, MAX)} fill="rgba(168, 85, 247, 0.45)" stroke="#c084fc" stroke-width="1.25" />
-        </g>
-        {days.map((day, i) => (
-          <text x={40 + (W / (days.length - 1)) * i} y={H + 45} fill="#8a909a" font-size="12" text-anchor="middle">{day}</text>
-        ))}
-      </svg>
-      <ul class="bot-chart-legend">
-        {legend.map((item) => (
-          <li><span class="bot-chart-legend__swatch" style={`background:${item.color}`}></span>{item.label}</li>
+  <button type="button" class="bot-pill bot-pill--ghost bot-broadcast">
+    <Icon name="megaphone" /> BROADCAST MESSAGE
+  </button>
+
+  <div class="bot-rows">
+    <section class="bot-card">
+      <header class="bot-card__head">
+        <h2>Events</h2>
+        <button type="button" class="bot-card__menu" aria-label="Events menu"><Icon name="dots" /></button>
+      </header>
+      <ul class="bot-events">
+        {events.map((e) => (
+          <li>
+            <span class="bot-events__icon"><Icon name="user-check" /></span>
+            <span class="bot-events__text">
+              <strong>{e.user}</strong> {e.action}
+            </span>
+            <span class="bot-events__date">{e.date}</span>
+          </li>
         ))}
       </ul>
-    </div>
+    </section>
+
+    <section class="bot-card">
+      <header class="bot-card__head">
+        <h2>Leaderboard</h2>
+        <button type="button" class="bot-card__menu" aria-label="Leaderboard menu"><Icon name="dots" /></button>
+      </header>
+      <ol class="bot-leaderboard">
+        {leaderboard.map((row, i) => (
+          <li>
+            <span class="bot-leaderboard__rank">{i + 1}</span>
+            <span class="bot-leaderboard__name">{row.name}</span>
+            <span class="bot-leaderboard__points">{fmt.format(row.points)}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
   </div>
 
   <section class="bot-case-note">
@@ -146,9 +154,10 @@ const legend = [
       from memory — not a live link.
     </p>
     <p>
-      Explore <a href="/portfolio/botisimo/commands/">Commands</a> for the chatbot
-      configuration UI (with Create/Edit modals) or
-      <a href="/portfolio/botisimo/stream-frame/">Stream Frame</a> for the broadcast layout designer.
+      Open <a href="/portfolio/botisimo/commands/">Commands</a> for the chatbot
+      configuration UI, <a href="/portfolio/botisimo/timers/">Timers</a> for scheduled chat broadcasts,
+      <a href="/portfolio/botisimo/stream-reports/">Stream Reports</a> for the analytics view,
+      or <a href="/portfolio/botisimo/stream-frame/">Stream Frame</a> for the broadcast layout designer.
     </p>
     <p>
       <a href="/portfolio/">&larr; Back to portfolio</a>
@@ -157,82 +166,341 @@ const legend = [
 </BotisimoLayout>
 
 <style>
-  .bot-section-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.3em;
-    color: var(--bot-muted);
-    margin: 0 0 16px;
-  }
-
-  .bot-status-row {
+  .bot-connections {
     display: flex;
     flex-wrap: wrap;
-    gap: 28px;
-    margin: 8px 0 28px;
+    gap: 14px;
+    margin-bottom: 24px;
   }
-  .bot-status-row__item {
+
+  .bot-connection {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 4px 4px 0;
+    background: none;
+    border: none;
+    color: var(--bot-text);
+    font-size: 14px;
+    cursor: pointer;
+
+    & :global(svg) {
+      width: 18px;
+      height: 18px;
+      color: var(--bot-mint);
+      opacity: 0.55;
+    }
+
+    &.is-on :global(svg) { opacity: 1; }
+    &:hover :global(svg) { opacity: 0.85; }
+  }
+
+  .bot-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 22px;
+
+    @media (max-width: 1100px) { grid-template-columns: 1fr; }
+  }
+
+  .bot-rows {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 18px;
+    margin-top: 22px;
+
+    @media (max-width: 900px) { grid-template-columns: 1fr; }
+  }
+
+  .bot-card {
+    background: var(--bot-panel);
+    border: 1px solid var(--bot-line-soft);
+    border-radius: 8px;
+    padding: 18px 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bot-card__head {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
+
+    & h2 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 600;
+      color: #fff;
+    }
+  }
+
+  .bot-card__menu {
+    background: none;
+    border: none;
+    color: var(--bot-muted);
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+
+    & :global(svg) { width: 20px; height: 20px; }
+    &:hover { color: var(--bot-text); }
+  }
+
+  .bot-card__sub {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--bot-mint);
+  }
+
+  .bot-card__actions {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+
+    & button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      color: var(--bot-mint);
+      font-size: 13px;
+      padding: 0;
+      cursor: pointer;
+
+      & :global(svg) { width: 14px; height: 14px; }
+      &:hover { color: var(--bot-mint-strong); }
+    }
+  }
+
+  .bot-card__line {
+    margin: 0;
     font-size: 13px;
+    color: var(--bot-text);
+
+    & strong {
+      color: var(--bot-mint);
+      font-weight: 600;
+    }
+  }
+
+  .bot-card__win {
+    margin: 6px 0 0;
+    padding: 8px 12px;
+    border-left: 3px solid var(--bot-mint);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .bot-card__winner {
+    margin: 0;
+    font-size: 14px;
     color: var(--bot-text);
   }
 
-  .bot-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--bot-mint);
-    display: inline-block;
-  }
-  .bot-dot--off { background: #4a4f57; }
-
-  .bot-chart {
-    flex: 1;
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-  .bot-chart-row {
-    display: flex;
-    align-items: stretch;
-    gap: 24px;
-  }
-
-  .bot-chart-block {
-    margin-bottom: 32px;
-  }
-  .bot-chart-block__title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.3em;
-    color: var(--bot-muted);
-    margin: 0 0 12px;
-  }
-
-  .bot-chart-legend {
+  .bot-poll {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    align-self: center;
-    min-width: 86px;
-    font-size: 13px;
-    color: var(--bot-text);
+    gap: 14px;
 
-    & li {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    & li { display: flex; flex-direction: column; gap: 6px; }
+  }
+
+  .bot-poll__head {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .bot-poll__label {
+    color: var(--bot-text);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .bot-poll__vote {
+    font-size: 12px;
+    color: var(--bot-muted);
+
+    & strong { color: var(--bot-mint); font-weight: 600; }
+  }
+
+  .bot-poll__bar {
+    position: relative;
+    height: 22px;
+    border: 1px solid var(--bot-line);
+    border-radius: 4px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  .bot-poll__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--p, 0%);
+    background: rgba(126, 224, 194, 0.16);
+  }
+
+  .bot-poll__meta {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 10px;
+    font-size: 11px;
+    color: var(--bot-muted);
+  }
+
+  .bot-pillette {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--bot-mint);
+    background: transparent;
+    color: var(--bot-mint);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    cursor: pointer;
+    white-space: nowrap;
+
+    & :global(svg) { width: 12px; height: 12px; }
+    &:hover { background: rgba(126, 224, 194, 0.1); }
+  }
+
+  .bot-pillette--lg {
+    align-self: flex-start;
+    padding: 6px 16px;
+    font-size: 12px;
+
+    & :global(svg) { width: 14px; height: 14px; }
+  }
+
+  .bot-music-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 1;
+    color: var(--bot-muted);
+    text-align: center;
+    padding: 28px 12px;
+
+    & :global(svg) {
+      width: 48px;
+      height: 48px;
+      color: var(--bot-text);
+      opacity: 0.55;
+    }
+
+    & p {
+      margin: 6px 0 0;
+      color: var(--bot-text);
+      font-size: 13px;
+    }
+
+    & a {
+      color: var(--bot-muted);
+      font-size: 12px;
+      text-decoration: underline;
     }
   }
-  .bot-chart-legend__swatch {
-    width: 18px;
-    height: 14px;
-    border-radius: 2px;
-    display: inline-block;
+
+  .bot-broadcast {
+    margin-top: 4px;
+  }
+
+  .bot-events {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    & li {
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--bot-line-soft);
+
+      &:last-child { border-bottom: none; }
+    }
+  }
+
+  .bot-events__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bot-mint);
+
+    & :global(svg) { width: 18px; height: 18px; }
+  }
+
+  .bot-events__text {
+    color: var(--bot-text);
+    font-size: 13px;
+
+    & strong { color: #fff; font-weight: 600; }
+  }
+
+  .bot-events__date {
+    color: var(--bot-muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bot-leaderboard {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    & li {
+      display: grid;
+      grid-template-columns: 22px 1fr auto;
+      gap: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--bot-line-soft);
+      align-items: center;
+
+      &:last-child { border-bottom: none; }
+    }
+  }
+
+  .bot-leaderboard__rank {
+    color: var(--bot-muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bot-leaderboard__name {
+    color: var(--bot-text);
+    font-size: 13px;
+  }
+
+  .bot-leaderboard__points {
+    color: var(--bot-mint);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
   }
 </style>

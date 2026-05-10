@@ -307,12 +307,6 @@ a {
   transition: background-color 120ms ease;
 }
 
-a.lane:hover h2,
-a.lane:focus-visible h2 {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
 a.lane:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: -4px;

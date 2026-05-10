@@ -1,0 +1,762 @@
+---
+import BotisimoLayout from "./_layout.astro";
+import Icon from "./_components/Icon.astro";
+
+interface Track {
+  id: string;
+  title: string;
+  artist: string;
+  source: "Upload" | "Link";
+  duration: string;
+  mode: "Streamer" | "Random" | "Request";
+  requester: string;
+  platforms: string[];
+}
+
+interface Request {
+  user: string;
+  track: string;
+  status: "Queued" | "Sub only" | "Blocked";
+  eta: string;
+}
+
+const platformOrder = ["twitch", "youtube", "discord"] as const;
+
+const tracks: Track[] = [
+  {
+    id: "lofi-loop",
+    title: "Late Night Lobby",
+    artist: "Stream Beats",
+    source: "Upload",
+    duration: "3:42",
+    mode: "Streamer",
+    requester: "Samuel",
+    platforms: ["twitch", "youtube"],
+  },
+  {
+    id: "opening-song",
+    title: "Opening Soon",
+    artist: "Creator Pack",
+    source: "Upload",
+    duration: "2:18",
+    mode: "Random",
+    requester: "Auto DJ",
+    platforms: ["twitch"],
+  },
+  {
+    id: "chat-pick",
+    title: "Pixel Highway",
+    artist: "Neon FM",
+    source: "Link",
+    duration: "4:05",
+    mode: "Request",
+    requester: "MaraJade",
+    platforms: ["twitch", "discord"],
+  },
+  {
+    id: "cooldown",
+    title: "Cooldown Screen",
+    artist: "Botisimo Library",
+    source: "Link",
+    duration: "5:12",
+    mode: "Random",
+    requester: "Auto DJ",
+    platforms: ["youtube"],
+  },
+];
+
+const requests: Request[] = [
+  { user: "MaraJade", track: "Pixel Highway", status: "Queued", eta: "Next" },
+  { user: "PrimeOnly", track: "Ocean City Nights", status: "Sub only", eta: "2 songs" },
+  { user: "NightBotFan", track: "Ten Hour Loop", status: "Blocked", eta: "Filtered" },
+];
+---
+
+<BotisimoLayout title="Botisimo Music Player | Samuel Dillow" active="music-player">
+  <h1 class="bot-page-title">Music Player <span class="bot-help" aria-label="Help">?</span></h1>
+
+  <div class="bot-toolbar">
+    <button class="bot-pill" type="button">
+      <Icon name="upload" /> UPLOAD SONG
+    </button>
+    <button class="bot-pill bot-pill--ghost" type="button">
+      <Icon name="link" /> ADD LINK
+    </button>
+    <input class="bot-search" type="text" placeholder="SEARCH SONGS" />
+    <button class="bot-pill bot-pill--icon" type="button" aria-label="Refresh"><Icon name="refresh" /></button>
+    <button class="bot-pill bot-pill--icon" type="button" aria-label="Download"><Icon name="download" /></button>
+  </div>
+
+  <section class="music-now">
+    <div class="music-art">
+      <Icon name="music" />
+    </div>
+    <div class="music-current">
+      <span class="music-eyebrow">NOW PLAYING</span>
+      <h2>Late Night Lobby</h2>
+      <p>Stream Beats / uploaded file / streamer controlled</p>
+      <div class="music-progress" aria-label="Song progress">
+        <span style="width: 42%;"></span>
+      </div>
+      <div class="music-time">
+        <span>1:34</span>
+        <span>3:42</span>
+      </div>
+    </div>
+    <div class="music-controls" aria-label="Playback controls">
+      <button type="button" aria-label="Previous song"><Icon name="refresh" /></button>
+      <button class="music-controls__play" type="button" aria-label="Play"><Icon name="play" /></button>
+      <button type="button" aria-label="Stop"><Icon name="stop" /></button>
+    </div>
+  </section>
+
+  <section class="music-settings" aria-label="Music request settings">
+    <div class="music-setting">
+      <span class="music-setting__label">PLAY MODE</span>
+      <div class="music-segment">
+        <button class="is-on" type="button">Streamer</button>
+        <button type="button">Random</button>
+        <button type="button">Chat Requests</button>
+      </div>
+    </div>
+    <label class="music-switch">
+      <span>
+        <strong>Song requests</strong>
+        <small>Allow chat to request tracks from the approved library.</small>
+      </span>
+      <input type="checkbox" checked />
+    </label>
+    <label class="music-switch">
+      <span>
+        <strong>Subscribers only</strong>
+        <small>Limit request commands to subscribers and members.</small>
+      </span>
+      <input type="checkbox" checked />
+    </label>
+  </section>
+
+  <div class="music-layout">
+    <div class="music-table-wrap">
+      <table class="bot-table music-table">
+        <colgroup>
+          <col class="music-col-title" />
+          <col class="music-col-source" />
+          <col class="music-col-duration" />
+          <col class="music-col-mode" />
+          <col class="music-col-requester" />
+          <col class="music-col-platforms" />
+          <col class="music-col-actions" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>SONG</th>
+            <th>SOURCE</th>
+            <th>LENGTH</th>
+            <th>MODE</th>
+            <th>REQUESTER</th>
+            <th>PLATFORMS</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {tracks.map((track) => (
+            <tr>
+              <td class="music-song">
+                <span class="music-song__icon"><Icon name="music" /></span>
+                <span class="music-song__copy">
+                  <strong>{track.title}</strong>
+                  <small>{track.artist}</small>
+                </span>
+              </td>
+              <td><span class={`music-tag music-tag--${track.source.toLowerCase()}`}>{track.source}</span></td>
+              <td class="music-duration">{track.duration}</td>
+              <td><span class="music-mode">{track.mode}</span></td>
+              <td class="music-requester">{track.requester}</td>
+              <td>
+                <span class="music-platforms">
+                  {platformOrder.map((p) => (
+                    <span class={`music-platform ${track.platforms.includes(p) ? "is-on" : ""}`} aria-label={p}>
+                      <Icon name={p} />
+                    </span>
+                  ))}
+                </span>
+              </td>
+              <td>
+                <span class="bot-row-actions">
+                  <button type="button" aria-label={`Play ${track.title}`}><Icon name="play" /></button>
+                  <button type="button" aria-label={`Edit ${track.title}`}><Icon name="edit" /></button>
+                  <button type="button" aria-label={`Delete ${track.title}`}><Icon name="trash" /></button>
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <aside class="music-queue" aria-label="Chat request queue">
+      <h2>Request Queue</h2>
+      {requests.map((request) => (
+        <div class="music-request">
+          <div>
+            <strong>{request.track}</strong>
+            <span>{request.user}</span>
+          </div>
+          <span class={`music-request__status music-request__status--${request.status.toLowerCase().replace(" ", "-")}`}>
+            {request.status}
+          </span>
+          <small>{request.eta}</small>
+        </div>
+      ))}
+    </aside>
+  </div>
+
+  <section class="bot-case-note">
+    <p>
+      The Music Player gave streamers one place to upload songs, attach external
+      music links, and decide who controlled playback: the streamer, random
+      rotation, or viewers requesting songs from chat.
+    </p>
+    <p>
+      Subscriber-only requests turned music into a moderation and membership tool,
+      not just a playlist. A creator could keep the stream moving while still
+      letting trusted viewers shape the room.
+    </p>
+    <p><a href="/portfolio/botisimo/stream-frame/">&larr; Stream Frame</a> · <a href="/portfolio/botisimo/polls/">Polls &rarr;</a></p>
+  </section>
+</BotisimoLayout>
+
+<style>
+  .bot-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    border: 1.5px solid var(--bot-mint);
+    color: var(--bot-mint);
+    margin-left: 10px;
+    vertical-align: middle;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  .bot-search {
+    flex: 1 1 280px;
+    max-width: 320px;
+    height: 32px;
+    border-radius: 999px;
+    background: #11161e;
+    border: 1px solid var(--bot-line);
+    color: var(--bot-text);
+    padding: 0 16px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+
+    &::placeholder { color: var(--bot-muted); }
+  }
+
+  .music-now {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) auto;
+    gap: 22px;
+    align-items: center;
+    border: 1px solid var(--bot-line-soft);
+    background: var(--bot-bg-soft);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .music-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: #151b24;
+    color: var(--sec-engage);
+
+    & :global(svg) {
+      width: 44px;
+      height: 44px;
+    }
+  }
+
+  .music-current {
+    min-width: 0;
+
+    & h2 {
+      color: #fff;
+      font-size: 24px;
+      line-height: 1.1;
+      margin: 4px 0 4px;
+    }
+
+    & p {
+      color: var(--bot-muted);
+      margin: 0 0 16px;
+      font-size: 13px;
+    }
+  }
+
+  .music-eyebrow,
+  .music-setting__label {
+    color: var(--sec-engage);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+  }
+
+  .music-progress {
+    height: 6px;
+    border-radius: 999px;
+    background: #080a0e;
+    overflow: hidden;
+
+    & span {
+      display: block;
+      height: 100%;
+      background: var(--sec-engage);
+      border-radius: inherit;
+    }
+  }
+
+  .music-time {
+    display: flex;
+    justify-content: space-between;
+    color: var(--bot-muted);
+    font-family: var(--bot-mono);
+    font-size: 11px;
+    margin-top: 7px;
+  }
+
+  .music-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    & button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--bot-line);
+      border-radius: 999px;
+      background: #11161e;
+      color: var(--bot-text);
+
+      &:hover {
+        color: var(--sec-engage);
+      }
+
+      & :global(svg) {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    & .music-controls__play {
+      width: 48px;
+      height: 48px;
+      background: var(--sec-engage);
+      border-color: var(--sec-engage);
+      color: #0a0d12;
+    }
+  }
+
+  .music-settings {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(220px, 0.7fr) minmax(220px, 0.7fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .music-setting,
+  .music-switch {
+    border: 1px solid var(--bot-line-soft);
+    background: #0d1117;
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .music-setting {
+    display: grid;
+    gap: 12px;
+  }
+
+  .music-segment {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    & button {
+      border: 1px solid var(--bot-line);
+      border-radius: 999px;
+      background: #11161e;
+      color: var(--bot-text);
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+
+      &.is-on {
+        background: var(--sec-engage);
+        border-color: var(--sec-engage);
+        color: #0a0d12;
+      }
+    }
+  }
+
+  .music-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+
+    & strong,
+    & small {
+      display: block;
+    }
+
+    & strong {
+      color: #fff;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    & small {
+      color: var(--bot-muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    & input {
+      appearance: none;
+      flex: 0 0 auto;
+      width: 42px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--bot-line);
+      position: relative;
+      cursor: pointer;
+
+      &::after {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--bot-muted);
+        top: 3px;
+        left: 3px;
+        transition: transform 160ms ease, background 160ms ease;
+      }
+
+      &:checked {
+        background: color-mix(in srgb, var(--sec-engage) 32%, #11161e);
+
+        &::after {
+          transform: translateX(18px);
+          background: var(--sec-engage);
+        }
+      }
+    }
+  }
+
+  .music-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 22px;
+    align-items: start;
+  }
+
+  .music-table-wrap {
+    overflow-x: auto;
+  }
+
+  .bot-table.music-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 13px;
+
+    & th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--bot-mint);
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--bot-line-soft);
+    }
+
+    & td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--bot-line-soft);
+      color: var(--bot-text);
+      vertical-align: middle;
+    }
+
+    & .music-col-title { width: 25%; }
+    & .music-col-source { width: 10%; }
+    & .music-col-duration { width: 9%; }
+    & .music-col-mode { width: 13%; }
+    & .music-col-requester { width: 14%; }
+    & .music-col-platforms { width: 16%; }
+    & .music-col-actions { width: 100px; }
+  }
+
+  .music-song {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .music-song__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    border: 1px solid var(--bot-line);
+    border-radius: 5px;
+    color: var(--sec-engage);
+    background: #11161e;
+
+    & :global(svg) {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .music-song__copy {
+    min-width: 0;
+
+    & strong,
+    & small {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    & strong {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    & small {
+      color: var(--bot-muted);
+      font-size: 11px;
+    }
+  }
+
+  .music-tag,
+  .music-mode {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .music-tag {
+    border: 1px solid var(--bot-line);
+    color: var(--bot-text);
+  }
+
+  .music-tag--link {
+    border-color: var(--sec-loyalty);
+    color: var(--sec-loyalty);
+  }
+
+  .music-mode {
+    border: 1px solid var(--sec-engage);
+    color: var(--sec-engage);
+  }
+
+  .music-duration,
+  .music-requester {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .music-duration {
+    font-family: var(--bot-mono);
+    color: #fff;
+  }
+
+  .music-platforms {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .music-platform {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    color: var(--bot-dim);
+
+    & :global(svg) {
+      width: 16px;
+      height: 16px;
+    }
+
+    &.is-on {
+      color: var(--bot-text);
+    }
+  }
+
+  .bot-row-actions {
+    display: inline-flex;
+    gap: 14px;
+    color: var(--bot-muted);
+
+    & :global(svg) {
+      width: 16px;
+      height: 16px;
+    }
+
+    & button {
+      background: none;
+      border: none;
+      color: inherit;
+      padding: 0;
+
+      &:hover { color: var(--sec-engage); }
+    }
+  }
+
+  .music-queue {
+    border: 1px solid var(--bot-line-soft);
+    background: #0d1117;
+    border-radius: 8px;
+    padding: 18px;
+
+    & h2 {
+      color: #fff;
+      font-size: 15px;
+      letter-spacing: 0.18em;
+      margin: 0 0 16px;
+      text-transform: uppercase;
+    }
+  }
+
+  .music-request {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    border-top: 1px solid var(--bot-line-soft);
+    padding: 14px 0;
+
+    &:first-of-type {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    & strong,
+    & span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    & strong {
+      color: #fff;
+      font-size: 13px;
+    }
+
+    & span,
+    & small {
+      color: var(--bot-muted);
+      font-size: 12px;
+    }
+
+    & small {
+      grid-column: 1 / -1;
+      font-family: var(--bot-mono);
+      text-transform: uppercase;
+    }
+  }
+
+  .music-request__status {
+    align-self: start;
+    border-radius: 999px;
+    border: 1px solid var(--bot-line);
+    padding: 3px 8px;
+    font-size: 10px !important;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .music-request__status--queued {
+    border-color: var(--sec-engage);
+    color: var(--sec-engage) !important;
+  }
+
+  .music-request__status--sub-only {
+    border-color: var(--sec-loyalty);
+    color: var(--sec-loyalty) !important;
+  }
+
+  .music-request__status--blocked {
+    border-color: #ff7171;
+    color: #ff7171 !important;
+  }
+
+  @media (max-width: 1100px) {
+    .music-layout,
+    .music-settings {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .music-now {
+      grid-template-columns: 1fr;
+    }
+
+    .music-art {
+      width: 72px;
+    }
+
+    .music-controls {
+      justify-content: flex-start;
+    }
+
+    .bot-search {
+      max-width: none;
+    }
+
+    .bot-toolbar {
+      align-items: stretch;
+
+      & .bot-pill,
+      & .bot-search {
+        flex-basis: 100%;
+      }
+    }
+  }
+</style>

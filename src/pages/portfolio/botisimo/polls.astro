@@ -1,0 +1,791 @@
+---
+import BotisimoLayout from "./_layout.astro";
+import Icon from "./_components/Icon.astro";
+
+interface Option {
+  label: string;
+  votes: number;
+  percent: number;
+  color: string;
+}
+
+interface Poll {
+  id: string;
+  question: string;
+  status: "Live" | "Scheduled" | "Closed";
+  votes: number;
+  duration: string;
+  command: string;
+  platforms: string[];
+}
+
+const platformOrder = ["twitch", "youtube", "discord"] as const;
+
+const options: Option[] = [
+  { label: "Ranked", votes: 128, percent: 42, color: "var(--sec-engage)" },
+  { label: "Arena", votes: 91, percent: 30, color: "var(--bot-mint)" },
+  { label: "Campaign", votes: 58, percent: 19, color: "var(--sec-loyalty)" },
+  {
+    label: "Viewer customs",
+    votes: 26,
+    percent: 9,
+    color: "var(--sec-gamify)",
+  },
+];
+
+const polls: Poll[] = [
+  {
+    id: "next-mode",
+    question: "What should we play next?",
+    status: "Live",
+    votes: 303,
+    duration: "12m left",
+    command: "!vote",
+    platforms: ["twitch", "youtube", "discord"],
+  },
+  {
+    id: "loadout",
+    question: "Pick the next loadout",
+    status: "Scheduled",
+    votes: 0,
+    duration: "Starts in 18m",
+    command: "!loadout",
+    platforms: ["twitch"],
+  },
+  {
+    id: "charity-goal",
+    question: "Which charity milestone unlocks first?",
+    status: "Closed",
+    votes: 842,
+    duration: "Closed",
+    command: "!charity",
+    platforms: ["twitch", "youtube"],
+  },
+  {
+    id: "movie-night",
+    question: "Friday watch party pick",
+    status: "Closed",
+    votes: 219,
+    duration: "Closed",
+    command: "!movie",
+    platforms: ["discord"],
+  },
+];
+---
+
+<BotisimoLayout title="Botisimo Polls | Samuel Dillow" active="polls">
+  <h1 class="bot-page-title">
+    Polls <span class="bot-help" aria-label="Help">?</span>
+  </h1>
+
+  <div class="bot-toolbar">
+    <button class="bot-pill" type="button">
+      <Icon name="plus" /> CREATE POLL
+    </button>
+    <input class="bot-search" type="text" placeholder="SEARCH POLLS" />
+    <button class="bot-pill bot-pill--icon" type="button" aria-label="Refresh"
+      ><Icon name="refresh" /></button
+    >
+    <button class="bot-pill bot-pill--icon" type="button" aria-label="Download"
+      ><Icon name="download" /></button
+    >
+    <button class="bot-pill bot-pill--ghost" type="button"
+      >VIEW OVERLAY <Icon name="external" /></button
+    >
+  </div>
+
+  <section class="poll-hero">
+    <div class="poll-live">
+      <div class="poll-live__top">
+        <span class="poll-badge poll-badge--live">LIVE</span>
+        <span class="poll-live__time">12m left</span>
+      </div>
+      <h2>What should we play next?</h2>
+      <p>
+        Viewers vote from chat with <code>!vote ranked</code>, <code
+          >!vote arena</code
+        >, or the overlay buttons.
+      </p>
+      <div class="poll-stats">
+        <div>
+          <strong>303</strong>
+          <span>Total votes</span>
+        </div>
+        <div>
+          <strong>3</strong>
+          <span>Platforms</span>
+        </div>
+        <div>
+          <strong>1</strong>
+          <span>Vote per viewer</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="poll-results" aria-label="Live poll results">
+      {
+        options.map((option) => (
+          <div
+            class="poll-option"
+            style={`--option-color: ${option.color}; --option-width: ${option.percent}%;`}
+          >
+            <div class="poll-option__head">
+              <strong>{option.label}</strong>
+              <span>{option.percent}%</span>
+            </div>
+            <div class="poll-bar">
+              <span />
+            </div>
+            <small>{option.votes} votes</small>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="poll-settings" aria-label="Poll settings">
+    <label class="poll-switch">
+      <span>
+        <strong>Chat voting</strong>
+        <small>Accept votes from commands in connected chat rooms.</small>
+      </span>
+      <input type="checkbox" checked />
+    </label>
+    <label class="poll-switch">
+      <span>
+        <strong>Overlay voting</strong>
+        <small>Show clickable options on the stream overlay.</small>
+      </span>
+      <input type="checkbox" checked />
+    </label>
+    <label class="poll-switch">
+      <span>
+        <strong>Subscribers only</strong>
+        <small>Limit voting to subscribers, members, and moderators.</small>
+      </span>
+      <input type="checkbox" />
+    </label>
+  </section>
+
+  <div class="poll-layout">
+    <div class="poll-table-wrap">
+      <table class="bot-table poll-table">
+        <colgroup>
+          <col class="poll-col-question" />
+          <col class="poll-col-status" />
+          <col class="poll-col-votes" />
+          <col class="poll-col-duration" />
+          <col class="poll-col-command" />
+          <col class="poll-col-platforms" />
+          <col class="poll-col-actions" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>QUESTION</th>
+            <th>STATUS</th>
+            <th>VOTES</th>
+            <th>TIME</th>
+            <th>COMMAND</th>
+            <th>PLATFORMS</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            polls.map((poll) => (
+              <tr>
+                <td class="poll-question">
+                  <span class="poll-question__icon">
+                    <Icon name="polls" />
+                  </span>
+                  <strong>{poll.question}</strong>
+                </td>
+                <td>
+                  <span
+                    class={`poll-badge poll-badge--${poll.status.toLowerCase()}`}
+                  >
+                    {poll.status}
+                  </span>
+                </td>
+                <td class="poll-votes">{poll.votes}</td>
+                <td class="poll-duration">{poll.duration}</td>
+                <td>
+                  <code class="poll-command">{poll.command}</code>
+                </td>
+                <td>
+                  <span class="poll-platforms">
+                    {platformOrder.map((p) => (
+                      <span
+                        class={`poll-platform ${poll.platforms.includes(p) ? "is-on" : ""}`}
+                        aria-label={p}
+                      >
+                        <Icon name={p} />
+                      </span>
+                    ))}
+                  </span>
+                </td>
+                <td>
+                  <span class="bot-row-actions">
+                    <button type="button" aria-label={`View ${poll.question}`}>
+                      <Icon name="external" />
+                    </button>
+                    <button type="button" aria-label={`Edit ${poll.question}`}>
+                      <Icon name="edit" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Delete ${poll.question}`}
+                    >
+                      <Icon name="trash" />
+                    </button>
+                  </span>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <aside class="poll-chat" aria-label="Recent poll votes">
+      <h2>Recent Votes</h2>
+      {
+        [
+          { user: "QuickScopeQT", vote: "Ranked", platform: "twitch" },
+          { user: "MaraJade", vote: "Arena", platform: "discord" },
+          { user: "BLU3BEAST", vote: "Ranked", platform: "youtube" },
+          { user: "CoffeeCarnage", vote: "Campaign", platform: "twitch" },
+        ].map((vote) => (
+          <div class="poll-vote">
+            <span class="poll-vote__platform">
+              <Icon name={vote.platform} />
+            </span>
+            <div class="poll-vote__info">
+              <strong>{vote.user}</strong>
+              <span>{vote.vote}</span>
+            </div>
+          </div>
+        ))
+      }
+    </aside>
+  </div>
+
+  <section class="bot-case-note">
+    <p>
+      Polls let creators turn chat into a control surface: choose the next game,
+      pick a loadout, settle a giveaway rule, or collect feedback without
+      leaving the Botisimo dashboard.
+    </p>
+    <p>
+      Results could be collected from chat commands or stream overlays, then
+      shown back on stream so viewers saw their votes change the broadcast in
+      real time.
+    </p>
+    <p>
+      <a href="/portfolio/botisimo/music-player/">&larr; Music Player</a> · <a
+        href="/portfolio/botisimo/">Dashboard</a
+      >
+    </p>
+  </section>
+</BotisimoLayout>
+
+<style>
+  .bot-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    border: 1.5px solid var(--bot-mint);
+    color: var(--bot-mint);
+    margin-left: 10px;
+    vertical-align: middle;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  .bot-search {
+    flex: 1 1 280px;
+    max-width: 320px;
+    height: 32px;
+    border-radius: 999px;
+    background: #11161e;
+    border: 1px solid var(--bot-line);
+    color: var(--bot-text);
+    padding: 0 16px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+
+    &::placeholder {
+      color: var(--bot-muted);
+    }
+  }
+
+  .poll-hero {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.85fr) minmax(320px, 1.15fr);
+    gap: 22px;
+    align-items: stretch;
+    margin-bottom: 20px;
+  }
+
+  .poll-live,
+  .poll-results,
+  .poll-switch,
+  .poll-chat {
+    border: 1px solid var(--bot-line-soft);
+    background: var(--bot-bg-soft);
+    border-radius: 8px;
+  }
+
+  .poll-live {
+    padding: 22px;
+  }
+
+  .poll-live__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .poll-live__time {
+    color: var(--bot-muted);
+    font-family: var(--bot-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  .poll-live h2 {
+    color: #fff;
+    font-size: 28px;
+    line-height: 1.1;
+    margin: 0 0 10px;
+  }
+
+  .poll-live p {
+    color: var(--bot-muted);
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 0 0 22px;
+  }
+
+  .poll-live code,
+  .poll-command {
+    color: var(--sec-engage);
+    font-family: var(--bot-mono);
+    font-size: 12px;
+  }
+
+  .poll-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .poll-stats div {
+    border-top: 1px solid var(--bot-line);
+    padding-top: 12px;
+  }
+
+  .poll-stats strong,
+  .poll-stats span {
+    display: block;
+  }
+
+  .poll-stats strong {
+    color: #fff;
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  .poll-stats span {
+    color: var(--bot-muted);
+    font-size: 11px;
+    margin-top: 5px;
+    text-transform: uppercase;
+  }
+
+  .poll-results {
+    display: grid;
+    gap: 16px;
+    padding: 22px;
+  }
+
+  .poll-option__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: #fff;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .poll-bar {
+    height: 10px;
+    border-radius: 999px;
+    background: #080a0e;
+    overflow: hidden;
+  }
+
+  .poll-bar span {
+    display: block;
+    width: var(--option-width);
+    height: 100%;
+    border-radius: inherit;
+    background: var(--option-color);
+  }
+
+  .poll-option small {
+    display: block;
+    color: var(--bot-muted);
+    font-size: 11px;
+    margin-top: 6px;
+  }
+
+  .poll-settings {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .poll-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .poll-switch strong,
+  .poll-switch small {
+    display: block;
+  }
+
+  .poll-switch strong {
+    color: #fff;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .poll-switch small {
+    color: var(--bot-muted);
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .poll-switch input {
+    appearance: none;
+    flex: 0 0 auto;
+    width: 42px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--bot-line);
+    position: relative;
+    cursor: pointer;
+  }
+
+  .poll-switch input::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--bot-muted);
+    top: 3px;
+    left: 3px;
+    transition:
+      transform 160ms ease,
+      background 160ms ease;
+  }
+
+  .poll-switch input:checked {
+    background: color-mix(in srgb, var(--sec-engage) 32%, #11161e);
+  }
+
+  .poll-switch input:checked::after {
+    transform: translateX(18px);
+    background: var(--sec-engage);
+  }
+
+  .poll-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: 22px;
+    align-items: start;
+  }
+
+  .poll-table-wrap {
+    overflow-x: auto;
+  }
+
+  .bot-table.poll-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 13px;
+  }
+
+  .bot-table.poll-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--bot-mint);
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--bot-line-soft);
+  }
+
+  .bot-table.poll-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--bot-line-soft);
+    color: var(--bot-text);
+    vertical-align: middle;
+  }
+
+  .poll-col-question {
+    width: 28%;
+  }
+
+  .poll-col-status {
+    width: 12%;
+  }
+
+  .poll-col-votes {
+    width: 9%;
+  }
+
+  .poll-col-duration {
+    width: 14%;
+  }
+
+  .poll-col-command {
+    width: 12%;
+  }
+
+  .poll-col-platforms {
+    width: 14%;
+  }
+
+  .poll-col-actions {
+    width: 96px;
+  }
+
+  .poll-question {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .poll-question strong,
+  .poll-duration {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .poll-question strong {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .poll-question__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    border: 1px solid var(--bot-line);
+    border-radius: 5px;
+    color: var(--sec-engage);
+    background: #11161e;
+  }
+
+  .poll-question__icon :global(svg) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .poll-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    border-radius: 999px;
+    border: 1px solid var(--bot-line);
+    padding: 4px 10px;
+    color: var(--bot-text);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .poll-badge--live {
+    border-color: var(--sec-engage);
+    color: var(--sec-engage);
+  }
+
+  .poll-badge--scheduled {
+    border-color: var(--sec-loyalty);
+    color: var(--sec-loyalty);
+  }
+
+  .poll-badge--closed {
+    color: var(--bot-muted);
+  }
+
+  .poll-votes {
+    color: #fff;
+    font-family: var(--bot-mono);
+  }
+
+  .poll-platforms {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .poll-platform {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    color: var(--bot-dim);
+  }
+
+  .poll-platform :global(svg) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .poll-platform.is-on {
+    color: var(--bot-text);
+  }
+
+  .bot-row-actions {
+    display: inline-flex;
+    gap: 14px;
+    color: var(--bot-muted);
+  }
+
+  .bot-row-actions :global(svg) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .bot-row-actions button {
+    background: none;
+    border: none;
+    color: inherit;
+    padding: 0;
+  }
+
+  .bot-row-actions button:hover {
+    color: var(--sec-engage);
+  }
+
+  .poll-chat {
+    padding: 18px;
+  }
+
+  .poll-chat h2 {
+    color: #fff;
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    margin: 0 0 16px;
+    text-transform: uppercase;
+  }
+
+  .poll-vote {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid var(--bot-line-soft);
+    padding: 14px 0;
+  }
+
+  .poll-vote:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .poll-vote__platform {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    border: 1px solid var(--bot-line);
+    border-radius: 999px;
+    color: var(--sec-engage);
+    background: #11161e;
+      color: var(--bot-muted);
+  }
+
+  .poll-vote__platform :global(svg) {
+    width: 15px;
+    height: 15px;
+  }
+
+  .poll-vote__info {
+    display: flex;
+    flex-direction: column;
+
+    strong,
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--bot-muted);
+      font-size: 12px;
+    }
+  }
+
+  .poll-vote strong {
+    color: #fff;
+    font-size: 13px;
+  }
+
+  @media (max-width: 1100px) {
+    .poll-hero,
+    .poll-settings,
+    .poll-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .bot-search {
+      max-width: none;
+    }
+
+    .bot-toolbar {
+      align-items: stretch;
+    }
+
+    .bot-toolbar .bot-pill,
+    .bot-toolbar .bot-search {
+      flex-basis: 100%;
+    }
+
+    .poll-live h2 {
+      font-size: 24px;
+    }
+
+    .poll-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,143 @@
+---
+import Icon from "./Icon.astro";
+
+interface Item {
+  id: string;
+  label: string;
+  icon: string;
+  href?: string;
+}
+
+interface Props {
+  title: string;
+  color: string;
+  items: Item[];
+  active?: string;
+  softActive?: boolean;
+  open?: boolean;
+}
+
+const {
+  title,
+  color,
+  items,
+  active,
+  softActive = false,
+  open = true,
+} = Astro.props;
+---
+
+<details class="bot-section" style={`--sec-color: ${color};`} open={open}>
+  <summary class="bot-section__head">
+    <span>{title}</span>
+    <Icon name="chevron-up" />
+  </summary>
+  <ul class="bot-section__list">
+    {
+      items.map((item) => {
+        const isActive = item.id === active;
+        const cls = isActive
+          ? softActive
+            ? "is-active is-active--soft"
+            : "is-active"
+          : "";
+        return (
+          <li>
+            <a href={item.href ?? "#"} class={cls}>
+              <Icon name={item.icon} />
+              <span>{item.label}</span>
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</details>
+
+<style>
+  .bot-section {
+    padding: 8px 0 4px;
+    border-bottom: 1px solid var(--bot-line-soft);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .bot-section__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 18px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    color: var(--sec-color, var(--bot-muted));
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    & :global(svg) {
+      width: 12px;
+      height: 12px;
+      color: var(--bot-muted);
+      transition: transform 0.15s ease;
+    }
+  }
+
+  .bot-section:not([open]) .bot-section__head :global(svg) {
+    transform: rotate(180deg);
+  }
+
+  .bot-section__list {
+    list-style: none;
+    margin: 0;
+    padding: 0 8px 4px;
+
+    & a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      border-radius: 6px;
+      color: var(--bot-text);
+      font-size: 13px;
+      position: relative;
+      outline: none;
+
+      & :global(svg) {
+        width: 18px;
+        height: 18px;
+        color: var(--sec-color, var(--bot-muted));
+        flex-shrink: 0;
+      }
+
+      &:hover:not(.is-active):not(.is-active--soft) {
+        background: var(--bot-line-soft);
+      }
+
+      &.is-active {
+        background: var(--sec-color, var(--bot-mint));
+        color: #0a0d12;
+        font-weight: 500;
+
+        & :global(svg) {
+          color: #0a0d12;
+        }
+      }
+
+      &.is-active--soft {
+        background: color-mix(in srgb, var(--sec-color) 22%, transparent);
+        color: #fff;
+
+        & :global(svg) {
+          color: var(--sec-color);
+        }
+      }
+    }
+  }
+</style>

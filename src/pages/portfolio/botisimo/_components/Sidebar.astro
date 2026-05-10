@@ -1,5 +1,5 @@
 ---
-import Icon from "./Icon.astro";
+import SidebarSection from "./SidebarSection.astro";
 
 interface Props {
   active?: string;
@@ -99,31 +99,13 @@ const sections = [
 
 <aside class="bot-sidebar" aria-label="Botisimo navigation">
   {sections.map((section) => (
-    <div class="bot-section" style={`--sec-color: ${section.color};`}>
-      <div class="bot-section__head">
-        <span>{section.title}</span>
-        <Icon name="chevron-up" />
-      </div>
-      <ul class="bot-section__list">
-        {section.items.map((item) => {
-          const isActive = item.id === active;
-          const isSoft = section.key === "automate" && isActive;
-          const cls = isActive
-            ? isSoft
-              ? "is-active is-active--soft"
-              : "is-active"
-            : "";
-          return (
-            <li>
-              <a href={item.href ?? "#"} class={cls}>
-                <Icon name={item.icon} />
-                <span>{item.label}</span>
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+    <SidebarSection
+      title={section.title}
+      color={section.color}
+      items={section.items}
+      active={active}
+      softActive={section.key === "automate"}
+    />
   ))}
 </aside>
 
@@ -138,66 +120,5 @@ const sections = [
     height: calc(100vh - var(--bot-topbar));
 
     @media (max-width: 900px) { display: none; }
-  }
-
-  .bot-section {
-    padding: 8px 0 4px;
-    border-bottom: 1px solid var(--bot-line-soft);
-
-    &:last-child { border-bottom: none; }
-  }
-
-  .bot-section__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 18px 6px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.4em;
-    color: var(--sec-color, var(--bot-muted));
-
-    & :global(svg) { width: 12px; height: 12px; color: var(--bot-muted); }
-  }
-
-  .bot-section__list {
-    list-style: none;
-    margin: 0;
-    padding: 0 8px 4px;
-
-    & a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 7px 12px;
-      border-radius: 6px;
-      color: var(--bot-text);
-      font-size: 13px;
-      position: relative;
-
-      & :global(svg) {
-        width: 18px;
-        height: 18px;
-        color: var(--sec-color, var(--bot-muted));
-        flex-shrink: 0;
-      }
-
-      &:hover { background: var(--bot-line-soft); }
-
-      &.is-active {
-        background: var(--sec-color, var(--bot-mint));
-        color: #0a0d12;
-        font-weight: 500;
-
-        & :global(svg) { color: #0a0d12; }
-      }
-
-      &.is-active--soft {
-        background: color-mix(in srgb, var(--sec-color) 22%, transparent);
-        color: #fff;
-
-        & :global(svg) { color: var(--sec-color); }
-      }
-    }
   }
 </style>

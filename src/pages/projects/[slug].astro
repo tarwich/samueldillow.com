@@ -1,0 +1,99 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import type { PortfolioEntry } from "../../content.config";
+
+interface Props {
+  project: PortfolioEntry;
+}
+
+export async function getStaticPaths() {
+  const projects = (await getCollection("entries")).filter(
+    (entry) => entry.data.type === "portfolio",
+  );
+
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const demoUrl = project.data.demoUrl;
+---
+
+<BaseLayout title={`${project.data.title} | Samuel Dillow`} description={project.data.description}>
+  <article class="site-shell page-title project-detail-hero">
+    <div>
+      <div class="mono-label">{project.data.role}</div>
+      <h1>{project.data.title}</h1>
+      <p>{project.data.description}</p>
+      <div class="actions">
+        {
+          demoUrl && (
+            <a
+              class="button button--steel"
+              href={demoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open demo
+            </a>
+          )
+        }
+        <a class="button" href="/portfolio/">Back to portfolio</a>
+      </div>
+    </div>
+    <aside class="project-detail-summary" aria-label="Project summary">
+      <dl>
+        <div>
+          <dt>Role</dt>
+          <dd>{project.data.role}</dd>
+        </div>
+        <div>
+          <dt>Outcome</dt>
+          <dd>{project.data.outcome}</dd>
+        </div>
+        <div>
+          <dt>Tech</dt>
+          <dd>
+            <ul>
+              {project.data.tags.map((tag) => <li>{tag}</li>)}
+            </ul>
+          </dd>
+        </div>
+      </dl>
+    </aside>
+  </article>
+
+  <section class="site-shell">
+    <img class="entry-hero-image" src={project.data.image.src} alt={project.data.image.alt} />
+  </section>
+
+  <section class="site-shell project-detail-layout">
+    <article class="list-card project-prose">
+      <Content />
+    </article>
+    <aside class="project-demo-panel">
+      <div class="mono-label">Demo</div>
+      <h2>The reconstruction</h2>
+      <p>
+        The demo is here for context. The case study is the important part: what
+        the product needed, what made it hard, and what the work taught me.
+      </p>
+      {
+        demoUrl && (
+          <a
+            class="button button--rust"
+            href={demoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View demo
+          </a>
+        )
+      }
+    </aside>
+  </section>
+</BaseLayout>

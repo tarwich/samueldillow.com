@@ -1,37 +1,54 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
   <title id="title">Botisimo dashboard reconstruction</title>
   <desc id="desc">A dark product dashboard with charts, command controls, and stream platform status indicators.</desc>
-  <rect width="1200" height="760" fill="#10141b"/>
-  <rect x="70" y="62" width="1060" height="636" rx="18" fill="#171d26" stroke="#2a3340" stroke-width="3"/>
-  <rect x="70" y="62" width="220" height="636" rx="18" fill="#121720"/>
-  <rect x="92" y="94" width="72" height="72" rx="16" fill="#7c3aed"/>
-  <text x="188" y="136" fill="#f8fafc" font-family="Inter, Arial, sans-serif" font-size="32" font-weight="700">BOTISIMO</text>
+  <rect width="1200" height="760" fill="#10141b" />
+  <rect x="70" y="62" width="1060" height="636" rx="18" fill="#171d26" stroke="#2a3340" stroke-width="3" />
+  <rect x="70" y="62" width="220" height="636" rx="18" fill="#121720" />
+  <rect x="92" y="94" width="72" height="72" rx="16" fill="#7c3aed" />
+  <text x="188" y="136" fill="#f8fafc" font-family="Inter, Arial, sans-serif" font-size="32"
+    font-weight="700">BOTISIMO</text>
   <g fill="#293241">
-    <rect x="104" y="220" width="142" height="18" rx="9"/>
-    <rect x="104" y="270" width="120" height="18" rx="9"/>
-    <rect x="104" y="320" width="152" height="18" rx="9"/>
-    <rect x="104" y="370" width="98" height="18" rx="9"/>
+    <rect x="104" y="220" width="142" height="18" rx="9" />
+    <rect x="104" y="270" width="120" height="18" rx="9" />
+    <rect x="104" y="320" width="152" height="18" rx="9" />
+    <rect x="104" y="370" width="98" height="18" rx="9" />
   </g>
-  <g transform="translate(336 118)">
-    <rect x="0" y="56" width="728" height="70" rx="12" fill="#202835" stroke="#334155"/>
-    <circle cx="42" cy="91" r="10" fill="#22c55e"/>
-    <circle cx="184" cy="91" r="10" fill="#22c55e"/>
-    <circle cx="326" cy="91" r="10" fill="#ef4444"/>
-    <circle cx="468" cy="91" r="10" fill="#22c55e"/>
-    <g fill="#aeb7c5" font-family="Inter, Arial, sans-serif" font-size="24">
-      <text x="62" y="100">Twitch</text><text x="204" y="100">DLive</text><text x="346" y="100">Facebook</text><text x="488" y="100">YouTube</text>
+  <g transform="translate(336 118)" font-family="Inter, Arial, sans-serif" font-size="24" fill="#aeb7c5">
+    <g data-name="streams" transform="translate(0 56)">
+      <rect width="728" height="70" rx="12" fill="#202835" stroke="#334155" />
+      <g class="stream" transform="translate(32 34)">
+        <circle r="10" fill="#22c55e" />
+        <text x="20" y="10">Twitch</text>
+      </g>
+      <g class="stream" transform="translate(160 34)">
+        <circle r="10" fill="#22c55e" />
+        <text x="20" y="10">DLive</text>
+      </g>
+      <g class="stream" transform="translate(280 34)">
+        <circle r="10" fill="#ef4444" />
+        <text x="20" y="10">Facebook</text>
+      </g>
+      <g class="stream" transform="translate(440 34)">
+        <circle r="10" fill="#22c55e" />
+        <text x="20" y="10">YouTube</text>
+      </g>
     </g>
-    <rect x="0" y="168" width="728" height="248" rx="12" fill="#111827" stroke="#334155"/>
+
+    <rect x="0" y="168" width="728" height="248" rx="12" fill="#111827" stroke="#334155" />
     <g stroke="#273241" stroke-width="2">
-      <path d="M38 352H690M38 300H690M38 248H690M38 196H690"/>
-      <path d="M38 196V352"/>
+      <path d="M38 352H690M38 300H690M38 248H690M38 196H690" />
+      <path d="M38 196V352" />
     </g>
-    <path d="M38 352C122 312 168 316 234 272C316 216 374 280 456 226C542 170 602 238 690 190V352Z" fill="#7c3aed" opacity=".42"/>
-    <path d="M38 352C130 328 190 336 250 306C322 270 388 316 456 278C542 230 604 286 690 252V352Z" fill="#38bdf8" opacity=".36"/>
-    <path d="M38 352C112 336 178 330 252 322C348 310 420 326 492 294C574 258 630 282 690 266V352Z" fill="#fb7185" opacity=".42"/>
-    <rect x="0" y="454" width="340" height="92" rx="12" fill="#202835" stroke="#334155"/>
-    <rect x="388" y="454" width="340" height="92" rx="12" fill="#202835" stroke="#334155"/>
+    <path d="M38 352C122 312 168 316 234 272C316 216 374 280 456 226C542 170 602 238 690 190V352Z" fill="#7c3aed"
+      opacity=".42" />
+    <path d="M38 352C130 328 190 336 250 306C322 270 388 316 456 278C542 230 604 286 690 252V352Z" fill="#38bdf8"
+      opacity=".36" />
+    <path d="M38 352C112 336 178 330 252 322C348 310 420 326 492 294C574 258 630 282 690 266V352Z" fill="#fb7185"
+      opacity=".42" />
+    <rect x="0" y="454" width="340" height="92" rx="12" fill="#202835" stroke="#334155" />
+    <rect x="388" y="454" width="340" height="92" rx="12" fill="#202835" stroke="#334155" />
     <text x="24" y="510" fill="#f8fafc" font-family="SFMono-Regular, Consolas, monospace" font-size="28">!enter</text>
-    <text x="412" y="510" fill="#f8fafc" font-family="SFMono-Regular, Consolas, monospace" font-size="28">Stream Frame</text>
+    <text x="412" y="510" fill="#f8fafc" font-family="SFMono-Regular, Consolas, monospace" font-size="28">Stream
+      Frame</text>
   </g>
 </svg>

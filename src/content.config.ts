@@ -25,6 +25,7 @@ const portfolioEntry = baseEntry.extend({
   role: z.string(),
   outcome: z.string(),
   caseStudyUrl: z.string().optional(),
+  demoUrl: z.string().optional(),
   gallery: z
     .array(
       z.object({

@@ -23,7 +23,7 @@ const work = (await getCollection("entries"))
   <section class="site-shell list-page">
     {
       work.map((item) => (
-        <a class="list-card list-card--with-image" href={item.data.caseStudyUrl ?? "#"}>
+        <a class="list-card list-card--with-image" href={item.data.caseStudyUrl ?? `/projects/${item.id}/`}>
           <img src={item.data.image.src} alt={item.data.image.alt} loading="lazy" />
           <div>
             <div class="mono-label">{item.data.role}</div>

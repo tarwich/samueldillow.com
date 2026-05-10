@@ -6,3 +6,30 @@ import Icon from "./Icon.astro";
   <Icon name="chat" />
   <span>LIVE SUPPORT</span>
 </a>
+
+<style>
+  .bot-live-support {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 1px solid var(--bot-mint);
+    background: #0a0d12;
+    color: var(--bot-mint);
+    padding: 18px 6px;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    writing-mode: vertical-rl;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 30;
+  }
+  .bot-live-support :global(svg) {
+    width: 14px;
+    height: 14px;
+  }
+</style>

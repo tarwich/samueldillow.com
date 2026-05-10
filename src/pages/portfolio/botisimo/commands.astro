@@ -99,3 +99,73 @@ const rows = [
     });
   </script>
 </BotisimoLayout>
+
+<style>
+  .bot-search {
+    flex: 1 1 280px;
+    max-width: 320px;
+    height: 32px;
+    border-radius: 999px;
+    background: #11161e;
+    border: 1px solid var(--bot-line);
+    color: var(--bot-text);
+    padding: 0 16px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+
+    &::placeholder { color: var(--bot-muted); }
+  }
+
+  .bot-divider {
+    height: 1px;
+    background: var(--bot-line-soft);
+    margin: 14px 0;
+  }
+
+  .bot-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    & th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--bot-mint);
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--bot-line-soft);
+    }
+    & td {
+      padding: 12px;
+      border-bottom: 1px solid var(--bot-line-soft);
+      color: var(--bot-text);
+    }
+
+    & .bot-platform-icons {
+      display: inline-flex;
+      gap: 6px;
+      color: var(--bot-text);
+
+      & :global(svg) { width: 16px; height: 16px; }
+    }
+
+    & .bot-row-actions {
+      display: inline-flex;
+      gap: 14px;
+      color: var(--bot-muted);
+
+      & :global(svg) { width: 16px; height: 16px; }
+
+      & button {
+        background: none;
+        border: none;
+        color: inherit;
+        padding: 0;
+
+        &:hover { color: var(--bot-mint); }
+      }
+    }
+  }
+</style>

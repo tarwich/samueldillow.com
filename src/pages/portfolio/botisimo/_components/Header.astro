@@ -22,3 +22,77 @@ import Icon from "./Icon.astro";
     <span class="bot-avatar" aria-hidden="true"></span>
   </div>
 </header>
+
+<style>
+  .bot-topbar {
+    height: var(--bot-topbar);
+    background: #000;
+    display: grid;
+    grid-template-columns: var(--bot-sidebar) 1fr auto;
+    align-items: center;
+    border-bottom: 1px solid #000;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr auto auto;
+    }
+  }
+
+  .bot-topbar__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    color: var(--bot-mint);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    font-size: 16px;
+
+    & :global(svg) { width: 28px; height: 28px; color: var(--bot-mint); }
+  }
+
+  .bot-topbar__center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    color: var(--bot-text);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+
+    & .bot-help-icons {
+      display: flex;
+      gap: 8px;
+      color: var(--bot-mint);
+
+      & :global(svg) { width: 16px; height: 16px; }
+    }
+
+    @media (max-width: 900px) { display: none; }
+  }
+
+  .bot-topbar__right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+
+    & .bot-bell {
+      color: var(--bot-text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    & .bot-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 35%, #d8a884 0 30%, transparent 31%),
+        linear-gradient(160deg, #4b3a2c, #1a1410);
+      border: 1px solid #2a2018;
+    }
+  }
+</style>

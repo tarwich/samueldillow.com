@@ -108,3 +108,84 @@ const chatLines = [
     <p><a href="/portfolio/botisimo/commands/">&larr; Commands</a> · <a href="/portfolio/botisimo/">Dashboard</a></p>
   </section>
 </BotisimoLayout>
+
+<style>
+  .bot-stream-frame {
+    background: linear-gradient(180deg, #1a1230 0%, #0a0d12 80%);
+    border: 1px solid var(--bot-line);
+    border-radius: 8px;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .bot-stream-frame__name {
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    margin-bottom: 14px;
+  }
+
+  .bot-stream-grid {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 16px;
+
+    @media (max-width: 900px) { grid-template-columns: 1fr; }
+  }
+
+  .bot-stream-screen,
+  .bot-stream-cam {
+    aspect-ratio: 16/9;
+    background: #000;
+    border: 1px solid #2a2030;
+    border-radius: 4px;
+  }
+
+  .bot-stream-chat {
+    background: rgba(10, 10, 25, 0.6);
+    border: 1px solid #2a2030;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 11px;
+    color: #b0b8c5;
+    height: 220px;
+    overflow: hidden;
+    line-height: 1.4;
+
+    & .u { color: #c8a8ff; }
+  }
+  .bot-stream-chat__title {
+    color: var(--bot-mint);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+
+  .bot-stream-meta {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+
+    @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+  }
+  .bot-stream-meta__cell {
+    border-top: 1px solid var(--bot-line);
+    padding-top: 10px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--bot-muted);
+
+    & strong {
+      display: block;
+      color: #fff;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      text-transform: none;
+      margin-top: 4px;
+    }
+    & :global(svg) { width: 14px; height: 14px; }
+  }
+</style>

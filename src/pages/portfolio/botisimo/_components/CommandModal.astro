@@ -26,54 +26,57 @@ const cta = mode === "create" ? "CREATE" : "SAVE";
 ---
 
 <Dialog id={id} title={title} cta={cta}>
-  <div class="bot-field">
-    <label class="bot-field__label">COMMAND</label>
-    <span class="bot-field__hint">
-      This is the text you must type in chat to activate the command. Separate multiple command triggers with a comma.
-    </span>
-    <input type="text" placeholder="!hello" value={command} />
-  </div>
-
-  <div class="bot-toggle" role="tablist">
-    <button type="button" class={ai ? "" : "is-on"} data-toggle="regular">REGULAR</button>
-    <button type="button" class={ai ? "is-on" : ""} data-toggle="ai">AI</button>
-  </div>
-
-  {!ai && (
+  <div class="cmd-modal" data-mode={ai ? "ai" : "regular"}>
     <div class="bot-field">
-      <label class="bot-field__label">RESPONSE</label>
+      <label class="bot-field__label">COMMAND</label>
       <span class="bot-field__hint">
-        This is the text that the bot will respond with when activating this command. You can use response variables and response directives to create powerful, dynamic responses and behaviors for your command.
+        This is the text you must type in chat to activate the command. Separate multiple command triggers with a comma.
       </span>
-      <textarea placeholder="ENTER COMMAND RESPONSE">{response}</textarea>
+      <input type="text" placeholder="!hello" value={command} />
     </div>
-  )}
 
-  {ai && (
-    <>
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 16px; border:1px solid var(--bot-line); border-radius:6px;">
-        <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; line-height:1.6; color:#fff;">
+    <div class="bot-toggle" role="tablist">
+      <button type="button" class={ai ? "" : "is-on"} data-toggle="regular" data-mode-set="regular">REGULAR</button>
+      <button type="button" class={ai ? "is-on" : ""} data-toggle="ai" data-mode-set="ai">AI</button>
+    </div>
+
+    <div class="cmd-mode cmd-mode--regular">
+      <div class="bot-field">
+        <label class="bot-field__label">RESPONSE</label>
+        <span class="bot-field__hint">
+          This is the text that the bot will respond with when activating this command. You can use response variables and response directives to create powerful, dynamic responses and behaviors for your command.
+        </span>
+        <textarea placeholder="ENTER COMMAND RESPONSE">{response}</textarea>
+      </div>
+    </div>
+
+    <div class="cmd-mode cmd-mode--ai">
+      <div class="bot-ai-banner">
+        <div class="bot-ai-banner__copy">
           <div>USE AI TO GENERATE RESPONSES BASED ON A CONTEXT AND PROMPT.</div>
-          <div style="color: var(--bot-muted);">CURRENT BALANCE: $4.9</div>
+          <div class="bot-ai-banner__balance">CURRENT BALANCE: $4.99</div>
         </div>
         <button type="button" class="bot-pill bot-pill--ghost">MANAGE BALANCE</button>
       </div>
       <div class="bot-field">
         <label class="bot-field__label">AI CONTEXT</label>
         <span class="bot-field__hint">
-          The persona or context the AI will use when generating the response. Example: "writing a haiku" or "in the voice of terminator".
+          The persona or context the AI will use when generating the response. example: "writing a haiku"
         </span>
-        <input type="text" value={aiContext} />
+        <div class="bot-textarea">
+          <textarea placeholder='a poet writing a haiku'>{aiContext}</textarea>
+          <button type="button" class="bot-textarea__emoji" aria-label="Insert emoji">🙂</button>
+        </div>
       </div>
       <div class="bot-field">
         <label class="bot-field__label">AI PROMPT</label>
         <span class="bot-field__hint">
-          This is the text to prompt the AI to respond to. You can use response variables and response directives to create powerful, dynamic prompts and behaviors for your command.
+          This is the text to prompt the AI to respond to. You can use <a href="#" class="bot-link">response variables</a> and <a href="#" class="bot-link">response directives</a> to create powerful, dynamic prompts and behaviors for your command.
         </span>
-        <input type="text" value={aiPrompt} />
+        <textarea placeholder="Enter AI Prompt">{aiPrompt}</textarea>
       </div>
-    </>
-  )}
+    </div>
+  </div>
 
   <div class="bot-field">
     <label class="bot-field__label">PLATFORMS</label>
@@ -111,3 +114,76 @@ const cta = mode === "create" ? "CREATE" : "SAVE";
     <input type="text" placeholder="OPTIONAL" />
   </div>
 </Dialog>
+
+<style>
+  .cmd-modal,
+  .cmd-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .cmd-modal[data-mode="regular"] .cmd-mode--ai { display: none; }
+  .cmd-modal[data-mode="ai"] .cmd-mode--regular { display: none; }
+
+  .bot-toggle {
+    display: flex;
+    overflow: hidden;
+    width: max-content;
+    padding: inherit 0.5em;
+  }
+
+  .bot-ai-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 18px;
+    background: #0a0d12;
+    border: 1px solid var(--bot-line);
+    border-radius: 6px;
+  }
+
+  .bot-ai-banner__copy {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1.6;
+    color: #fff;
+  }
+
+  .bot-ai-banner__balance {
+    color: var(--bot-muted);
+  }
+
+  .bot-textarea {
+    position: relative;
+
+    & :global(textarea) {
+      width: 100%;
+      padding-right: 38px;
+    }
+  }
+
+  .bot-textarea__emoji {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1;
+    color: inherit;
+    opacity: 0.85;
+
+    &:hover { opacity: 1; }
+  }
+
+  .bot-link {
+    color: var(--bot-mint);
+    text-decoration: underline;
+  }
+</style>

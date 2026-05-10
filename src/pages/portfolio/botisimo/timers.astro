@@ -228,6 +228,11 @@ const rows: Timer[] = [
         parent.querySelectorAll<HTMLButtonElement>("[data-toggle]").forEach((b) => {
           b.classList.toggle("is-on", b === btn);
         });
+        const target = btn.getAttribute("data-mode-set");
+        if (target) {
+          const host = btn.closest<HTMLElement>("[data-mode]");
+          if (host) host.dataset.mode = target;
+        }
       });
     });
   </script>

@@ -88,13 +88,18 @@ const rows = [
       });
     });
 
-    document.querySelectorAll<HTMLDialogElement>(".bot-dialog").forEach((dlg) => {
-      dlg.querySelectorAll<HTMLButtonElement>("[data-toggle]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          dlg.querySelectorAll<HTMLButtonElement>("[data-toggle]").forEach((b) =>
-            b.classList.toggle("is-on", b === btn),
-          );
+    document.querySelectorAll<HTMLButtonElement>(".bot-toggle [data-toggle]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const parent = btn.parentElement;
+        if (!parent) return;
+        parent.querySelectorAll<HTMLButtonElement>("[data-toggle]").forEach((b) => {
+          b.classList.toggle("is-on", b === btn);
         });
+        const target = btn.getAttribute("data-mode-set");
+        if (target) {
+          const host = btn.closest<HTMLElement>("[data-mode]");
+          if (host) host.dataset.mode = target;
+        }
       });
     });
   </script>

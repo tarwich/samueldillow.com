@@ -37,6 +37,7 @@ const { id, title, cta = "SAVE", ctaIcon = "robot" } = Astro.props;
     width: min(720px, 92vw);
     padding: 0;
     max-height: 88vh;
+    overflow: hidden;
     position: fixed;
     inset: 0;
     margin: auto;
@@ -54,6 +55,16 @@ const { id, title, cta = "SAVE", ctaIcon = "robot" } = Astro.props;
     gap: 18px;
     max-height: 88vh;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bot-line) transparent;
+
+    &::-webkit-scrollbar { width: 6px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+      background: var(--bot-line);
+      border-radius: 3px;
+    }
+    &::-webkit-scrollbar-thumb:hover { background: var(--bot-dim); }
   }
 
   .bot-dialog__head {

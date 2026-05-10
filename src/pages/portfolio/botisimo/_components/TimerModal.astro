@@ -1,0 +1,106 @@
+---
+import Dialog from "./Dialog.astro";
+
+interface Props {
+  id: string;
+  mode: "create" | "edit";
+  name?: string;
+  intervalMinutes?: number;
+  minMessages?: number;
+  response?: string;
+  rotation?: "sequential" | "random";
+  runWhen?: "live" | "always";
+  enabled?: boolean;
+  platforms?: string[];
+}
+
+const {
+  id,
+  mode,
+  name = "",
+  intervalMinutes = 30,
+  minMessages = 5,
+  response = "",
+  rotation = "sequential",
+  runWhen = "live",
+  enabled = true,
+  platforms = ["Twitch"],
+} = Astro.props;
+
+const title = mode === "create" ? "CREATE TIMER" : "EDIT TIMER";
+const cta = mode === "create" ? "CREATE" : "SAVE";
+
+const platformList = ["Twitch", "YouTube", "Facebook", "Instagram", "Trovo", "Rumble", "Kick", "TikTok", "Discord"];
+---
+
+<Dialog id={id} title={title} cta={cta} ctaIcon="clock">
+  <div class="bot-field">
+    <label class="bot-field__label">NAME</label>
+    <span class="bot-field__hint">
+      Internal label shown in your timers list. Not broadcast to chat.
+    </span>
+    <input type="text" placeholder="DONATION PUSH" value={name} />
+  </div>
+
+  <div class="bot-field-row">
+    <div class="bot-field">
+      <label class="bot-field__label">INTERVAL (MINUTES)</label>
+      <span class="bot-field__hint">How often the timer fires.</span>
+      <input type="number" min="1" max="600" value={intervalMinutes} />
+    </div>
+
+    <div class="bot-field">
+      <label class="bot-field__label">MIN. MESSAGES SINCE LAST FIRE</label>
+      <span class="bot-field__hint">Skips a fire if chat has been quiet — keeps timers from spamming dead rooms.</span>
+      <input type="number" min="0" max="500" value={minMessages} />
+    </div>
+  </div>
+
+  <div class="bot-field">
+    <label class="bot-field__label">RESPONSE</label>
+    <span class="bot-field__hint">
+      Message broadcast to chat when this timer fires. Use <code style="color: var(--bot-mint);">$(rotate ... | ...)</code> to cycle through several lines, or <code style="color: var(--bot-mint);">$(user.name)</code>, <code style="color: var(--bot-mint);">$(stream.title)</code> and other variables.
+    </span>
+    <textarea placeholder="ENTER TIMER RESPONSE">{response}</textarea>
+  </div>
+
+  <div class="bot-field">
+    <label class="bot-field__label">ROTATION</label>
+    <span class="bot-field__hint">When the response uses <code style="color: var(--bot-mint);">$(rotate ...)</code>, choose how lines are picked.</span>
+    <div class="bot-toggle" role="tablist">
+      <button type="button" class={rotation === "sequential" ? "is-on" : ""} data-toggle="sequential">SEQUENTIAL</button>
+      <button type="button" class={rotation === "random" ? "is-on" : ""} data-toggle="random">RANDOM</button>
+    </div>
+  </div>
+
+  <div class="bot-field">
+    <label class="bot-field__label">RUN WHEN</label>
+    <span class="bot-field__hint">Limit timers to live streams, or fire any time the bot is connected.</span>
+    <div class="bot-toggle" role="tablist">
+      <button type="button" class={runWhen === "live" ? "is-on" : ""} data-toggle="live">LIVE ONLY</button>
+      <button type="button" class={runWhen === "always" ? "is-on" : ""} data-toggle="always">ALWAYS</button>
+    </div>
+  </div>
+
+  <div class="bot-field">
+    <label class="bot-field__label">PLATFORMS</label>
+    <span class="bot-field__hint">Choose which platforms the timer broadcasts to.</span>
+    <div class="bot-check-row">
+      {platformList.map((p) => (
+        <label class="bot-check">
+          <input type="checkbox" checked={platforms.includes(p)} />
+          <span>{p}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+
+  <div class="bot-field">
+    <label class="bot-field__label">STATUS</label>
+    <span class="bot-field__hint">Disabled timers stay in the list but never fire.</span>
+    <label class="bot-check">
+      <input type="checkbox" checked={enabled} />
+      <span>Enabled</span>
+    </label>
+  </div>
+</Dialog>

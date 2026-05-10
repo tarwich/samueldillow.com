@@ -1,0 +1,349 @@
+---
+import BotisimoLayout from "./_layout.astro";
+import Icon from "./_components/Icon.astro";
+import TimerModal from "./_components/TimerModal.astro";
+
+interface Timer {
+  id: string;
+  name: string;
+  interval: string;
+  intervalMinutes: number;
+  minMessages: number;
+  response: string;
+  platforms: string[];
+  modalPlatforms: string[];
+}
+
+const platformOrder = [
+  "twitch",
+  "youtube",
+  "facebook",
+  "instagram",
+  "trovo",
+  "rumble",
+  "kick",
+  "tiktok",
+] as const;
+
+const rows: Timer[] = [
+  {
+    id: "donation-30",
+    name: "30 Min Donation Push",
+    interval: "30m",
+    intervalMinutes: 30,
+    minMessages: 5,
+    response: "💰 A can of love, a belly of happiness! Support our foster kitties' food journey. 🥄🐱 - Feed a Foster - https://cuteavalanche.com/fooddrive2023",
+    platforms: ["twitch"],
+    modalPlatforms: ["Twitch"],
+  },
+  {
+    id: "brand",
+    name: "Brand",
+    interval: "60m",
+    intervalMinutes: 60,
+    minMessages: 8,
+    response: "FREE SAMPLES: Get free treats for your furry friend cuteavalanche.com/freecattreats (US & CAN only) #ad",
+    platforms: ["twitch", "youtube"],
+    modalPlatforms: ["Twitch", "YouTube"],
+  },
+  {
+    id: "current-litter",
+    name: "Current Litter message",
+    interval: "55m",
+    intervalMinutes: 55,
+    minMessages: 5,
+    response: "Type !names !age or !litter for more info.",
+    platforms: ["twitch"],
+    modalPlatforms: ["Twitch"],
+  },
+  {
+    id: "discord",
+    name: "Discord",
+    interval: "23m",
+    intervalMinutes: 23,
+    minMessages: 4,
+    response: "You like our kittens? Show us your pets - Join us on discord and post your pet pictures https://discord.gg/3Res|xy",
+    platforms: ["twitch", "discord"],
+    modalPlatforms: ["Twitch", "Discord"],
+  },
+  {
+    id: "donation-push",
+    name: "Donation Push",
+    interval: "35m",
+    intervalMinutes: 35,
+    minMessages: 5,
+    response: "Kittens eat a lot! We can always use more wet and dry food. Thank you http://cuteavalanche.com/wishlist",
+    platforms: ["twitch"],
+    modalPlatforms: ["Twitch"],
+  },
+  {
+    id: "food-drive",
+    name: "Food Drive for Mom",
+    interval: "36m",
+    intervalMinutes: 36,
+    minMessages: 5,
+    response: "$(rotate YOU can make a difference right meow. Food & Litter are our top priority and can be found on our Amazon wishlist",
+    platforms: ["twitch", "youtube"],
+    modalPlatforms: ["Twitch", "YouTube"],
+  },
+  {
+    id: "namepoll",
+    name: "namepoll",
+    interval: "20m",
+    intervalMinutes: 20,
+    minMessages: 3,
+    response: "Our current litter has names,http://cuteavalanche.com/namepoll",
+    platforms: ["twitch"],
+    modalPlatforms: ["Twitch"],
+  },
+  {
+    id: "news",
+    name: "News",
+    interval: "25m",
+    intervalMinutes: 25,
+    minMessages: 4,
+    response: "$(rotate Type !ages or !names for more info about our current fosters | We're raising funds to save kittens in 2023 http://cu",
+    platforms: ["twitch"],
+    modalPlatforms: ["Twitch"],
+  },
+  {
+    id: "news-old",
+    name: "NEWS OLD (holding)",
+    interval: "60m",
+    intervalMinutes: 60,
+    minMessages: 10,
+    response: "$(rotate when our kittens are available for adoption you can contact purrfostermama@gmail.com for more |Type !ages or",
+    platforms: ["twitch"],
+    modalPlatforms: ["Twitch"],
+  },
+  {
+    id: "prime-day",
+    name: "Prime Day",
+    interval: "20m",
+    intervalMinutes: 20,
+    minMessages: 4,
+    response: "It's Amazon Prime Day Oct 13 & 14! It's a great chance to help the Kittens! Check out the Amazon Wishlist at http://cuteava",
+    platforms: ["twitch"],
+    modalPlatforms: ["Twitch"],
+  },
+];
+---
+
+<BotisimoLayout title="Botisimo Timers | Samuel Dillow" active="timers">
+  <h1 class="bot-page-title">Timers <span class="bot-help" aria-label="Help">?</span></h1>
+
+  <div class="bot-toolbar">
+    <button class="bot-pill" type="button" data-open="create-timer">
+      <Icon name="plus" /> CREATE TIMER
+    </button>
+    <input class="bot-search" type="text" placeholder="SEARCH NAME" />
+    <button class="bot-pill bot-pill--icon" type="button" aria-label="Refresh"><Icon name="refresh" /></button>
+    <button class="bot-pill bot-pill--icon" type="button" aria-label="Download"><Icon name="download" /></button>
+  </div>
+
+  <label class="bot-check timers-check">
+    <input type="checkbox" />
+    <span>Show Disabled Timers</span>
+  </label>
+
+  <table class="bot-table timers-table">
+    <thead>
+      <tr>
+        <th>NAME</th>
+        <th>INTERVAL</th>
+        <th>RESPONSE</th>
+        <th>PLATFORMS</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row) => (
+        <tr>
+          <td class="timers-name">{row.name}</td>
+          <td class="timers-interval">{row.interval}</td>
+          <td class="timers-response">{row.response}</td>
+          <td>
+            <span class="timers-platforms">
+              {platformOrder.map((p) => (
+                <span class={`timers-platform ${row.platforms.includes(p) ? "is-on" : ""}`}>
+                  <Icon name={p} />
+                </span>
+              ))}
+            </span>
+          </td>
+          <td>
+            <span class="bot-row-actions">
+              <button type="button" aria-label="Reset"><Icon name="refresh" /></button>
+              <button type="button" aria-label="Edit" data-open={`edit-timer-${row.id}`}><Icon name="edit" /></button>
+              <button type="button" aria-label="Delete"><Icon name="trash" /></button>
+            </span>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <section class="bot-case-note">
+    <p>
+      Timers fired scheduled chat broadcasts on a per-platform basis — a way to keep
+      donation pushes, link drops, and fundraising messages visible without the
+      streamer having to type them by hand. Each row remembers its interval and the
+      platforms it should fan out to.
+    </p>
+    <p>
+      Click <strong>Create Timer</strong> or any row's edit pencil to open the live
+      modal — same pattern as the commands page, with timer-specific fields
+      (interval, rotation, run-when, min-messages-since-last-fire).
+    </p>
+    <p><a href="/portfolio/botisimo/commands/">&larr; Commands</a> · <a href="/portfolio/botisimo/stream-frame/">Stream Frame &rarr;</a></p>
+  </section>
+
+  <TimerModal id="create-timer" mode="create" />
+  {rows.map((row) => (
+    <TimerModal
+      id={`edit-timer-${row.id}`}
+      mode="edit"
+      name={row.name}
+      intervalMinutes={row.intervalMinutes}
+      minMessages={row.minMessages}
+      response={row.response}
+      platforms={row.modalPlatforms}
+    />
+  ))}
+
+  <script>
+    document.querySelectorAll<HTMLButtonElement>("[data-open]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-open");
+        if (!id) return;
+        const dlg = document.getElementById(id) as HTMLDialogElement | null;
+        dlg?.showModal();
+      });
+    });
+
+    document.querySelectorAll<HTMLButtonElement>(".bot-toggle [data-toggle]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const parent = btn.parentElement;
+        if (!parent) return;
+        parent.querySelectorAll<HTMLButtonElement>("[data-toggle]").forEach((b) => {
+          b.classList.toggle("is-on", b === btn);
+        });
+      });
+    });
+  </script>
+</BotisimoLayout>
+
+<style>
+  .bot-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    border: 1.5px solid var(--bot-mint);
+    color: var(--bot-mint);
+    margin-left: 10px;
+    vertical-align: middle;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  .bot-search {
+    flex: 1 1 280px;
+    max-width: 320px;
+    height: 32px;
+    border-radius: 999px;
+    background: #11161e;
+    border: 1px solid var(--bot-line);
+    color: var(--bot-text);
+    padding: 0 16px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+
+    &::placeholder { color: var(--bot-muted); }
+  }
+
+  .timers-check {
+    margin: 6px 0 22px;
+  }
+
+  .bot-table.timers-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    table-layout: fixed;
+
+    & th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--bot-mint);
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--bot-line-soft);
+    }
+    & td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--bot-line-soft);
+      color: var(--bot-text);
+      vertical-align: middle;
+    }
+
+    & th:nth-child(1), & td:nth-child(1) { width: 18%; }
+    & th:nth-child(2), & td:nth-child(2) { width: 8%; }
+    & th:nth-child(3), & td:nth-child(3) { width: auto; }
+    & th:nth-child(4), & td:nth-child(4) { width: 200px; }
+    & th:nth-child(5), & td:nth-child(5) { width: 100px; }
+  }
+
+  .timers-name,
+  .timers-interval,
+  .timers-response {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .timers-name { color: var(--bot-text); }
+  .timers-interval { color: var(--bot-text); }
+
+  .timers-platforms {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .timers-platform {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    color: var(--bot-dim);
+
+    & :global(svg) { width: 16px; height: 16px; }
+
+    &.is-on { color: var(--bot-text); }
+  }
+
+  .bot-row-actions {
+    display: inline-flex;
+    gap: 14px;
+    color: var(--bot-muted);
+
+    & :global(svg) { width: 16px; height: 16px; }
+
+    & button {
+      background: none;
+      border: none;
+      color: inherit;
+      padding: 0;
+
+      &:hover { color: var(--bot-mint); }
+    }
+  }
+</style>

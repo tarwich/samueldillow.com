@@ -1,0 +1,196 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  id: string;
+  title: string;
+  cta?: string;
+  ctaIcon?: string;
+}
+
+const { id, title, cta = "SAVE", ctaIcon = "robot" } = Astro.props;
+---
+
+<dialog class="bot-dialog" id={id}>
+  <form class="bot-dialog__inner" method="dialog">
+    <header class="bot-dialog__head">
+      <h2>{title}</h2>
+      <button type="submit" value="cancel" class="bot-dialog__close" aria-label="Close">
+        <Icon name="x" />
+      </button>
+    </header>
+
+    <slot />
+
+    <button type="submit" value="confirm" class="bot-dialog__submit">
+      <Icon name={ctaIcon} /> {cta}
+    </button>
+  </form>
+</dialog>
+
+<style is:global>
+  .bot-dialog {
+    background: var(--bot-bg-soft);
+    color: var(--bot-text);
+    border: 1px solid var(--bot-line);
+    border-radius: 8px;
+    width: min(720px, 92vw);
+    padding: 0;
+    max-height: 88vh;
+    position: fixed;
+    inset: 0;
+    margin: auto;
+
+    &::backdrop {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(2px);
+    }
+  }
+
+  .bot-dialog__inner {
+    padding: 22px 26px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+
+  .bot-dialog__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+
+    & h2 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: #fff;
+      text-transform: uppercase;
+      margin: 0;
+    }
+  }
+
+  .bot-dialog__close {
+    background: none;
+    border: none;
+    color: var(--bot-muted);
+    font-size: 18px;
+
+    & svg { width: 18px; height: 18px; }
+  }
+
+  .bot-dialog__submit {
+    margin-top: 4px;
+    width: 100%;
+    height: 36px;
+    border-radius: 999px;
+    border: none;
+    background: var(--bot-mint);
+    color: #0a0d12;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+
+    & svg { width: 16px; height: 16px; }
+  }
+
+  .bot-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    & input[type="text"],
+    & input[type="number"],
+    & textarea {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--bot-line);
+      color: #fff;
+      font: inherit;
+      padding: 6px 0;
+      outline: none;
+
+      &:focus { border-bottom-color: var(--bot-mint); }
+    }
+
+    & textarea {
+      border: 1px solid var(--bot-line);
+      border-radius: 4px;
+      padding: 8px 10px;
+      min-height: 64px;
+      resize: vertical;
+    }
+
+    & select {
+      background: transparent;
+      color: #fff;
+      border: none;
+      border-bottom: 1px solid var(--bot-line);
+      font: inherit;
+      padding: 6px 0;
+      outline: none;
+    }
+  }
+
+  .bot-field__label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .bot-field__hint {
+    font-size: 12px;
+    color: var(--bot-muted);
+    line-height: 1.5;
+  }
+
+  .bot-field-row {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+
+    & > .bot-field { flex: 1 1 180px; min-width: 160px; }
+  }
+
+  .bot-toggle {
+    display: inline-flex;
+    background: transparent;
+    border: 1px solid var(--bot-mint);
+    border-radius: 999px;
+    padding: 2px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+
+    & button {
+      background: transparent;
+      border: none;
+      color: var(--bot-text);
+      padding: 4px 12px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      cursor: pointer;
+
+      &.is-on {
+        background: var(--bot-mint);
+        color: #0a0d12;
+      }
+    }
+  }
+
+  .bot-check-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 4px;
+  }
+</style>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">A person guiding an AI workflow</title>
+  <desc id="desc">A hand-drawn office scene with task cards moving through a machine toward a person monitoring the output.</desc>
+  <rect width="1200" height="720" fill="#f7f3ea"/>
+  <path d="M78 562c168-42 324-34 468-18 171 19 306 12 579-45" fill="none" stroke="#d7cfbf" stroke-width="18" stroke-linecap="round"/>
+  <rect x="398" y="178" width="330" height="286" rx="22" fill="#27343a" stroke="#172126" stroke-width="10"/>
+  <rect x="432" y="214" width="262" height="164" rx="12" fill="#f9fbf7"/>
+  <path d="M460 255h184M460 293h148M460 331h166" stroke="#496870" stroke-width="13" stroke-linecap="round"/>
+  <circle cx="684" cy="416" r="22" fill="#ffcf6b"/>
+  <path d="M412 460h306l48 67H364z" fill="#172126"/>
+  <path d="M354 528h426" stroke="#172126" stroke-width="20" stroke-linecap="round"/>
+  <path d="M147 219h168M126 294h184M168 371h134" stroke="#325d74" stroke-width="16" stroke-linecap="round"/>
+  <rect x="113" y="185" width="220" height="74" rx="12" fill="#ffffff" stroke="#325d74" stroke-width="7"/>
+  <rect x="92" y="260" width="250" height="74" rx="12" fill="#ffffff" stroke="#325d74" stroke-width="7"/>
+  <rect x="138" y="337" width="205" height="74" rx="12" fill="#ffffff" stroke="#325d74" stroke-width="7"/>
+  <path d="M346 224c44 6 77 23 103 56M355 303c37 2 65 13 88 39M359 377c30 0 55-8 81-24" fill="none" stroke="#6f8f76" stroke-width="9" stroke-linecap="round"/>
+  <path d="M804 308c56 8 94 8 142-8" fill="none" stroke="#6f8f76" stroke-width="9" stroke-linecap="round"/>
+  <rect x="846" y="200" width="160" height="190" rx="18" fill="#f5d7bb" stroke="#35251d" stroke-width="8"/>
+  <path d="M846 258c36-58 129-54 160 0v-53c0-43-34-78-80-78s-80 35-80 78z" fill="#2c2a28"/>
+  <circle cx="895" cy="278" r="8" fill="#35251d"/>
+  <circle cx="957" cy="278" r="8" fill="#35251d"/>
+  <path d="M906 330c18 13 39 13 58 0" fill="none" stroke="#35251d" stroke-width="7" stroke-linecap="round"/>
+  <path d="M794 608c12-93 55-157 132-157s122 64 133 157z" fill="#325d74"/>
+  <path d="M852 470c-38 24-58 63-66 118M1000 470c38 24 58 63 66 118" fill="none" stroke="#26495b" stroke-width="14" stroke-linecap="round"/>
+  <rect x="749" y="556" width="356" height="44" rx="11" fill="#ffffff" stroke="#35251d" stroke-width="8"/>
+  <path d="M805 578h94M938 578h108" stroke="#496870" stroke-width="11" stroke-linecap="round"/>
+  <path d="M566 120v-42M522 132l-28-31M611 132l28-31" stroke="#ffcf6b" stroke-width="12" stroke-linecap="round"/>
+  <path d="M217 486c65 23 119 28 175 18" fill="none" stroke="#d89b58" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="196" cy="479" r="11" fill="#d89b58"/>
+  <circle cx="413" cy="499" r="11" fill="#d89b58"/>
+</svg>

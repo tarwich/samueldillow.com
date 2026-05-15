@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Prompting Toolbelt</title>
+  <desc id="desc">A small set of labeled prompt cards arranged like tools on a workbench.</desc>
+  <rect width="1200" height="630" fill="#f4efe6"/>
+  <rect x="82" y="82" width="1036" height="466" rx="28" fill="#2d3748"/>
+  <rect x="132" y="132" width="936" height="366" rx="20" fill="#f8f5ee"/>
+  <g fill="#d85f45">
+    <circle cx="186" cy="182" r="17"/>
+    <circle cx="236" cy="182" r="17"/>
+    <circle cx="286" cy="182" r="17"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="162" y="277" fill="#1f2937" font-size="54" font-weight="700">Prompting Toolbelt</text>
+    <text x="164" y="334" fill="#4b5563" font-size="28">small prompts, cleaner chats, better answers</text>
+  </g>
+  <g transform="translate(166 382)">
+    <rect width="178" height="74" rx="12" fill="#e7b857"/>
+    <text x="26" y="47" fill="#1f2937" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Options</text>
+  </g>
+  <g transform="translate(374 382)">
+    <rect width="178" height="74" rx="12" fill="#77a8a8"/>
+    <text x="26" y="47" fill="#1f2937" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Rubric</text>
+  </g>
+  <g transform="translate(582 382)">
+    <rect width="208" height="74" rx="12" fill="#d98b73"/>
+    <text x="26" y="47" fill="#1f2937" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Examples</text>
+  </g>
+  <g transform="translate(820 382)">
+    <rect width="184" height="74" rx="12" fill="#a7b36b"/>
+    <text x="26" y="47" fill="#1f2937" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Sources</text>
+  </g>
+  <g fill="none" stroke="#374151" stroke-linecap="round" stroke-linejoin="round" stroke-width="26">
+    <circle cx="875" cy="265" r="58"/>
+    <path d="M918 308l82 82"/>
+  </g>
+</svg>

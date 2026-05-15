@@ -32,7 +32,13 @@ const {
 const { Content } = await render(chapter);
 ---
 
-<BaseLayout title={`${chapter.data.title} | Why Be Happy?`} description={chapter.data.description}>
+<BaseLayout
+  title={`${chapter.data.title} | Why Be Happy?`}
+  description={chapter.data.description}
+  image="/books/why-be-happy/social-card.png"
+  imageAlt="Why Be Happy book cover."
+  type="article"
+>
   <article class="site-shell book-reader">
     <header class="book-reader-header">
       <a class="mono-label" href="/books/why-be-happy/">Why Be Happy?</a>

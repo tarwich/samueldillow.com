@@ -16,7 +16,10 @@ const projects = (await getCollection("entries"))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="Projects | Samuel Dillow">
+<BaseLayout
+  title="Projects | Samuel Dillow"
+  description="Selected professional work, product decisions, games, and shipped outcomes by Samuel Dillow."
+>
   <section class="site-shell page-title">
     <h1>Projects</h1>
     <p>Selected professional work, product decisions, and shipped outcomes.</p>

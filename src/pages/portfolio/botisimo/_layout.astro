@@ -4,6 +4,7 @@ import Header from "./_components/Header.astro";
 import Sidebar from "./_components/Sidebar.astro";
 import Footer from "./_components/Footer.astro";
 import LiveSupport from "./_components/LiveSupport.astro";
+import SeoHead from "../../../components/SeoHead.astro";
 
 interface Props {
   title?: string;
@@ -22,9 +23,13 @@ const {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
-    <meta name="robots" content="noindex" />
+    <SeoHead
+      title={title}
+      description={description}
+      image="/entries/botisimo.png"
+      imageAlt="Botisimo product dashboard reconstruction."
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -32,7 +37,6 @@ const {
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <title>{title}</title>
   </head>
   <body class="botisimo-app">
     <Header />

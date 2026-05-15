@@ -23,7 +23,13 @@ const { Content } = await render(project);
 const demoUrl = project.data.demoUrl;
 ---
 
-<BaseLayout title={`${project.data.title} | Samuel Dillow`} description={project.data.description}>
+<BaseLayout
+  title={`${project.data.title} | Samuel Dillow`}
+  description={project.data.description}
+  image={project.data.image.src}
+  imageAlt={project.data.image.alt}
+  type="article"
+>
   <article class="site-shell page-title project-detail-hero">
     <div>
       <div class="mono-label">{project.data.role}</div>

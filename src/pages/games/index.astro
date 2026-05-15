@@ -15,7 +15,12 @@ const games = (await getCollection("entries"))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="Games | Samuel Dillow">
+<BaseLayout
+  title="Games | Samuel Dillow"
+  description="Small browser games, experiments, and toy projects by Samuel Dillow."
+  image="/entries/towers.png"
+  imageAlt="A five-by-five Towers puzzle board with numbered edge clues."
+>
   <section class="site-shell page-title">
     <h1>Games</h1>
     <p>Small browser games, experiments, and toy projects.</p>

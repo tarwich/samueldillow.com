@@ -9,7 +9,10 @@ const posts = (await getCollection("entries"))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="Writing | Samuel Dillow">
+<BaseLayout
+  title="Writing | Samuel Dillow"
+  description="Technical notes, Christian essays, Bible reflections, and project write-ups by Samuel Dillow."
+>
   <section class="site-shell page-title page-title--with-actions">
     <div>
       <h1>Writing</h1>

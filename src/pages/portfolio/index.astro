@@ -15,7 +15,12 @@ const work = (await getCollection("entries"))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="Portfolio | Samuel Dillow">
+<BaseLayout
+  title="Portfolio | Samuel Dillow"
+  description="Selected professional work, product decisions, and shipped outcomes by Samuel Dillow."
+  image="/entries/botisimo.png"
+  imageAlt="Botisimo product dashboard reconstruction."
+>
   <section class="site-shell page-title">
     <h1>Portfolio</h1>
     <p>Selected professional work, product decisions, and shipped outcomes.</p>

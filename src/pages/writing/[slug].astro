@@ -23,7 +23,13 @@ const { post, spanishPost } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<BaseLayout title={`${post.data.title} | Samuel Dillow`} description={post.data.description}>
+<BaseLayout
+  title={`${post.data.title} | Samuel Dillow`}
+  description={post.data.description}
+  image={post.data.image.src}
+  imageAlt={post.data.image.alt}
+  type="article"
+>
   <article class="site-shell page-title page-title--with-actions">
     <div>
       <div class="mono-label">{post.data.category}</div>

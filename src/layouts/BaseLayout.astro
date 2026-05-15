@@ -1,10 +1,16 @@
 ---
 import "../styles/site.css";
+import SeoHead from "../components/SeoHead.astro";
 
 const {
   title = "Samuel Dillow",
-  description = "Software, SaaS, hosting infrastructure, writing, and faith.",
+  description = "I build SaaS products, run hosting infrastructure, write software, and think seriously about faith, Scripture, and technology.",
   lang = "en",
+  image,
+  imageAlt,
+  canonical,
+  type = "website",
+  noindex = false,
 } = Astro.props;
 ---
 
@@ -12,8 +18,17 @@ const {
 <html lang={lang}>
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
+    <SeoHead
+      title={title}
+      description={description}
+      lang={lang}
+      image={image}
+      imageAlt={imageAlt}
+      canonical={canonical}
+      type={type}
+      noindex={noindex}
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,7 +36,6 @@ const {
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap"
       rel="stylesheet"
     />
-    <title>{title}</title>
   </head>
   <body>
     <header class="site-header">

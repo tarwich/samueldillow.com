@@ -1,0 +1,29 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  icon: string;
+  "aria-label": string;
+  [key: string]: unknown;
+}
+
+const { icon, ...rest } = Astro.props;
+---
+
+<button class="air-icon-button" type="button" {...rest}>
+  <Icon name={icon} />
+</button>
+
+<style>
+  .air-icon-button {
+    width: 44px;
+    height: 44px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid #aeb9c9;
+    background: #fff;
+    color: var(--air-ink);
+    border-radius: 9px;
+    cursor: pointer;
+  }
+</style>

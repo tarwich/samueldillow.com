@@ -1,0 +1,68 @@
+/* Reusable data table used across the Airpeggio reconstruction.
+   Pair with an optional sibling .pagination element that visually joins
+   the table when present. */
+
+@scope (.portfolio--airpeggio) {
+  table.datatable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    border: 1px solid var(--air-line);
+    border-radius: 9px;
+    background: #fff;
+    overflow: hidden;
+
+    /* Drop bottom corners and shared border when followed by .pagination */
+    &:has(+ .pagination) {
+      border-bottom: none;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    th {
+      padding: 18px 20px;
+      background: #f1f4f8;
+      color: var(--air-muted);
+      text-align: left;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 22px 20px;
+      border-top: 1px solid var(--air-line);
+      vertical-align: top;
+      font-size: 14px;
+      font-weight: 500;
+
+      .datatable-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+    }
+  }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    border: 1px solid var(--air-line);
+    border-radius: 0 0 9px 9px;
+    background: #fbfcfe;
+    font-size: 14px;
+    font-weight: 500;
+
+    .pagination-nav {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+    }
+  }
+}

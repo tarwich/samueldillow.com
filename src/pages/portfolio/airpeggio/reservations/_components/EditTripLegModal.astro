@@ -1,0 +1,270 @@
+---
+import Button from "../../_components/Button.astro";
+import Icon from "../../_components/Icon.astro";
+import Modal from "../../_components/Modal.astro";
+import {
+  AIRPORTS,
+  formatLegTimezone,
+  legArrival,
+  legRegulation,
+  type ReservationLeg,
+} from "../../_data";
+
+interface Props {
+  id: string;
+  leg: ReservationLeg;
+}
+
+const { id, leg } = Astro.props;
+
+const tz = formatLegTimezone(leg.origin);
+const reg = legRegulation(leg);
+const arrival = legArrival(leg);
+
+const localIsoMinutes = (date: Date) => {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  // Render the timezone-adjusted display value used by the airline's
+  // operations team; UTC math then converts that wall-clock back.
+  const ms = date.getTime() - 5 * 60 * 60 * 1000; // CDT
+  const d = new Date(ms);
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+};
+---
+
+<Modal id={id} title="Edit Trip Leg">
+  <form class="leg-form" method="dialog">
+    <div class="leg-form__grid">
+      <div class="leg-field">
+        <label class="leg-field__label" for={`${id}-depart-airport`}>
+          Departure Airport <em>*</em>
+        </label>
+        <span class="leg-select">
+          <span>{leg.origin}</span>
+          <Icon name="chevron-down" />
+        </span>
+        <select id={`${id}-depart-airport`} hidden>
+          {AIRPORTS.map((a) => <option value={a.icao}>{a.icao}</option>)}
+        </select>
+      </div>
+      <div class="leg-field">
+        <label class="leg-field__label" for={`${id}-arrive-airport`}>
+          Arrival Airport <em>*</em>
+        </label>
+        <span class="leg-select">
+          <span>{leg.destination}</span>
+          <Icon name="chevron-down" />
+        </span>
+        <select id={`${id}-arrive-airport`} hidden>
+          {AIRPORTS.map((a) => <option value={a.icao}>{a.icao}</option>)}
+        </select>
+      </div>
+
+      <div class="leg-field">
+        <label class="leg-field__label" for={`${id}-depart-time`}>
+          Departure <em>*</em>
+          <span class="leg-field__suffix">{tz}</span>
+        </label>
+        <input
+          id={`${id}-depart-time`}
+          class="leg-input"
+          type="datetime-local"
+          value={localIsoMinutes(leg.departure)}
+        />
+      </div>
+      <div class="leg-field">
+        <label class="leg-field__label" for={`${id}-arrive-time`}>
+          Arrival
+          <span class="leg-field__suffix">{tz}</span>
+        </label>
+        <input
+          id={`${id}-arrive-time`}
+          class="leg-input"
+          type="datetime-local"
+          value={localIsoMinutes(arrival)}
+        />
+      </div>
+
+      <div class="leg-field">
+        <label class="leg-field__label" for={`${id}-passengers`}>
+          Passengers <em>*</em>
+        </label>
+        <input
+          id={`${id}-passengers`}
+          class="leg-input"
+          type="number"
+          value={leg.passengers}
+          min="0"
+        />
+      </div>
+      <div class="leg-field">
+        <label class="leg-field__label" for={`${id}-regulation`}>
+          Regulation <em>*</em>
+        </label>
+        <span class="leg-select">
+          <span>{reg}</span>
+          <Icon name="chevron-down" />
+        </span>
+      </div>
+    </div>
+
+    <div class="leg-field">
+      <label class="leg-field__label" for={`${id}-notes`}>Notes</label>
+      <textarea
+        id={`${id}-notes`}
+        class="leg-input leg-input--textarea"
+        placeholder="Add notes here">{leg.notes ?? ""}</textarea>
+    </div>
+  </form>
+
+  <Fragment slot="footer">
+    <div class="leg-form__footer">
+      <div class="leg-form__primary">
+        <Button variant="primary">Update Leg</Button>
+        <Button onclick={`document.getElementById('${id}')?.close()`}>
+          Cancel
+        </Button>
+      </div>
+      <div class="leg-form__release">
+        <input
+          class="leg-input leg-form__initials"
+          type="text"
+          placeholder="Initials"
+          aria-label="Initials"
+        />
+        <Button>Release</Button>
+      </div>
+    </div>
+  </Fragment>
+</Modal>
+
+<style>
+  :global(.modal:has(.leg-form)) {
+    width: 100%;
+    max-width: min(720px, calc(100vw - 32px));
+  }
+
+  .leg-form {
+    display: grid;
+    gap: 22px;
+    padding-top: 8px;
+  }
+
+  .leg-form__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 22px;
+
+    @media (max-width: 620px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .leg-field {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .leg-field__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--air-ink);
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1;
+
+    em {
+      color: #c83b00;
+      font-style: normal;
+      margin-left: 2px;
+    }
+  }
+
+  .leg-field__suffix {
+    color: var(--air-ink);
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .leg-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    &::placeholder {
+      color: #98a3b3;
+      font-weight: 500;
+    }
+
+    &:focus {
+      outline: 0;
+      border-color: var(--air-ink);
+      box-shadow: 0 0 0 2px rgba(11, 18, 34, 0.08);
+    }
+  }
+
+  .leg-input--textarea {
+    height: auto;
+    min-height: 96px;
+    padding: 12px 14px;
+    resize: vertical;
+  }
+
+  .leg-select {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 14px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--air-ink);
+    font-size: 14px;
+    font-weight: 600;
+
+    :global(.air-icon) {
+      width: 14px;
+      height: 14px;
+      color: var(--air-muted);
+    }
+  }
+
+  .leg-form__footer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    width: 100%;
+    padding-top: 14px;
+    border-top: 1px solid var(--air-line);
+    margin-top: 8px;
+
+    @media (max-width: 620px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .leg-form__primary,
+  .leg-form__release {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .leg-form__initials {
+    width: 96px;
+    height: 40px;
+  }
+</style>

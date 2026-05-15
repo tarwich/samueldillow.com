@@ -1,26 +1,37 @@
 # Rubric: How to Write Like Samuel
 
-A guide derived from analyzing the chapters of *Why Be Happy*. Use this rubric whenever drafting new chapters, blog posts, or essays in the same voice.
+A guide derived from analyzing the chapters of *Why Be Happy*. Use this rubric whenever drafting new chapters, essays, posts, emails, reports, or pull requests in the same underlying voice.
 
 ---
 
 ## 1. Voice and Posture
 
 - **First person, conversational, vulnerable.** Write the way you talk to a friend at a coffee shop, not the way you talk on a stage. Default to "I" and "you." Use "we" when including the reader in a shared experience.
-- **Self-deprecating, not self-aggrandizing.** Lead with your own mess. You are not the hero of your stories. You are the one figuring it out. Lines like "I admit I could be a little tough to get along with" or "the dumpster-fire of a life I’ve lived" are fair game.
+- **Match the edge to the format.** Stories, essays, and memoir chapters can be funny, wry, and occasionally sarcastic. Public posts can be funny, but sarcasm should be gentler and rarer. Emails, reports, proposals, pull requests, and technical updates should be clear, respectful, and useful, with no sarcasm and no jokes added for texture.
+- **Self-deprecating, not self-aggrandizing.** Lead with your own mess when the format has room for story. You are not the hero of your stories. You are the one figuring it out. Lines like "I admit I could be a little tough to get along with" or "the dumpster-fire of a life I’ve lived" are fair game in memoir or essay work, but usually too theatrical for professional communication.
 - **Honest about feelings, even ugly ones.** Don’t round corners off. Say you hated people, that you were jealous, that you drank a fifth a day. The honesty is what gives the reader permission to be honest with themselves.
 - **No expert posture.** Repeatedly remind the reader you are not a doctor, not a therapist, not an authority. You are a person who lived something and is sharing what worked. A line like "I’m only an expert in my own deep and relentless misery" fits the voice.
 - **Address the reader directly.** Ask them rhetorical questions. Acknowledge their pushback before they raise it. Lines like "Call me crazy, but...", "It might be tempting to...", and "Have you ever...?" fit the voice.
 
-## 2. Structure of a Piece
+## 2. Tone Modes
 
-Each chapter / post follows a loose three-part shape:
+Choose the mode before drafting. The voice stays plain, honest, and direct, but the amount of edge changes by format.
+
+1. **Story / essay / memoir.** Use scene, vulnerability, humor, and occasional sarcasm. Sarcasm works best when aimed at your past self, an absurd situation, or a contradiction the reader can recognize without feeling attacked.
+2. **Public post / reflection.** Keep the conversational warmth and occasional humor. Tone sarcasm down. If a line feels like a jab, make it plainer, kinder, or more self-aware.
+3. **Email / report / pull request / professional update.** Prioritize clarity, accountability, and usefulness. Do not add jokes, sarcastic asides, or theatrical self-deprecation. Keep the honesty, remove the performance.
+
+## 3. Structure of a Piece
+
+Each chapter / post / essay follows a loose three-part shape:
 
 1. **Open with a specific scene.** A concrete, sensory memory, usually with a specific place, time, age, or weight. Don’t open with the thesis. Open with a moment.
 2. **Pivot to the idea.** Use the scene to introduce the question or principle the piece is really about. Often a one-line transition: "This is the part where..." or "Here’s the weird thing..." or "I share this because..."
 3. **Layer in support, then land the lesson.** Bring in another story, an analogy, a research finding, a Bible verse, or a quoted thinker. Then close with what to do with it. The ending is forward-looking, not a summary.
 
-## 3. Storytelling Mechanics
+Professional writing can use a simpler shape: state the point, give the relevant context, name the decision or next step, and stop.
+
+## 4. Storytelling Mechanics
 
 - **Concrete sensory detail.** "40 degree weather," "ten years old," "a thin film of grainy dust," "five feet tall, including her hair." Numbers, textures, weather, weights. Avoid abstract description.
 - **Dialogue rendered, not summarized.** Reproduce conversations as exchanges, with attribution and small physical beats: "he chuckled. One corner of his mouth turned up."
@@ -32,9 +43,9 @@ Each chapter / post follows a loose three-part shape:
 - **Avoid parenthetical nesting.** Do not rely on parentheses for side thoughts or clarifications. If the aside matters, make it its own simple sentence. If it does not matter, cut it.
 - **Resist the warm bow.** When a story doesn’t resolve, say so: "This story doesn’t have a warm conclusion. The bully never got what was coming to him." Don’t fabricate redemption.
 
-## 4. How You Make a Point
+## 5. How You Make a Point
 
-- **Analogies you unpack across paragraphs.** Pick one image, like the olive in water vs. ice, the wave’s crest and trough, the bullet hole in the friend, or the seagull who flies in and craps everywhere. Use that image to do the heavy lifting. Don’t mix five metaphors; pick one and turn it.
+- **Analogies you unpack across paragraphs.** Pick one image, like the olive in water vs. ice, the wave’s crest and trough, the bullet hole in the friend, or the seagull who flies in and craps everywhere. Use that image to do the heavy lifting. Don’t mix five metaphors; pick one and turn it. Cruder or more sarcastic images belong in story and essay work, not professional writing.
 - **Lists of three.** Three quick parallel examples to make a pattern visible:
   - Someone prayed over me. I felt empowered. When they were gone, I felt alone.
   - I read a book. I felt confident. When I tried the same things, I felt inept.
@@ -43,39 +54,41 @@ Each chapter / post follows a loose three-part shape:
 - **Question, then answer.** Pose the reader’s likely objection, then engage it. "So why be happy? Any time you’re in a good moment, you know that a bad moment is going to come..." Then knock it down.
 - **Avoid binary "good / bad" labels.** When you can, replace them with something more useful, like "preferable," "sustainable," or "subject to change." Explain why a thing is preferable rather than declaring it good.
 
-## 5. Paragraph Shape
+## 6. Paragraph Shape
 
 - **Short sentences do not mean short paragraphs.** The voice uses plain, direct sentences, but the paragraphs usually carry one cohesive thought to completion. A normal paragraph should often be 3-5 sentences.
 - **Let a paragraph finish the thought.** Start with the claim, scene beat, or turn. Add the detail that makes it real. Then carry the consequence, objection, or meaning far enough that the reader is not left with a fragment.
 - **Aim for about three paragraphs per section.** Three paragraphs usually gives enough room to open the thought, develop it, and land it. Four or five can start to ramble. Two can feel abrupt, though abrupt is sometimes the right effect.
 - **Use one-sentence paragraphs rarely.** Save them for a line that needs to hit hard, mark a sharp turn, or let the reader breathe after something heavy. Do not make one-sentence paragraphs the default rhythm.
 
-## 6. Sentence Style
+## 7. Sentence Style
 
 - **Short and direct.** Most sentences are short. Long ones happen, but they’re built from short clauses, not nested ones.
 - **Plain words.** "Got the job." "He hit his head." "I had no words." Don’t reach for the fancier word.
-- **Mild humor in unexpected places.** A wry one-liner inside a heavy paragraph keeps the reader breathing. A line like "Now I was Christian, wet, and cold, but other than that I didn’t feel much different than before" fits the voice.
+- **Mild humor in unexpected places.** In stories and essays, a wry one-liner inside a heavy paragraph keeps the reader breathing. A line like "Now I was Christian, wet, and cold, but other than that I didn’t feel much different than before" fits that mode. In public posts, keep humor gentler and less biting. In emails, reports, pull requests, and technical writing, prioritize clarity over personality.
+- **Separate humor from sarcasm.** Humor builds connection or releases tension. Sarcasm adds an edge. Use sarcasm only when the format can hold it, and never aim it at the reader, a client, a coworker, a reviewer, or a group you need to treat with respect.
 - **Vary sentence length to control pace.** Cluster short sentences when something hits hard. Stretch out when you’re reflecting.
 - **Do not fake complexity with punctuation.** Avoid stringing thoughts together with em dashes or tucking nested thoughts into parentheses. Use a clean next sentence instead.
 
-## 7. Faith, Without Preaching
+## 8. Faith, Without Preaching
 
 - **Christianity is part of the furniture, not the sales pitch.** Quote Scripture when it actually says what you mean. For example: "In this world you will have troubles." Don’t use it as a hammer.
 - **Make room for readers who don’t share the faith.** Phrases like "regardless of what higher power you believe in" or "if you’re a Christian, it’s even easier" let the reader stay in the conversation either way.
 - **Treat doubt as legitimate.** Question your own beliefs in the text. Show the wrestling.
 
-## 8. What to Avoid
+## 9. What to Avoid
 
 - **Don’t open with the thesis.** Earn it through a scene first.
 - **Don’t moralize.** Show the lesson through the story; don’t lecture.
 - **Don’t use jargon or buzzwords.** No "leverage," "synergize," "actionable insights" unless you’re mocking them.
+- **Don’t mock in professional writing.** In emails, reports, proposals, pull requests, and technical updates, do not use sarcasm, jokes at someone else’s expense, or fake corporate language for comic effect.
 - **Don’t overuse adjectives.** A specific noun and a specific verb beat three adjectives.
 - **Don’t fake authority.** If you don’t know, say so. If you can’t remember a name, write "~~whose name I don’t remember~~" right in the text.
 - **Don’t pad endings.** End on the next step, the open question, or a single landing line. Do not summarize what you just wrote.
 - **Don’t turn every sentence into a paragraph.** Short sentences can live together. The paragraph is the unit of thought.
 - **Don’t overuse em dashes or parentheses.** They make the voice feel more polished, writerly, or nested than it should.
 
-## 9. The Sam Test (a quick gut-check before publishing)
+## 10. The Sam Test (a quick gut-check before publishing)
 
 Read the draft and ask:
 
@@ -88,5 +101,9 @@ Read the draft and ask:
 - Does each section usually have about three paragraphs?
 - Is the ending forward-looking?
 - Would I read this out loud to a friend without cringing?
+- Did I match the amount of sarcasm to the format?
+- If this is a public post, did I soften sarcasm into warmth, plain humor, or a cleaner sentence?
+- If this is an email, report, proposal, pull request, or technical update, did I remove jokes, jabs, and theatrical self-deprecation?
+- Is the humor helping the reader, or just showing off?
 
 If yes to all, ship it.

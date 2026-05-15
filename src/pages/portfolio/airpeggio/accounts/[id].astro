@@ -1,0 +1,631 @@
+---
+import AirpeggioLayout from "../_layout.astro";
+import AccountModal from "./_components/AccountModal.astro";
+import TrainingModal from "./_components/TrainingModal.astro";
+import Button from "../_components/Button.astro";
+import Icon from "../_components/Icon.astro";
+import {
+  ACCOUNTS,
+  TRAINING_REQUIREMENTS,
+  accessLabel,
+  accountFullName,
+  formatTrainingRequiredFor,
+  getAccount,
+  recordEffectiveDate,
+  trainingExpiresAt,
+  trainingStatus,
+} from "../_data";
+
+export function getStaticPaths() {
+  return ACCOUNTS.map((account) => ({
+    params: { id: account.id },
+    props: { account },
+  }));
+}
+
+const account = Astro.props.account ?? getAccount(Astro.params.id ?? "");
+
+if (!account) {
+  return Astro.redirect("/portfolio/airpeggio/accounts/");
+}
+
+const name = accountFullName(account);
+const access = accessLabel(account.roles).toUpperCase();
+
+const dateFmt = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const personalFields: Array<[string, string]> = [
+  ["Date of Birth", account.birthDate ? dateFmt.format(account.birthDate) : "N/A"],
+  ["Gender", account.gender ?? "N/A"],
+  ["Weight", account.weight !== undefined ? String(account.weight) : "0"],
+];
+
+const tabs = [
+  "Qualifications",
+  "Duty Logs",
+  "Reservations",
+  "Change Logs",
+  "Training",
+  "Currency",
+  "Documents",
+];
+
+const NOW = new Date("2026-05-14T12:00:00Z");
+
+const trainingRows = TRAINING_REQUIREMENTS.map((requirement) => {
+  const records = account.trainings
+    .filter((r) => r.requirementId === requirement.id)
+    .sort(
+      (a, b) =>
+        recordEffectiveDate(b).getTime() - recordEffectiveDate(a).getTime(),
+    );
+  const latest = records[0];
+  const status = trainingStatus(latest, requirement, NOW);
+  const expires = latest ? trainingExpiresAt(latest, requirement) : undefined;
+  return { requirement, records, latest, status, expires };
+});
+
+const renderInlineBold = (text: string): string =>
+  text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+
+const relativeFmt = new Intl.RelativeTimeFormat("en-US", { numeric: "auto" });
+
+const relativeMonths = (target: Date, ref: Date): string => {
+  const diffMs = target.getTime() - ref.getTime();
+  const months = Math.round(diffMs / (30.44 * 24 * 60 * 60_000));
+  if (months === 0) {
+    const days = Math.round(diffMs / (24 * 60 * 60_000));
+    return relativeFmt.format(days, "day");
+  }
+  return relativeFmt.format(months, "month");
+};
+
+const trainingStatusLabel = (status: string): string =>
+  status === "current"
+    ? "Current"
+    : status === "due-soon"
+      ? "Due Soon"
+      : status === "overridden"
+        ? "Overridden"
+        : "Expired";
+---
+
+<AirpeggioLayout
+  title={`Airpeggio Account ${name} | Samuel Dillow`}
+  active="accounts"
+>
+  <header class="account-detail-head">
+    <a
+      class="account-back"
+      href="/portfolio/airpeggio/accounts/"
+      aria-label="Back to accounts"
+    >
+      <Icon name="arrow-left" />
+    </a>
+    <div>
+      <h1>Account Details</h1>
+      <nav aria-label="Breadcrumb">
+        <a href="/portfolio/airpeggio/accounts/">Account</a>
+        <span>›</span>
+        <strong>{name}</strong>
+      </nav>
+    </div>
+    <Button icon="edit" class="account-edit" data-open-modal="edit-account">
+      Edit Details
+    </Button>
+  </header>
+
+  <section class="account-name-card">
+    <div class="account-name-card__top">
+      <h2>{name}</h2>
+      {access && <span class="account-role-badge">{access}</span>}
+    </div>
+    <div class="account-name-card__meta">
+      <p>
+        <Icon name="check" />
+        <span>{account.status}</span>
+      </p>
+      <p>
+        <Icon name="mail" />
+        <span>{account.email}</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="detail-panel">
+    <h2>Personal Details</h2>
+    <dl class="account-fields">
+      {
+        personalFields.map(([label, value]) => (
+          <div>
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="detail-panel">
+    <h2>Account Details</h2>
+    <div class="account-records">
+      <div class="account-record-tabs" role="tablist">
+        {
+          tabs.map((tab, i) => (
+            <button
+              type="button"
+              role="tab"
+              data-tab={tab}
+              class:list={[i === 0 && "is-active"]}
+              aria-selected={i === 0 ? "true" : "false"}
+            >
+              {tab}
+            </button>
+          ))
+        }
+      </div>
+
+      <div data-tab-panel="Qualifications" class="account-tab-panel">
+        <div class="account-tab-actions">
+          <Button variant="ghost" icon="plus">Add Qualification</Button>
+        </div>
+
+        <table class="datatable account-qualifications">
+          <colgroup>
+            <col style="width: 28%" />
+            <col style="width: 22%" />
+            <col style="width: 22%" />
+            <col style="width: 20%" />
+            <col style="width: 8%" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Aircraft Model</th>
+              <th>Positions</th>
+              <th>Regulations</th>
+              <th>Expiration Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              account.qualifications.length === 0 ? (
+                <tr>
+                  <td colspan="5" class="account-records__empty">
+                    No qualifications
+                  </td>
+                </tr>
+              ) : (
+                account.qualifications.map((q) => (
+                  <tr>
+                    <td>{q.aircraftModel}</td>
+                    <td>{q.positions.join(", ")}</td>
+                    <td>{q.regulations.join(", ")}</td>
+                    <td>{dateFmt.format(q.expirationDate)}</td>
+                    <td style={{ verticalAlign: "middle" }}>
+                      <div class="datatable-actions">
+                        <button
+                          type="button"
+                          class="account-row-action"
+                          aria-label={`Edit ${q.aircraftModel} qualification`}
+                        >
+                          <Icon name="edit" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div data-tab-panel="Training" class="account-tab-panel" hidden>
+        <table class="datatable account-trainings">
+          <colgroup>
+            <col style="width: 110px" />
+            <col style="width: 22%" />
+            <col style="width: 14%" />
+            <col style="width: 14%" />
+            <col />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Name</th>
+              <th>Due</th>
+              <th>Last Completed</th>
+              <th>Required For</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              trainingRows.map(({ requirement, latest, status, expires }) => (
+                <tr
+                  class="account-training-row"
+                  data-open-modal={`training-${requirement.id}`}
+                  tabindex="0"
+                  role="button"
+                  aria-label={`Open ${requirement.name} training record`}
+                >
+                  <td>
+                    <span
+                      class:list={["air-status-pill", `air-status-pill--${status}`]}
+                    >
+                      {trainingStatusLabel(status)}
+                    </span>
+                  </td>
+                  <td>{requirement.name}</td>
+                  <td>{expires ? relativeMonths(expires, NOW) : "—"}</td>
+                  <td>
+                    {latest ? relativeMonths(recordEffectiveDate(latest), NOW) : "—"}
+                  </td>
+                  <td
+                    set:html={renderInlineBold(
+                      formatTrainingRequiredFor(requirement),
+                    )}
+                  />
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      {
+        tabs
+          .filter((tab) => tab !== "Qualifications" && tab !== "Training")
+          .map((tab) => (
+            <div data-tab-panel={tab} class="account-tab-panel" hidden>
+              <table class="datatable">
+                <tbody>
+                  <tr>
+                    <td class="account-records__empty">No {tab.toLowerCase()}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          ))
+      }
+    </div>
+  </section>
+
+  <AccountModal id="edit-account" mode="edit" account={account} />
+
+  {
+    trainingRows.map(({ requirement, records }) => (
+      <TrainingModal
+        id={`training-${requirement.id}`}
+        requirement={requirement}
+        records={records}
+      />
+    ))
+  }
+</AirpeggioLayout>
+
+<script>
+  const tabButtons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>(
+      ".account-record-tabs [data-tab]",
+    ),
+  );
+  const panels = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-tab-panel]"),
+  );
+
+  for (const button of tabButtons) {
+    button.addEventListener("click", () => {
+      const target = button.dataset.tab;
+      for (const b of tabButtons) {
+        const active = b === button;
+        b.classList.toggle("is-active", active);
+        b.setAttribute("aria-selected", active ? "true" : "false");
+      }
+      for (const panel of panels) {
+        panel.hidden = panel.dataset.tabPanel !== target;
+      }
+    });
+  }
+
+  // Training rows: keyboard activation. The data-open-modal click handler in
+  // Modal.astro already covers mouse clicks for any element carrying that
+  // attribute, but keyboards land on a <tr role="button"> and need Enter/Space
+  // forwarded as a click.
+  document
+    .querySelectorAll<HTMLTableRowElement>(".account-training-row")
+    .forEach((row) => {
+      row.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          row.click();
+        }
+      });
+    });
+</script>
+
+<style>
+  .account-detail-head {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 24px;
+
+    h1 {
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+      font-size: 16px;
+
+      a {
+        color: var(--air-ink);
+        text-decoration: none;
+      }
+    }
+
+    @media (max-width: 760px) {
+      grid-template-columns: 28px 1fr;
+
+      .account-edit {
+        grid-column: 2;
+        justify-self: start;
+      }
+    }
+  }
+
+  .account-back {
+    display: inline-grid;
+    place-items: center;
+    color: var(--air-ink);
+    text-decoration: none;
+  }
+
+  .account-name-card {
+    margin-bottom: 22px;
+    padding: 22px 26px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+
+    .account-name-card__top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .account-name-card__meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    p {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      color: var(--air-ink);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    p :global(.air-icon) {
+      width: 16px;
+      height: 16px;
+      color: var(--air-muted);
+    }
+  }
+
+  .account-role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border: 1px solid #1d4fb4;
+    border-radius: 4px;
+    background: #fff;
+    color: #1d4fb4;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .detail-panel {
+    overflow: hidden;
+    margin-bottom: 22px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+
+    > h2 {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--air-line);
+      color: var(--air-ink);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  }
+
+  .account-fields {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 28px 24px;
+    margin: 0;
+    padding: 26px 26px 30px;
+
+    @media (max-width: 760px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    > div {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    dt {
+      color: var(--air-muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    dd {
+      color: var(--air-ink);
+      font-size: 16px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .account-records {
+    padding: 22px;
+  }
+
+  .account-record-tabs {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 18px;
+    padding: 4px;
+    border: 1px solid #cfd6e0;
+    border-radius: 7px;
+    flex-wrap: wrap;
+
+    button {
+      min-height: 34px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--air-ink);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+
+      &.is-active {
+        background: var(--air-purple);
+        color: #fff;
+      }
+    }
+  }
+
+  .account-tab-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 14px;
+  }
+
+  .account-tab-panel[hidden] {
+    display: none;
+  }
+
+  .account-qualifications {
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+  }
+
+  .account-records__empty {
+    padding: 56px 18px;
+    text-align: center;
+    color: var(--air-muted);
+    font-weight: 600;
+  }
+
+  .account-trainings {
+    th:first-child,
+    td:first-child {
+      padding-left: 18px;
+      padding-right: 12px;
+    }
+  }
+
+  .account-training-row {
+    cursor: pointer;
+
+    &:hover td {
+      background: var(--air-panel-soft);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--air-purple);
+      outline-offset: -2px;
+    }
+
+    td {
+      vertical-align: middle;
+    }
+  }
+
+  .air-status-pill {
+    --pill-bg: #0a8d42;
+    --pill-fg: #fff;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--pill-bg);
+    color: var(--pill-fg);
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    &.air-status-pill--due-soon {
+      --pill-bg: #c97a00;
+    }
+
+    &.air-status-pill--expired {
+      --pill-bg: #bd2f20;
+    }
+
+    &.air-status-pill--overridden {
+      --pill-bg: #1d4fb4;
+    }
+  }
+
+  .account-row-action {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--air-ink);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--air-panel-soft);
+    }
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+</style>

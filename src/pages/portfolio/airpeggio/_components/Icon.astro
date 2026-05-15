@@ -1,0 +1,109 @@
+---
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  Ban,
+  Bell,
+  Brain,
+  Building2,
+  Calendar,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  CirclePlus,
+  Clock,
+  Copy,
+  Download,
+  Trash2,
+  Upload,
+  IdCard,
+  Eye,
+  Grid2X2,
+  Inbox,
+  List,
+  Mail,
+  ListFilter,
+  MapPin,
+  MoreHorizontal,
+  Pencil,
+  Phone,
+  Plane,
+  ReceiptText,
+  Search,
+  Settings,
+  ShieldCheck,
+  Users,
+  Wrench,
+  X,
+} from "lucide-static";
+
+interface Props {
+  name: string;
+}
+const { name } = Astro.props;
+
+const icons: Record<string, string> = {
+  inbox: Inbox,
+  mail: Mail,
+  customer: IdCard,
+  account: Building2,
+  aircraft: Plane,
+  calendar: Calendar,
+  check: Check,
+  "chevron-down": ChevronDown,
+  "chevron-up": ChevronUp,
+  trash: Trash2,
+  upload: Upload,
+  wrench: Wrench,
+  brain: Brain,
+  bell: Bell,
+  search: Search,
+  plus: CirclePlus,
+  list: List,
+  filter: ListFilter,
+  pin: MapPin,
+  more: MoreHorizontal,
+  phone: Phone,
+  receipt: ReceiptText,
+  ban: Ban,
+  settings: Settings,
+  x: X,
+  "arrow-left": ArrowLeft,
+  "arrow-right": ArrowRight,
+  edit: Pencil,
+  eye: Eye,
+  grid: Grid2X2,
+  alert: AlertTriangle,
+  clock: Clock,
+  copy: Copy,
+  download: Download,
+  shield: ShieldCheck,
+  users: Users,
+};
+
+const svg = (icons[name] ?? "").replace(
+  "<svg",
+  '<svg class="air-icon-svg" aria-hidden="true"',
+);
+---
+
+<span class="air-icon" aria-hidden="true" set:html={svg} />
+
+<style>
+  .air-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1em;
+    height: 1.1em;
+    flex: 0 0 auto;
+
+    :global(.air-icon-svg) {
+      width: 100%;
+      height: 100%;
+      stroke: currentColor;
+      stroke-width: 1.5;
+    }
+  }
+</style>

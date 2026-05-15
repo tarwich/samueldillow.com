@@ -1,0 +1,17 @@
+.air-case-note {
+  max-width: 780px;
+  margin-top: 36px;
+  color: #293447;
+  font-size: 16px;
+  line-height: 1.65;
+
+  h2 {
+    margin: 0 0 10px;
+    font-size: 20px;
+  }
+
+  a {
+    color: var(--air-purple);
+    font-weight: 900;
+  }
+}

@@ -1,0 +1,82 @@
+---
+interface Props {
+  variant?:
+    | "qualified"
+    | "unqualified"
+    | "error"
+    | "manual"
+    | "quoted"
+    | "scheduled"
+    | "approved"
+    | "flown";
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { variant = "qualified", class: className, ...rest } = Astro.props;
+---
+
+<span class:list={["air-badge", `air-badge--${variant}`, className]} {...rest}>
+  <slot />
+</span>
+
+<style>
+  .air-badge {
+    --badge-color: #098d42;
+    min-height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1em;
+    border: 1px solid var(--badge-color);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--badge-color);
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.75rem;
+    font-weight: 900;
+    line-height: 1em;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .air-badge--qualified {
+    --badge-color: #098d42;
+  }
+
+  .air-badge--unqualified {
+    --badge-color: #bf4309;
+  }
+
+  .air-badge--error {
+    --badge-color: #bd2f20;
+  }
+
+  .air-badge--manual {
+    --badge-color: #1d4fb4;
+  }
+
+  .air-badge--quoted {
+    --badge-color: #510c62;
+  }
+
+  .air-badge--scheduled {
+    --badge-color: #2550ad;
+    background: var(--badge-color);
+    color: #fff;
+  }
+
+  .air-badge--approved {
+    --badge-color: #138645;
+    background: var(--badge-color);
+    color: #fff;
+  }
+
+  .air-badge--flown {
+    --badge-color: #510c62;
+    background: var(--badge-color);
+    color: #fff;
+  }
+</style>

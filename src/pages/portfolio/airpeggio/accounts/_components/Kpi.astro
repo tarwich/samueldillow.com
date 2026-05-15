@@ -1,0 +1,105 @@
+---
+import Icon from "../../_components/Icon.astro";
+
+interface KpiProps {
+  title: string;
+  value: number;
+  subtitle: string;
+  icon: string;
+  active?: boolean;
+  variant: "total" | "current" | "due-soon" | "overdue" | "overridden";
+  [key: string]: unknown;
+}
+
+const {
+  title,
+  value,
+  subtitle,
+  icon,
+  active: isActive,
+  variant,
+  ...rest
+} = Astro.props as KpiProps;
+---
+
+<article
+  class:list={[{ "is-active": isActive }]}
+  data-variant={variant}
+  {...rest}
+>
+  <header>
+    <h3>{title}</h3>
+    <icon>
+      <Icon name={icon} />
+    </icon>
+  </header>
+  <value>{value}</value>
+  <subtitle>{subtitle}</subtitle>
+</article>
+
+<style>
+  article {
+    &[data-variant="total"] {
+      --kpi-color: var(--air-gray);
+    }
+    &[data-variant="current"] {
+      --kpi-color: var(--air-green);
+    }
+    &[data-variant="due-soon"] {
+      --kpi-color: var(--air-yellow);
+    }
+    &[data-variant="overdue"] {
+      --kpi-color: var(--air-red);
+    }
+    &[data-variant="overridden"] {
+      --kpi-color: var(--air-blue);
+    }
+
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    border: 1px solid color-mix(in srgb, var(--kpi-color) 50%, #fff);
+    border-radius: 9px;
+    padding: 18px 20px;
+    cursor: pointer;
+
+    &:hover:not(.is-active) {
+      background: color-mix(in srgb, var(--kpi-color) 5%, #fff);
+    }
+
+    &.is-active {
+      background: color-mix(in srgb, var(--kpi-color) 10%, #fff);
+    }
+
+    header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+
+      icon {
+        display: inline-flex;
+        place-items: center;
+        border-radius: 0.4em;
+        background: color-mix(in srgb, var(--kpi-color) 10%, #fff);
+        padding: 0.4em;
+        color: var(--kpi-color);
+      }
+    }
+
+    value {
+      margin: 0;
+      color: var(--air-ink);
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    subtitle {
+      margin: 0;
+      color: var(--air-muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+  }
+</style>

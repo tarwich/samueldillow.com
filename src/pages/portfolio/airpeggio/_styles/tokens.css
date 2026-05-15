@@ -1,0 +1,96 @@
+@scope (.portfolio--airpeggio) {
+  :scope {
+    --air-purple: #510c62;
+    --air-primary: var(--air-purple);
+    --air-purple-dark: #40054f;
+    --air-purple-soft: #efe7f3;
+    --air-ink: #0b1222;
+    --air-muted: #657287;
+    --air-line: #dce3ee;
+    --air-panel: #ffffff;
+    --air-panel-soft: #f2f5f9;
+    --air-gray: #8b8b8b;
+    --air-green: #138645;
+    --air-yellow: #d99931;
+    --air-red: #b32f3e;
+    --air-blue: #2d32d0;
+    --air-topbar: 72px;
+    --air-font:
+      ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #fff;
+    color: var(--air-ink);
+    font-family: var(--air-font);
+    font-weight: 700;
+  }
+
+  main {
+    padding: 48px 40px 64px;
+
+    @media (max-width: 980px) {
+      padding: 32px 18px 54px;
+    }
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .hidden { display: none; }
+  .invisible { visibility: hidden; }
+
+  .truncate {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .z-sticky { z-index: 1; }
+  .z-modal { z-index: 2; }
+  .z-popover { z-index: 3; }
+
+  .flex-row {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .flex-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .items-start { align-items: flex-start; }
+  .items-center { align-items: center; }
+  .items-end { align-items: flex-end; }
+
+  .justify-start { justify-content: flex-start; }
+  .justify-center { justify-content: center; }
+  .justify-end { justify-content: flex-end; }
+
+  .gap-1 { gap: 0.25rem; }
+  .gap-2 { gap: 0.5rem; }
+  .gap-3 { gap: 0.75rem; }
+  .gap-4 { gap: 1rem; }
+  .gap-8 { gap: 2rem; }
+
+  .text-muted { color: var(--air-muted); }
+}

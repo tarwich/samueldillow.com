@@ -1,0 +1,150 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  /** Unique id triggers target via data-open-modal or commandfor */
+  id: string;
+  /** Modal heading shown in the top zone */
+  title: string;
+}
+
+const { id, title } = Astro.props;
+const titleId = `${id}-title`;
+---
+
+<dialog id={id} class="modal" aria-labelledby={titleId}>
+  <header class="modal__head">
+    <h2 id={titleId}>{title}</h2>
+  </header>
+
+  <div class="modal__body">
+    <slot />
+  </div>
+
+  {
+    Astro.slots.has("footer") && (
+      <footer class="modal__foot">
+        <slot name="footer" />
+      </footer>
+    )
+  }
+
+  {/*
+    Close button is last in DOM order so showModal()'s default focus lands on
+    the first interactive element in the body instead of the X. CSS grid
+    places it visually in the top zone via grid-area. <form method="dialog">
+    closes the dialog on submit — zero JS required.
+  */}
+  <form method="dialog" class="modal__close-form">
+    <button type="submit" class="modal__close" aria-label="Close">
+      <Icon name="x" />
+    </button>
+  </form>
+</dialog>
+
+<script>
+  // Open triggers placed anywhere on the page: <button data-open-modal="my-modal">
+  document.querySelectorAll("[data-open-modal]").forEach((trigger) => {
+    trigger.addEventListener("click", () => {
+      const targetId = trigger.getAttribute("data-open-modal");
+      if (!targetId) return;
+      const dialog = document.getElementById(targetId);
+      if (dialog instanceof HTMLDialogElement) dialog.showModal();
+    });
+  });
+
+  // Backdrop click closes the dialog
+  document.querySelectorAll("dialog.modal").forEach((dialog) => {
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog && dialog instanceof HTMLDialogElement) {
+        dialog.close();
+      }
+    });
+  });
+</script>
+
+<style>
+  .modal {
+    width: fit-content;
+    max-width: min(560px, calc(100vw - 32px));
+    max-height: min(90vh, 720px);
+    /* Re-asserting margin: auto because the page-level `* { margin: 0 }` reset
+       clobbers the UA stylesheet that centers a modal dialog via margin auto
+       inside its position:fixed; inset:0 box. */
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.22);
+
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "head close"
+      "body body"
+      "foot foot";
+
+    /* Author display: grid above defeats the UA's "dialog:not([open]) { display: none }".
+       Re-assert hidden-when-closed so the box vanishes along with the backdrop. */
+    &:not([open]) {
+      display: none;
+    }
+
+    &::backdrop {
+      background: rgba(15, 23, 42, 0.45);
+    }
+
+    .modal__head {
+      grid-area: head;
+      display: flex;
+      align-items: center;
+      padding: 18px 0 14px 24px;
+      border-bottom: 1px solid var(--air-line);
+
+      h2 {
+        margin: 0;
+        font-size: 19px;
+        line-height: 1.2;
+      }
+    }
+
+    .modal__close-form {
+      grid-area: close;
+      margin: 0;
+      padding: 14px 14px 0 0;
+      border-bottom: 1px solid var(--air-line);
+    }
+
+    .modal__close {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--air-muted);
+      cursor: pointer;
+
+      &:hover {
+        color: var(--air-ink);
+      }
+    }
+
+    .modal__body {
+      grid-area: body;
+      overflow: auto;
+      padding: 8px 24px 18px;
+    }
+
+    .modal__foot {
+      grid-area: foot;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 14px 24px 18px;
+    }
+  }
+</style>

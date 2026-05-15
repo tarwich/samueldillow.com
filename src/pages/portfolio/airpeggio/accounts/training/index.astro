@@ -1,0 +1,445 @@
+---
+import AirpeggioLayout from "../../_layout.astro";
+import Button from "../../_components/Button.astro";
+import IconButton from "../../_components/IconButton.astro";
+import PageHeader from "../../_components/PageHeader.astro";
+import ViewToggle from "../../_components/ViewToggle.astro";
+import {
+  ACCOUNTS,
+  TRAINING_REQUIREMENTS,
+  accountFullName,
+  trainingExpiresAt,
+  trainingStatus,
+  type Account,
+  type TrainingRecord,
+  type TrainingRequirement,
+  type TrainingStatus,
+} from "../../_data";
+import Kpi from "../_components/Kpi.astro";
+
+const NOW = new Date("2026-05-14T12:00:00Z");
+
+const pilots = ACCOUNTS.filter((a) => a.roles.includes("pilot")).sort((a, b) =>
+  accountFullName(a).localeCompare(accountFullName(b)),
+);
+
+const latestRecordFor = (
+  account: Account,
+  requirement: TrainingRequirement,
+): TrainingRecord | undefined =>
+  account.trainings
+    .filter((r) => r.requirementId === requirement.id)
+    .sort(
+      (a, b) =>
+        trainingExpiresAt(b, requirement).getTime() -
+        trainingExpiresAt(a, requirement).getTime(),
+    )[0];
+
+interface Cell {
+  status: TrainingStatus | "missing";
+  expiresAt?: Date;
+}
+
+const buildCell = (
+  account: Account,
+  requirement: TrainingRequirement,
+): Cell => {
+  const record = latestRecordFor(account, requirement);
+  if (!record) return { status: "missing" };
+  return {
+    status: trainingStatus(record, requirement, NOW),
+    expiresAt: trainingExpiresAt(record, requirement),
+  };
+};
+
+const rows = pilots.map((account) => {
+  const cells = TRAINING_REQUIREMENTS.map((req) => buildCell(account, req));
+  const statuses = new Set(cells.map((c) => c.status));
+  return { account, cells, statuses };
+});
+
+const stats = {
+  total: pilots.length,
+  current: 0,
+  dueSoon: 0,
+  overdue: 0,
+  overridden: 0,
+};
+
+for (const { cells } of rows) {
+  for (const cell of cells) {
+    if (cell.status === "current") stats.current++;
+    else if (cell.status === "due-soon") stats.dueSoon++;
+    else if (cell.status === "expired") stats.overdue++;
+    else if (cell.status === "overridden") stats.overridden++;
+  }
+}
+
+// Maps each KPI's variant to the cell status it filters by. "total" is the
+// "show everything" sentinel — the row x-show and cell dimming both fall
+// through to no-op when filter === 'total'.
+const KPI = [
+  {
+    title: "Total",
+    value: pilots.length,
+    subtitle: "Pilots",
+    icon: "users",
+    variant: "total",
+    matches: "total",
+  },
+  {
+    title: "Current",
+    value: stats.current,
+    subtitle: "Up to date",
+    icon: "check",
+    variant: "current",
+    matches: "current",
+  },
+  {
+    title: "Due soon",
+    value: stats.dueSoon,
+    subtitle: "Within 30 days",
+    icon: "clock",
+    variant: "due-soon",
+    matches: "due-soon",
+  },
+  {
+    title: "Overdue",
+    value: stats.overdue,
+    subtitle: "Past due",
+    icon: "alert",
+    variant: "overdue",
+    matches: "expired",
+  },
+  {
+    title: "Overridden",
+    value: stats.overridden,
+    subtitle: "Manual override",
+    icon: "shield",
+    variant: "overridden",
+    matches: "overridden",
+  },
+];
+
+const monthFmt = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+const dayFmt = new Intl.DateTimeFormat("en-US", {
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+});
+
+const formatExpires = (date: Date): string =>
+  date.getUTCFullYear() === NOW.getUTCFullYear()
+    ? dayFmt.format(date)
+    : monthFmt.format(date);
+---
+
+<AirpeggioLayout title="Airpeggio Training | Samuel Dillow" active="accounts">
+  <div x-data="{
+    filter: 'total',
+  }">
+    <PageHeader
+      search
+      searchLabel="Search pilots"
+      searchTable="training-matrix"
+    >
+      <Fragment slot="title">
+        <div class="training-title">
+          <h1>Training Dashboard</h1>
+          <p>Monitor training status and compliance across all pilots.</p>
+        </div>
+      </Fragment>
+      <Fragment slot="actions">
+        <IconButton icon="settings" aria-label="Dashboard settings" />
+      </Fragment>
+      <Fragment slot="tools">
+        <!-- <ViewToggle
+          label="View as"
+          options={[
+            { icon: "list", label: "List view", value: "list" },
+            { icon: "grid", label: "Grid view", value: "grid", active: true },
+          ]}
+        /> -->
+        <IconButton icon="download" aria-label="Export training data" />
+      </Fragment>
+    </PageHeader>
+
+    <section class="training-stats" aria-label="Training summary">
+      {
+        KPI.map((kpi) => (
+          <Kpi
+            title={kpi.title}
+            value={kpi.value}
+            subtitle={kpi.subtitle}
+            icon={kpi.icon}
+            variant={kpi.variant as never}
+            @click={`filter = '${kpi.matches}'`}
+            :class={`{ 'is-active': filter === '${kpi.matches}' }`}
+          />
+        ))
+      }
+    </section>
+
+    <div class="training-matrix-wrap">
+      <table class="datatable training-matrix" id="training-matrix">
+        <thead>
+          <tr>
+            <th class="training-matrix__crew">Crew</th>
+            {
+              TRAINING_REQUIREMENTS.map((req) => (
+                <th class="training-matrix__req">{req.name}</th>
+              ))
+            }
+          </tr>
+        </thead>
+        <tbody>
+          {
+            rows.map(({ account, cells, statuses }) => (
+              <tr
+                data-statuses={Array.from(statuses).join(",")}
+                x-show={`filter === 'total' || $el.dataset.statuses.split(',').includes(filter)`}
+              >
+                <th scope="row" class="training-matrix__crew">
+                  <a
+                    href={`/portfolio/airpeggio/accounts/${account.id}/`}
+                    class="training-matrix__crew-link"
+                  >
+                    {accountFullName(account)}
+                  </a>
+                </th>
+                {cells.map((cell) => (
+                  <td class="training-matrix__cell" data-status={cell.status}>
+                    {cell.status !== "missing" && cell.expiresAt && (
+                      <span
+                        class:list={[
+                          "training-pill",
+                          `training-pill--${cell.status}`,
+                        ]}
+                        :class={`{ 'is-dimmed': filter !== 'total' && filter !== '${cell.status}' }`}
+                      >
+                        {formatExpires(cell.expiresAt)}
+                      </span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</AirpeggioLayout>
+
+<style>
+  .training-title {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    h1 {
+      margin: 0;
+    }
+
+    p {
+      margin: 0;
+      color: var(--air-muted);
+      font-size: 15px;
+      font-weight: 500;
+    }
+  }
+
+  .training-stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+
+    @media (max-width: 1180px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 620px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .training-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 20px;
+    border: 1px solid var(--air-line);
+    border-radius: 9px;
+    background: #fff;
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+
+      h3 {
+        margin: 0;
+        color: var(--air-ink);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      :global(.air-icon) {
+        width: 18px;
+        height: 18px;
+        padding: 6px;
+        box-sizing: content-box;
+        border-radius: 6px;
+        background: var(--air-panel-soft);
+        color: var(--air-muted);
+      }
+    }
+
+    &.is-highlight {
+      background: #eef3fb;
+      border-color: #cbd9ef;
+
+      header :global(.air-icon) {
+        background: #fff;
+        color: #1d4fb4;
+      }
+    }
+  }
+
+  .training-stat__value {
+    margin: 0;
+    color: var(--air-ink);
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .training-stat__label {
+    margin: 0;
+    color: var(--air-muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .training-stat:nth-child(3) header :global(.air-icon) {
+    background: #fdf4dd;
+    color: #c97a00;
+  }
+
+  .training-stat:nth-child(4) header :global(.air-icon) {
+    background: #fbe5e1;
+    color: #bd2f20;
+  }
+
+  .training-stat:nth-child(5) header :global(.air-icon) {
+    background: #e3ecfb;
+    color: #1d4fb4;
+  }
+
+  .training-matrix-wrap {
+    overflow-x: auto;
+    border-radius: 9px;
+  }
+
+  .training-matrix {
+    min-width: 880px;
+    table-layout: auto;
+
+    th,
+    td {
+      padding: 16px 14px;
+      vertical-align: middle;
+    }
+
+    .training-matrix__crew {
+      width: 200px;
+      min-width: 180px;
+      text-align: left;
+      background: #fff;
+      color: var(--air-ink);
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    thead .training-matrix__crew {
+      background: #f1f4f8;
+      color: var(--air-muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .training-matrix__req {
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-align: left;
+      white-space: normal;
+      line-height: 1.3;
+    }
+
+    .training-matrix__cell {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    tbody tr:hover td,
+    tbody tr:hover th {
+      background: var(--air-panel-soft);
+    }
+  }
+
+  .training-matrix__crew-link {
+    color: var(--air-ink);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--air-purple);
+    }
+  }
+
+  .training-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border: 1px solid #b5e3c4;
+    border-radius: 6px;
+    background: #e6f6ec;
+    color: #0a5b2c;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: opacity 120ms ease, filter 120ms ease;
+
+    &.training-pill--due-soon {
+      border-color: #f0d28b;
+      background: #fdf2d6;
+      color: #8a5b00;
+    }
+
+    &.training-pill--expired {
+      border-color: #f1b9b1;
+      background: #fbe1dd;
+      color: #8a2418;
+    }
+
+    &.training-pill--overridden {
+      border-color: #b9c8e8;
+      border-style: dashed;
+      background: #e8eefa;
+      color: #1d4fb4;
+    }
+
+    &.is-dimmed {
+      opacity: 0.35;
+      filter: saturate(0.4);
+    }
+  }
+</style>

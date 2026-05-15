@@ -1,0 +1,125 @@
+---
+import Icon from "../../_components/Icon.astro";
+
+export type ChecklistStatus = "complete" | "warning" | "error" | "pending";
+
+interface Props {
+  status: ChecklistStatus;
+  label: string;
+}
+
+const { status, label } = Astro.props;
+
+const STATUS_ICON: Record<ChecklistStatus, string> = {
+  complete: "check",
+  warning: "alert",
+  error: "alert",
+  pending: "clock",
+};
+---
+
+<div class:list={["checklist-item", `checklist-item--${status}`]}>
+  <span class="checklist-item__icon" aria-hidden="true">
+    <Icon name={STATUS_ICON[status]} />
+  </span>
+  <span class="checklist-item__label">{label}</span>
+  <div class="checklist-item__body"><slot /></div>
+  <div class="checklist-item__actions"><slot name="actions" /></div>
+</div>
+
+<style>
+  .checklist-item {
+    display: grid;
+    grid-template-columns: 40px 140px 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 18px 24px;
+    border-top: 1px solid var(--air-line);
+
+    &:first-child {
+      border-top: 0;
+    }
+
+    @media (max-width: 880px) {
+      grid-template-columns: 40px 1fr;
+      grid-template-areas:
+        "icon label"
+        "body body"
+        "actions actions";
+
+      .checklist-item__icon {
+        grid-area: icon;
+      }
+
+      .checklist-item__label {
+        grid-area: label;
+      }
+
+      .checklist-item__body {
+        grid-area: body;
+      }
+
+      .checklist-item__actions {
+        grid-area: actions;
+        justify-self: end;
+      }
+    }
+  }
+
+  .checklist-item__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e3f6ea;
+    color: #138645;
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .checklist-item--warning .checklist-item__icon {
+    background: #fdecd1;
+    color: #c97a00;
+  }
+
+  .checklist-item--error .checklist-item__icon {
+    background: #fbe1de;
+    color: #bd2f20;
+  }
+
+  .checklist-item--pending .checklist-item__icon {
+    background: var(--air-panel-soft);
+    color: var(--air-muted);
+  }
+
+  .checklist-item__label {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--air-ink);
+  }
+
+  .checklist-item__body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--air-ink);
+    min-width: 0;
+  }
+
+  .checklist-item__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    color: var(--air-ink);
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+</style>

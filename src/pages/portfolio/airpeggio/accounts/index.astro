@@ -1,0 +1,405 @@
+---
+import AirpeggioLayout from "../_layout.astro";
+import AccountModal from "./_components/AccountModal.astro";
+import Button from "../_components/Button.astro";
+import ColumnsPopover from "../_components/ColumnsPopover.astro";
+import Icon from "../_components/Icon.astro";
+import PageHeader from "../_components/PageHeader.astro";
+import Popover from "../_components/Popover.astro";
+import { ACCOUNTS, accessLabel, accountFullName } from "../_data";
+import Select from "../_components/Select.astro";
+
+const lastActiveFmt = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const emailFmt = (email: string, max = 30) =>
+  email.length > max ? email.slice(0, max - 3) + "..." : email;
+
+const editAccount = ACCOUNTS[0];
+---
+
+<AirpeggioLayout title="Airpeggio Accounts | Samuel Dillow" active="accounts">
+  <div
+    class="accounts-view"
+    x-data="{
+      filters: {
+        access: '',
+        lastActive: '',
+      },
+      isMatch($el) {
+        const {access = '', lastActive} = this.filters;
+        const elRoles = ($el.dataset.access || '').split(',');
+
+        if (access && !access.split(',').filter(Boolean).some(
+          role => elRoles.includes(role)
+        )) {
+          return false;
+        }
+
+        if (lastActive) {
+          const daysSinceActive = parseInt($el.dataset.daysSinceActive || '', 10);
+          if (isNaN(daysSinceActive)) return false;
+
+          if (lastActive === '30-days' && daysSinceActive > 30) {
+            return false;
+          }
+          if (lastActive === '90-days' && daysSinceActive > 90) {
+            return false;
+          }
+          if (lastActive === '180-days' && daysSinceActive > 180) {
+            return false;
+          }
+        }
+
+        return true;
+      },
+    }
+    "
+  >
+    <PageHeader
+      search
+      searchLabel="Search accounts"
+      searchTable="accounts-table"
+    >
+      <h1 slot="title">Accounts</h1>
+      <Fragment slot="actions">
+        <Button href="#">Manage Schedule</Button>
+        <Button variant="primary" icon="plus" data-open-modal="add-account">
+          Add Account
+        </Button>
+      </Fragment>
+      <Fragment slot="filters">
+        <span x-text="`Filters: ${filters.lastActive}`"></span>
+        <Popover icon="filter" label="Filter" orientation="bottom">
+          <div class="accounts-filter">
+            <h3 class="accounts-filter__title">Filter Results</h3>
+            <Select
+              label="Access"
+              name="access"
+              @change="filters.access = $event.target.value"
+              options={[
+                { label: "All", value: "" },
+                { label: "Scheduler", value: "scheduler" },
+                { label: "Pilot", value: "pilot" },
+              ]}
+            />
+            <Select
+              label="Last Active"
+              name="lastActive"
+              @change="filters.lastActive = $event.target.value"
+              options={[
+                { label: "All", value: "" },
+                { label: "Active in last 30 days", value: "30-days" },
+                { label: "Active in last 90 days", value: "90-days" },
+                { label: "Active in last 6 months", value: "180-days" },
+              ]}
+            />
+          </div>
+        </Popover>
+      </Fragment>
+      <Fragment slot="tools">
+        <ColumnsPopover
+          columns={["Name", "Phone", "Access", "Last Active", "Tags"]}
+        />
+      </Fragment>
+    </PageHeader>
+
+    <section aria-label="Accounts list">
+      <table id="accounts-table" class="datatable accounts-table">
+        <colgroup>
+          <col style="width: 26%" />
+          <col style="width: 14%" />
+          <col style="width: 20%" />
+          <col style="width: 16%" />
+          <col style="width: 16%" />
+          <col style="width: 8%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Access</th>
+            <th>Last Active</th>
+            <th>Tags</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            ACCOUNTS.map((account) => {
+              const name = accountFullName(account);
+              const access = accessLabel(account.roles);
+              return (
+                <tr
+                  data-status={account.status}
+                  data-access={account.roles.join(",")}
+                  data-days-since-active={
+                    account.lastActive
+                      ? Math.floor(
+                          (Date.now() - account.lastActive.getTime()) /
+                            (1000 * 60 * 60 * 24),
+                        )
+                      : ""
+                  }
+                  x-show="isMatch($el)"
+                >
+                  <td>
+                    <a
+                      class="accounts-name-link"
+                      href={`/portfolio/airpeggio/accounts/${account.id}/`}
+                    >
+                      <strong>{name}</strong>
+                    </a>
+                    <br />
+                    <span class="text-muted">{emailFmt(account.email)}</span>
+                  </td>
+                  <td>{account.phone ?? ""}</td>
+                  <td>{access}</td>
+                  <td>
+                    {account.lastActive
+                      ? lastActiveFmt.format(account.lastActive)
+                      : "-"}
+                  </td>
+                  <td>
+                    {account.tags.length === 0
+                      ? "-"
+                      : account.tags.map((tag) => (
+                          <span class="accounts-tag">{tag}</span>
+                        ))}
+                  </td>
+                  <td style={{ verticalAlign: "middle" }}>
+                    <div class="datatable-actions">
+                      <a
+                        class="accounts-row-action"
+                        href={`/portfolio/airpeggio/accounts/${account.id}/`}
+                        aria-label={`View ${name}`}
+                      >
+                        <Icon name="eye" />
+                      </a>
+                      <button
+                        type="button"
+                        class="accounts-row-action"
+                        aria-label={`Edit ${name}`}
+                        data-open-modal="edit-account"
+                      >
+                        <Icon name="edit" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="accounts-pagination" aria-label="Pagination">
+      <div class="accounts-page-size">
+        <span>Items per page</span>
+        <button type="button">20 <Icon name="chevron-down" /></button>
+        <strong>Records 1 - {ACCOUNTS.length} of {ACCOUNTS.length}</strong>
+      </div>
+      <nav class="accounts-page-nav" aria-label="Account pages">
+        <button type="button" disabled>First</button>
+        <button type="button" disabled>Last</button>
+        <button type="button" class="is-current">1</button>
+        <button type="button" disabled><Icon name="arrow-left" /></button>
+        <button type="button" disabled><Icon name="arrow-right" /></button>
+      </nav>
+    </footer>
+
+    <AccountModal id="add-account" mode="add" />
+    <AccountModal id="edit-account" mode="edit" account={editAccount} />
+  </div>
+</AirpeggioLayout>
+
+<style>
+  .accounts-filter {
+    width: 280px;
+    display: grid;
+
+    > * {
+      padding: 1em;
+    }
+  }
+
+  .accounts-filter__title {
+    margin: 0;
+    color: var(--air-ink);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--air-line);
+  }
+
+  .accounts-filter__field {
+    display: grid;
+    gap: 8px;
+
+    > span {
+      color: var(--air-ink);
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1;
+    }
+  }
+
+  .accounts-filter__select {
+    position: relative;
+    display: block;
+
+    select {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 36px 0 14px;
+      border: 1px solid var(--air-line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--air-ink);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      appearance: none;
+      cursor: pointer;
+
+      &:focus {
+        outline: 0;
+        border-color: var(--air-ink);
+        box-shadow: 0 0 0 2px var(--air-ink);
+      }
+
+      &:has(option[value=""]:checked) {
+        color: #777;
+        font-weight: 500;
+      }
+    }
+
+    :global(.air-icon) {
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      width: 14px;
+      height: 14px;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--air-ink);
+    }
+  }
+
+  .accounts-table {
+    margin-top: 6px;
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+
+    td {
+      vertical-align: middle;
+    }
+
+    .text-muted {
+      font-weight: 500;
+    }
+  }
+
+  .accounts-name-link {
+    color: var(--air-ink);
+    text-decoration: none;
+
+    &:hover strong {
+      text-decoration: underline;
+    }
+  }
+
+  .accounts-tag {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #1d4fb4;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .accounts-row-action {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--air-ink);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--air-panel-soft);
+    }
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .accounts-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 40px;
+    padding: 0 16px;
+
+    @media (max-width: 760px) {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  .accounts-page-size,
+  .accounts-page-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--air-ink);
+    font-size: 13px;
+  }
+
+  .accounts-page-size button,
+  .accounts-page-nav button {
+    min-width: 64px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid var(--air-line);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+  }
+
+  .accounts-page-nav button {
+    min-width: 48px;
+
+    &[disabled] {
+      color: #b4bdca;
+      background: #fbfcfe;
+    }
+
+    &.is-current {
+      border-color: var(--air-purple);
+      color: var(--air-purple);
+    }
+  }
+</style>

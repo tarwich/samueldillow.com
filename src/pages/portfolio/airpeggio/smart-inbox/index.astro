@@ -1,0 +1,605 @@
+---
+import AirpeggioLayout from "../_layout.astro";
+import Badge from "../_components/Badge.astro";
+import Button from "../_components/Button.astro";
+import Icon from "../_components/Icon.astro";
+import IconButton from "../_components/IconButton.astro";
+import {
+  AIRCRAFT,
+  BOOKINGS,
+  CONTACTS,
+  contactFullName,
+  getAirport,
+  getCustomer,
+  legsForBooking,
+} from "../_data";
+import ColumnsPopover from "../_components/ColumnsPopover.astro";
+
+// TODO(reservations): No dedicated reservations data model exists yet. This
+// page reuses BOOKINGS + TRIP_LEGS as a stand-in for upcoming flights. Once a
+// proper Reservation domain is built (with trip numbers, scheduled/in-progress/
+// completed states, crew assignments, and positioning legs), rewire this page
+// to read from it instead. The aircraft tabs, header, and location dividers
+// can stay as-is — only the trip table needs to swap data sources.
+
+const dateFmt = new Intl.DateTimeFormat("en-US", {
+  month: "2-digit",
+  day: "2-digit",
+  year: "2-digit",
+  timeZone: "UTC",
+});
+const timeFmt = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "UTC",
+});
+
+const truncateEmail = (email: string, max = 24) =>
+  email.length > max ? email.slice(0, max - 3) + "..." : email;
+
+const formatDeparture = (date: Date, originIcao: string) => {
+  const tz = getAirport(originIcao)?.timezone ?? "UTC";
+  return `${dateFmt.format(date)}, ${timeFmt.format(date)} ${tz}`;
+};
+
+interface TripRow {
+  tripNumber: number;
+  contactName: string;
+  contactEmail: string;
+  customerName: string;
+  origin: string;
+  destination: string;
+  departure: Date;
+  passengers: number;
+}
+
+function tripRowsFor(aircraftId: string): TripRow[] {
+  const rows: TripRow[] = [];
+
+  for (const booking of BOOKINGS) {
+    if (booking.aircraftId !== aircraftId) continue;
+
+    const customer = getCustomer(booking.customerId);
+    if (!customer) continue;
+
+    const contact = CONTACTS.find((c) => c.customerId === customer.id);
+    if (!contact) continue;
+
+    const legs = legsForBooking(booking.id);
+    const tripNumber = parseInt(booking.reference.slice(-4), 10);
+
+    for (const leg of legs) {
+      rows.push({
+        tripNumber,
+        contactName: contactFullName(contact),
+        contactEmail: contact.email,
+        customerName: customer.name,
+        origin: leg.origin,
+        destination: leg.destination,
+        departure: leg.departure,
+        passengers: leg.passengers,
+      });
+    }
+  }
+
+  return rows
+    .sort((a, b) => a.departure.getTime() - b.departure.getTime())
+    .slice(0, 8);
+}
+
+const aircraftData = AIRCRAFT.map((aircraft) => {
+  const rows = tripRowsFor(aircraft.id);
+  const nextLocation =
+    rows.length > 0 ? rows[rows.length - 1].destination : aircraft.location;
+  return {
+    aircraft,
+    rows,
+    currentLocation: aircraft.location,
+    nextLocation,
+  };
+});
+
+const defaultTail = aircraftData[0]?.aircraft.tail ?? "";
+const lastUpdated = "May. 13th at 11:03 AM";
+---
+
+<AirpeggioLayout title="Airpeggio Smart Inbox | Samuel Dillow" active="inbox">
+  <div class="smart-inbox" data-active-tail={defaultTail}>
+    <header class="smart-inbox__head">
+      <h1>Smart Inbox<sup>&trade;</sup></h1>
+      <div class="smart-inbox__head-side">
+        <div class="smart-inbox__head-row">
+          <Button>Refresh</Button>
+          <IconButton icon="settings" aria-label="Smart Inbox settings" />
+        </div>
+        <span class="smart-inbox__last-updated">
+          Last Updated: {lastUpdated}
+        </span>
+      </div>
+    </header>
+
+    <div class="smart-inbox__tab-bar">
+      <div class="smart-inbox__tabs" role="tablist" aria-label="Aircraft">
+        {
+          aircraftData.map(({ aircraft }) => (
+            <button
+              class:list={[
+                "smart-inbox__tab",
+                aircraft.tail === defaultTail && "is-active",
+              ]}
+              type="button"
+              role="tab"
+              data-tail-select={aircraft.tail}
+              aria-selected={aircraft.tail === defaultTail ? "true" : "false"}
+            >
+              {aircraft.tail}
+            </button>
+          ))
+        }
+      </div>
+      
+      <ColumnsPopover
+        columns={[
+          "Received",
+          "Customer",
+          "Itinerary",
+          "Available Crew",
+          "Status",
+        ]}
+      />
+    </div>
+
+    {
+      aircraftData.map(
+        ({ aircraft, rows, currentLocation, nextLocation }) => (
+          <section
+            class="smart-inbox__panel"
+            data-tail-panel={aircraft.tail}
+            hidden={aircraft.tail !== defaultTail}
+          >
+            <article class="smart-inbox__aircraft">
+              <header>Aircraft Details</header>
+              <div class="smart-inbox__aircraft-body">
+                <img
+                  src={aircraft.image}
+                  alt={`${aircraft.tail} aircraft`}
+                />
+                <dl>
+                  <div>
+                    <dt>Tail Number</dt>
+                    <dd>
+                      <Icon name="aircraft" />
+                      <strong>{aircraft.tail}</strong>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Serial Number</dt>
+                    <dd>{aircraft.serialNumber}</dd>
+                  </div>
+                  <div>
+                    <dt>Model</dt>
+                    <dd>{aircraft.model}</dd>
+                  </div>
+                  <div>
+                    <dt>Status</dt>
+                    <dd>
+                      <span class="smart-inbox__chip smart-inbox__chip--available">
+                        Available
+                      </span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Privacy</dt>
+                    <dd>
+                      <span
+                        class:list={[
+                          "smart-inbox__chip",
+                          `smart-inbox__chip--${aircraft.privacy}`,
+                        ]}
+                      >
+                        {aircraft.privacy}
+                      </span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Class</dt>
+                    <dd>{aircraft.class}</dd>
+                  </div>
+                  <div>
+                    <dt>Seats</dt>
+                    <dd>{aircraft.seats}</dd>
+                  </div>
+                  <div>
+                    <dt>Homebase Airport</dt>
+                    <dd>{aircraft.location}</dd>
+                  </div>
+                  <div>
+                    <dt>Require Owner Approval</dt>
+                    <dd>{aircraft.requireOwnerApproval ? "Yes" : "No"}</dd>
+                  </div>
+                </dl>
+              </div>
+            </article>
+
+            <div class="smart-inbox__divider">
+              <span>Current Location: {currentLocation}</span>
+            </div>
+
+            {rows.length > 0 ? (
+              <table class="datatable smart-inbox__trips">
+                <colgroup>
+                  <col style="width: 12%" />
+                  <col style="width: 24%" />
+                  <col style="width: 32%" />
+                  <col style="width: 13%" />
+                  <col style="width: 12%" />
+                  <col style="width: 7%" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>Received</th>
+                    <th>Customer</th>
+                    <th>Itinerary</th>
+                    <th>Available Crew</th>
+                    <th>Status</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row) => (
+                    <tr>
+                      <td>
+                        <span class="smart-inbox__trip-chip">
+                          Trip #{row.tripNumber}
+                        </span>
+                      </td>
+                      <td>
+                        <strong>{row.contactName}</strong>
+                        <br />
+                        <span class="text-muted">
+                          {truncateEmail(row.contactEmail)}
+                        </span>
+                        <br />
+                        <span class="text-muted">{row.customerName}</span>
+                      </td>
+                      <td>
+                        <strong>
+                          {row.origin} - {row.destination}
+                        </strong>{" "}
+                        <span class="text-muted font-normal">
+                          {formatDeparture(row.departure, row.origin)} |{" "}
+                          {row.passengers} pax
+                        </span>
+                      </td>
+                      <td style={{ verticalAlign: "middle" }} />
+                      <td style={{ verticalAlign: "middle" }}>
+                        <Badge variant="scheduled">SCHEDULED</Badge>
+                      </td>
+                      <td style={{ verticalAlign: "middle" }}>
+                        <a
+                          class="smart-inbox__row-action"
+                          href="#"
+                          aria-label={`View trip ${row.tripNumber}`}
+                        >
+                          <Icon name="eye" />
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div class="smart-inbox__empty">
+                No upcoming trips for {aircraft.tail}.
+              </div>
+            )}
+
+            <div class="smart-inbox__divider">
+              <span>Next Location: {nextLocation}</span>
+            </div>
+          </section>
+        ),
+      )
+    }
+  </div>
+</AirpeggioLayout>
+
+<script>
+  const root = document.querySelector<HTMLElement>(".smart-inbox");
+
+  if (root) {
+    const tabs = Array.from(
+      root.querySelectorAll<HTMLButtonElement>("[data-tail-select]"),
+    );
+    const panels = Array.from(
+      root.querySelectorAll<HTMLElement>("[data-tail-panel]"),
+    );
+
+    function setActive(tail: string) {
+      if (root) root.dataset.activeTail = tail;
+      for (const tab of tabs) {
+        const active = tab.dataset.tailSelect === tail;
+        tab.classList.toggle("is-active", active);
+        tab.setAttribute("aria-selected", String(active));
+      }
+      for (const panel of panels) {
+        panel.hidden = panel.dataset.tailPanel !== tail;
+      }
+    }
+
+    for (const tab of tabs) {
+      tab.addEventListener("click", () =>
+        setActive(tab.dataset.tailSelect ?? ""),
+      );
+    }
+  }
+</script>
+
+<style>
+  .smart-inbox__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: -0.02em;
+
+      sup {
+        font-size: 0.55em;
+        font-weight: 700;
+        vertical-align: super;
+        margin-left: 1px;
+      }
+    }
+  }
+
+  .smart-inbox__head-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .smart-inbox__head-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .smart-inbox__last-updated {
+    color: var(--air-muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .smart-inbox__tab-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .smart-inbox__tabs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .smart-inbox__tab {
+    min-height: 38px;
+    padding: 0 16px;
+    border: 1px solid var(--air-line);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--air-panel-soft);
+    }
+
+    &.is-active {
+      border-color: var(--air-purple);
+      box-shadow: 0 0 0 1px var(--air-purple);
+      background: var(--air-purple-soft);
+      color: var(--air-purple);
+    }
+  }
+
+  .smart-inbox__panel {
+    display: grid;
+    gap: 22px;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .smart-inbox__aircraft {
+    overflow: hidden;
+    border: 1px solid var(--air-line);
+    border-radius: 7px;
+    background: #fff;
+
+    > header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--air-line);
+      color: var(--air-ink);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  }
+
+  .smart-inbox__aircraft-body {
+    display: grid;
+    grid-template-columns: minmax(260px, 360px) 1fr;
+    gap: 48px;
+    padding: 28px 28px 32px;
+    align-items: start;
+
+    img {
+      width: 100%;
+      aspect-ratio: 360 / 200;
+      display: block;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #eef2f7;
+    }
+
+    dl {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 26px 40px;
+      align-content: start;
+      margin: 0;
+
+      > div {
+        display: grid;
+        gap: 6px;
+      }
+
+      dt {
+        color: #465164;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1;
+      }
+
+      dd {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.2;
+
+        :global(.air-icon) {
+          width: 16px;
+          height: 16px;
+          color: var(--air-green);
+        }
+      }
+    }
+
+    @media (max-width: 980px) {
+      grid-template-columns: 1fr;
+      gap: 24px;
+
+      dl {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      }
+    }
+  }
+
+  .smart-inbox__chip {
+    min-height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .smart-inbox__chip--available {
+    border-color: var(--air-green);
+    background: var(--air-green);
+    color: #fff;
+  }
+
+  .smart-inbox__chip--private {
+    color: #b65a2d;
+  }
+
+  .smart-inbox__chip--charter {
+    color: #2550ad;
+  }
+
+  .smart-inbox__divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--air-muted);
+    font-size: 13px;
+    font-weight: 500;
+
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      border-top: 1px solid var(--air-line);
+    }
+  }
+
+  .smart-inbox__trips {
+    td {
+      vertical-align: middle;
+    }
+  }
+
+  .smart-inbox__trip-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0 12px;
+    border-radius: 6px;
+    background: #e9ecf2;
+    color: var(--air-ink);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .font-normal {
+    font-weight: 500;
+  }
+
+  .smart-inbox__row-action {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    color: var(--air-ink);
+    text-decoration: none;
+
+    &:hover {
+      background: var(--air-panel-soft);
+    }
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .smart-inbox__empty {
+    padding: 32px;
+    border: 1px dashed var(--air-line);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--air-muted);
+    font-size: 14px;
+    text-align: center;
+  }
+</style>

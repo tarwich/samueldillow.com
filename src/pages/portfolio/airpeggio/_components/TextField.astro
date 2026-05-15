@@ -1,0 +1,101 @@
+---
+interface Props {
+  label?: string;
+  type?: "text" | "search" | "email" | "number" | "tel" | "url";
+  placeholder?: string;
+  name?: string;
+  value?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  label,
+  type = "text",
+  placeholder,
+  name,
+  value,
+  class: className,
+  ...rest
+} = Astro.props;
+const fieldLabel = label ?? placeholder ?? name ?? "Text field";
+---
+
+<label class:list={["air-text-field", className]}>
+  <span class="sr-only">{fieldLabel}</span>
+  <input
+    type={type}
+    name={name}
+    value={value}
+    placeholder={placeholder}
+    {...rest}
+  />
+  {
+    Astro.slots.has("rightIcon") && (
+      <span class="air-text-field__right">
+        <slot name="rightIcon" />
+      </span>
+    )
+  }
+</label>
+
+<style>
+  .air-text-field {
+    height: 44px;
+    display: grid;
+    grid-template:
+      "left center right" 1fr
+      / auto 1fr auto;
+    align-items: center;
+    padding: 0 1em;
+    border: 1px solid var(--air-line);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--air-muted);
+    font-size: 14px;
+    box-shadow: 0 0 0 1px rgba(220, 227, 238, 0.45);
+    cursor: text;
+
+    &:focus-within {
+      border-color: #aeb9c9;
+      box-shadow: 0 0 0 2px rgba(149, 140, 140, 0.35);
+    }
+
+    > * {
+      grid-area: center;
+    }
+
+    input {
+      grid-area: 1 / left / 2 / right;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--air-ink);
+      font: inherit;
+      font-weight: 500;
+    }
+
+    input::placeholder {
+      color: var(--air-muted);
+      opacity: 1;
+    }
+
+    input::-webkit-search-decoration,
+    input::-webkit-search-cancel-button {
+      appearance: none;
+    }
+
+    .air-text-field__right {
+      display: inline-grid;
+      place-items: center;
+      color: var(--air-muted);
+      grid-area: right;
+    }
+
+    .air-text-field__right :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+</style>

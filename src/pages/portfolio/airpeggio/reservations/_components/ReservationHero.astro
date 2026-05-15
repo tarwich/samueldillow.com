@@ -1,0 +1,228 @@
+---
+import Icon from "../../_components/Icon.astro";
+import {
+  contactFullName,
+  formatLegDayLabel,
+  formatLegHourLabel,
+  formatLegTimezone,
+  legArrival,
+  legRegulation,
+  passengerCountForLeg,
+  reservationAircraft,
+  reservationContact,
+  reservationCustomer,
+  type Reservation,
+} from "../../_data";
+
+interface Props {
+  reservation: Reservation;
+}
+
+const { reservation } = Astro.props;
+
+const aircraft = reservationAircraft(reservation);
+const contact = reservationContact(reservation);
+const company = reservationCustomer(reservation);
+
+const tailColors: Record<string, string> = {
+  red: "#b24b4a",
+  lime: "#c7d533",
+  blue: "#565bc4",
+};
+---
+
+<section class="reservation-hero">
+  <div class="reservation-hero__left">
+    {
+      aircraft && (
+        <p class="reservation-hero__line reservation-hero__line--tail">
+          <Icon name="aircraft" />
+          <strong style={`color: ${tailColors[aircraft.color] ?? "var(--air-ink)"}`}>
+            {aircraft.tail}
+          </strong>
+        </p>
+      )
+    }
+    <p class="reservation-hero__line">
+      <Icon name="customer" />
+      {contact ? (
+        <span>{contactFullName(contact)}</span>
+      ) : (
+        <span class="text-muted">No customer assigned</span>
+      )}
+    </p>
+    <p class="reservation-hero__line reservation-hero__line--muted">
+      <Icon name="account" />
+      <span>{company?.name ?? "(No company assigned)"}</span>
+    </p>
+  </div>
+
+  <ul class="reservation-hero__legs">
+    {
+      reservation.legs.slice(0, 4).map((leg) => {
+        const arrival = legArrival(leg);
+        const tz = formatLegTimezone(leg.origin);
+        const assigned = passengerCountForLeg(reservation, leg.id);
+        const reg = legRegulation(leg);
+        return (
+          <li>
+            <span class="reservation-hero__route">
+              <strong>{leg.origin}</strong>
+              <Icon name="arrow-right" />
+              <strong>{leg.destination}</strong>
+            </span>
+            <span class="reservation-hero__time">
+              <Icon name="calendar" />
+              <span>
+                <strong>
+                  {formatLegDayLabel(leg.departure)} {formatLegHourLabel(leg.departure)} {tz}
+                </strong>
+                <Icon name="arrow-right" />
+                <strong>
+                  {formatLegDayLabel(arrival).replace(/^\w+ /, "")}{" "}
+                  {formatLegHourLabel(arrival)} {tz}
+                </strong>
+              </span>
+            </span>
+            <span class="reservation-hero__pax">
+              <Icon name="customer" />
+              {assigned}/{leg.passengers}
+            </span>
+            <span class="reservation-hero__reg">{reg}</span>
+          </li>
+        );
+      })
+    }
+  </ul>
+</section>
+
+<style>
+  .reservation-hero {
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) 1fr;
+    gap: 32px;
+    padding: 12px 16px 24px;
+
+    @media (max-width: 880px) {
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+  }
+
+  .reservation-hero__left {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+
+  .reservation-hero__line {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--air-ink);
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+      color: var(--air-muted);
+    }
+
+    &.reservation-hero__line--tail :global(.air-icon) {
+      color: inherit;
+    }
+  }
+
+  .reservation-hero__line--muted {
+    color: var(--air-muted);
+    font-weight: 600;
+  }
+
+  .reservation-hero__legs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+    align-content: start;
+
+    li {
+      display: grid;
+      grid-template-columns: max-content 1fr max-content max-content;
+      gap: 20px;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--air-ink);
+
+      @media (max-width: 880px) {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+    }
+  }
+
+  .reservation-hero__route {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+
+    strong {
+      font-weight: 800;
+    }
+
+    :global(.air-icon) {
+      width: 14px;
+      height: 14px;
+      color: var(--air-muted);
+    }
+  }
+
+  .reservation-hero__time {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    > span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    :global(.air-icon) {
+      width: 14px;
+      height: 14px;
+      color: var(--air-muted);
+    }
+  }
+
+  .reservation-hero__pax {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid var(--air-line);
+    border-radius: 20px;
+    background: #fff;
+    font-weight: 700;
+
+    :global(.air-icon) {
+      width: 14px;
+      height: 14px;
+      color: var(--air-muted);
+    }
+  }
+
+  .reservation-hero__reg {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border: 1px solid var(--air-line);
+    border-radius: 20px;
+    background: #fff;
+    font-weight: 700;
+  }
+</style>

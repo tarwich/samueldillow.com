@@ -1,0 +1,454 @@
+---
+import AirpeggioLayout from "../_layout.astro";
+import Badge from "../_components/Badge.astro";
+import Button from "../_components/Button.astro";
+import ColumnsPopover from "../_components/ColumnsPopover.astro";
+import Icon from "../_components/Icon.astro";
+import IconButton from "../_components/IconButton.astro";
+import PageHeader from "../_components/PageHeader.astro";
+import ViewToggle from "../_components/ViewToggle.astro";
+import ReservationModal from "./_components/ReservationModal.astro";
+import ReserveAircraftModal from "./_components/ReserveAircraftModal.astro";
+import {
+  RESERVATIONS,
+  formatLegDate,
+  formatLegTime,
+  formatLegTimezone,
+  reservationAircraft,
+  reservationAssignedLabel,
+  reservationContact,
+  reservationCrewLabel,
+  reservationCustomer,
+} from "../_data";
+
+const tailColors: Record<string, string> = {
+  red: "#b24b4a",
+  lime: "#c7d533",
+  blue: "#565bc4",
+};
+
+// Server-render the edit modal with the first reservation so the form has
+// realistic content; a future iteration could swap row data on open.
+const editReservation = RESERVATIONS[0];
+---
+
+<AirpeggioLayout
+  title="Airpeggio Reservations | Samuel Dillow"
+  active="reservations"
+>
+  <div class="reservations-view">
+    <PageHeader
+      search
+      searchLabel="Search reservations"
+      searchTable="reservations-table"
+    >
+      <h1 slot="title">Reservations</h1>
+      <Fragment slot="actions">
+        <Button>Embed Booking Form</Button>
+        <Button variant="primary" icon="plus" data-open-modal="add-reservation">
+          Reserve Aircraft
+        </Button>
+      </Fragment>
+      <Fragment slot="filters">
+        <Button variant="ghost" icon="filter">Filter</Button>
+      </Fragment>
+      <Fragment slot="tools">
+        <ViewToggle
+          label="Reservations view"
+          options={[
+            { icon: "list", label: "List view", value: "list", active: true },
+            { icon: "calendar", label: "Calendar view", value: "calendar" },
+          ]}
+        />
+        <ColumnsPopover
+          columns={[
+            "Trip",
+            "Customer",
+            "Itinerary",
+            "Crew",
+            "Status",
+            "Assigned",
+            "Tags",
+          ]}
+        />
+        <IconButton icon="download" aria-label="Export reservations" />
+      </Fragment>
+    </PageHeader>
+
+    <section aria-label="Reservations list">
+      <table id="reservations-table" class="datatable reservations-table">
+        <colgroup>
+          <col style="width: 9%" />
+          <col style="width: 16%" />
+          <col style="width: 32%" />
+          <col style="width: 6%" />
+          <col style="width: 16%" />
+          <col style="width: 6%" />
+          <col style="width: 6%" />
+          <col style="width: 9%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Trip</th>
+            <th>Customer</th>
+            <th>Itinerary</th>
+            <th>Crew</th>
+            <th>Status</th>
+            <th>Assigned</th>
+            <th>Tags</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            RESERVATIONS.map((reservation) => {
+              const aircraft = reservationAircraft(reservation);
+              const customer = reservationCustomer(reservation);
+              const contact = reservationContact(reservation);
+              const crew = reservationCrewLabel(reservation);
+              const assigned = reservationAssignedLabel(reservation);
+              return (
+                <tr data-reservation-id={reservation.id}>
+                  <td>
+                    <div class="reservation-trip">
+                      <span class="reservation-trip__number">
+                        Trip #{reservation.tripNumber}
+                      </span>
+                      {aircraft && (
+                        <span
+                          class="reservation-trip__tail"
+                          style={`--tail-color: ${tailColors[aircraft.color] ?? "var(--air-ink)"}`}
+                        >
+                          <Icon name="aircraft" />
+                          <strong>{aircraft.tail}</strong>
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    {contact ? (
+                      <div class="reservation-customer">
+                        <strong>
+                          {contact.firstName} {contact.lastName}
+                        </strong>
+                        {customer && contact.email && (
+                          <span class="text-muted reservation-customer__email">
+                            {contact.email.length > 22
+                              ? contact.email.slice(0, 19) + "..."
+                              : contact.email}
+                          </span>
+                        )}
+                        {customer && (
+                          <span class="reservation-customer__company">
+                            {customer.name}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span class="text-muted">—</span>
+                    )}
+                  </td>
+                  <td>
+                    <ul class="reservation-itinerary">
+                      {reservation.legs.map((leg) => (
+                        <li>
+                          <strong>
+                            {leg.origin} - {leg.destination}
+                          </strong>
+                          <span>
+                            {formatLegDate(leg.departure)},{" "}
+                            {formatLegTime(leg.departure)}{" "}
+                            {formatLegTimezone(leg.origin)} | {leg.passengers}{" "}
+                            pax
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </td>
+                  <td>
+                    <div class="reservation-initials-stack">
+                      {crew.length > 0 ? (
+                        crew.map((c) => <span>{c}</span>)
+                      ) : (
+                        <span class="text-muted">—</span>
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="reservation-status">
+                      {reservation.lifecycle === "planned" && (
+                        <Badge variant="manual">Planned</Badge>
+                      )}
+                      {reservation.lifecycle === "scheduled" && (
+                        <Badge variant="scheduled">Scheduled</Badge>
+                      )}
+                      {reservation.lifecycle === "flown" && (
+                        <Badge variant="flown">Flown</Badge>
+                      )}
+                      {reservation.lifecycle === "cancelled" && (
+                        <Badge variant="error">Cancelled</Badge>
+                      )}
+                      {reservation.approval === "pending" && (
+                        <Badge variant="unqualified">Pending</Badge>
+                      )}
+                      {reservation.approval === "quoted" && (
+                        <Badge variant="quoted">Quoted</Badge>
+                      )}
+                      {reservation.approval === "approved" && (
+                        <Badge variant="approved">Approved</Badge>
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    <span class="reservation-assigned">{assigned}</span>
+                  </td>
+                  <td>
+                    <span class="text-muted">-</span>
+                  </td>
+                  <td style={{ verticalAlign: "middle" }}>
+                    <div class="datatable-actions">
+                      <a
+                        class="reservation-row-action"
+                        href={`/portfolio/airpeggio/reservations/${reservation.id}/`}
+                        aria-label={`View trip ${reservation.tripNumber}`}
+                      >
+                        <Icon name="eye" />
+                      </a>
+                      <button
+                        type="button"
+                        class="reservation-row-action"
+                        aria-label={`Edit trip ${reservation.tripNumber}`}
+                        data-open-modal="edit-reservation"
+                      >
+                        <Icon name="edit" />
+                      </button>
+                      <button
+                        type="button"
+                        class="reservation-row-action"
+                        aria-label={`Duplicate trip ${reservation.tripNumber}`}
+                      >
+                        <Icon name="copy" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="reservations-pagination" aria-label="Pagination">
+      <div class="reservations-page-size">
+        <span>Items per page</span>
+        <button type="button">20 <Icon name="chevron-down" /></button>
+        <strong>
+          Records 1 - {Math.min(20, RESERVATIONS.length)} of {RESERVATIONS.length}
+        </strong>
+      </div>
+      <nav class="reservations-page-nav" aria-label="Reservation pages">
+        <button type="button" disabled>First</button>
+        <button type="button">Last</button>
+        <button type="button" class="is-current">1</button>
+        <button type="button" disabled><Icon name="arrow-left" /></button>
+        <button type="button"><Icon name="arrow-right" /></button>
+      </nav>
+    </footer>
+
+    <ReservationModal id="edit-reservation" reservation={editReservation} />
+    <ReserveAircraftModal id="add-reservation" />
+  </div>
+</AirpeggioLayout>
+
+<style>
+  .reservations-table {
+    margin-top: 6px;
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+
+    td {
+      vertical-align: top;
+    }
+  }
+
+  .reservation-trip {
+    display: grid;
+    gap: 10px;
+    align-items: start;
+  }
+
+  .reservation-trip__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: #eef0f5;
+    color: var(--air-ink);
+    font-size: 13px;
+    font-weight: 700;
+    width: fit-content;
+  }
+
+  .reservation-trip__tail {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--air-ink);
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+      color: var(--tail-color, var(--air-ink));
+    }
+
+    strong {
+      font-size: 14px;
+      font-weight: 700;
+    }
+  }
+
+  .reservation-customer {
+    display: grid;
+    gap: 2px;
+
+    strong {
+      font-size: 14px;
+      font-weight: 700;
+    }
+  }
+
+  .reservation-customer__email {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .reservation-customer__company {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--air-ink);
+  }
+
+  .reservation-itinerary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+    font-size: 13.5px;
+
+    li {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 10px;
+      align-items: baseline;
+    }
+
+    strong {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    span {
+      color: var(--air-ink);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+  }
+
+  .reservation-initials-stack {
+    display: grid;
+    gap: 2px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .reservation-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .reservation-assigned {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .reservation-row-action {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--air-ink);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--air-panel-soft);
+    }
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .reservations-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 40px;
+    padding: 0 16px;
+
+    @media (max-width: 760px) {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  .reservations-page-size,
+  .reservations-page-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--air-ink);
+    font-size: 13px;
+  }
+
+  .reservations-page-size button,
+  .reservations-page-nav button {
+    min-width: 64px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid var(--air-line);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+  }
+
+  .reservations-page-nav button {
+    min-width: 48px;
+
+    &[disabled] {
+      color: #b4bdca;
+      background: #fbfcfe;
+    }
+
+    &.is-current {
+      border-color: var(--air-purple);
+      color: var(--air-purple);
+    }
+  }
+</style>
+

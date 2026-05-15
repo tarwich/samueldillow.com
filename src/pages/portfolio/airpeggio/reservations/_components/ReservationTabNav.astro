@@ -1,0 +1,76 @@
+---
+import Icon from "../../_components/Icon.astro";
+
+export interface ReservationTab {
+  id: string;
+  label: string;
+  icon: string;
+}
+
+interface Props {
+  tabs: ReservationTab[];
+  active: string;
+}
+
+const { tabs, active } = Astro.props;
+---
+
+<nav class="reservation-tab-nav" aria-label="Reservation sections">
+  {
+    tabs.map((tab) => (
+      <button
+        type="button"
+        data-reservation-tab={tab.id}
+        class:list={[active === tab.id && "is-active"]}
+        aria-pressed={active === tab.id ? "true" : "false"}
+      >
+        <Icon name={tab.icon} />
+        <span>{tab.label}</span>
+      </button>
+    ))
+  }
+</nav>
+
+<style>
+  .reservation-tab-nav {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 0 auto;
+    padding: 4px;
+    border: 1px solid var(--air-line);
+    border-radius: 8px;
+    background: #fff;
+
+    button {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 14px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--air-ink);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+
+      :global(.air-icon) {
+        width: 16px;
+        height: 16px;
+        color: var(--air-muted);
+      }
+
+      &.is-active {
+        background: var(--air-purple);
+        color: #fff;
+
+        :global(.air-icon) {
+          color: rgba(255, 255, 255, 0.85);
+        }
+      }
+    }
+  }
+</style>

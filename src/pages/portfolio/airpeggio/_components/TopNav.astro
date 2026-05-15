@@ -1,0 +1,335 @@
+---
+import Icon from "./Icon.astro";
+import { accountFullName, getCurrentUser } from "../_data";
+
+interface Props {
+  active?: string;
+}
+
+const { active = "inbox" } = Astro.props;
+const currentUser = getCurrentUser();
+const currentUserName = accountFullName(currentUser);
+const currentUserInitials = (currentUser.firstName[0] + currentUser.lastName[0])
+  .toUpperCase();
+const currentUserHref = `/portfolio/airpeggio/accounts/${currentUser.id}/`;
+const nav = [
+  {
+    id: "inbox",
+    label: "Inbox",
+    href: "/portfolio/airpeggio/",
+    icon: "inbox",
+    menu: [
+      { label: "Inbox", href: "/portfolio/airpeggio/" },
+      { label: "Inbox Filters", href: "/portfolio/airpeggio/filters/" },
+      { label: "Smart Inbox™", href: "/portfolio/airpeggio/smart-inbox/" },
+    ],
+  },
+  {
+    id: "customers",
+    label: "Customers",
+    href: "/portfolio/airpeggio/customers/",
+    icon: "customer",
+    menu: [
+      { label: "Customers", href: "/portfolio/airpeggio/customers/" },
+      { label: "Companies", href: "/portfolio/airpeggio/companies/" },
+    ],
+  },
+  {
+    id: "accounts",
+    label: "Accounts",
+    href: "/portfolio/airpeggio/accounts/",
+    icon: "account",
+    menu: [
+      { label: "Accounts", href: "/portfolio/airpeggio/accounts/" },
+      { label: "Schedule", href: "#" },
+      { label: "Training", href: "/portfolio/airpeggio/accounts/training/" },
+      { label: "Flight Times", href: "#" },
+      { label: "Duty", href: "#" },
+    ],
+  },
+  {
+    id: "aircraft",
+    label: "Aircraft",
+    href: "/portfolio/airpeggio/aircraft/",
+    icon: "aircraft",
+    menu: [
+      { label: "Aircraft", href: "/portfolio/airpeggio/aircraft/" },
+      { label: "Schedule", href: "#" },
+      { label: "Pricing Profiles", href: "#" },
+    ],
+  },
+  {
+    id: "reservations",
+    label: "Reservations",
+    href: "/portfolio/airpeggio/reservations/",
+    icon: "calendar",
+    menu: [
+      { label: "Reservations", href: "/portfolio/airpeggio/reservations/" },
+      { label: "Quotes", href: "#" },
+      { label: "Trips", href: "#" },
+    ],
+  },
+  {
+    id: "mgmt",
+    label: "Mgmt Requests",
+    href: "#",
+    icon: "wrench",
+    menu: [
+      { label: "Mgmt Requests", href: "#" },
+      { label: "Open Requests", href: "#" },
+      { label: "Archived Requests", href: "#" },
+    ],
+  },
+];
+---
+
+<header class="air-topbar">
+  <a
+    class="air-brand"
+    href="/portfolio/airpeggio/"
+    aria-label="Airpeggio inbox"
+  >
+    <img src="/portfolio/airpeggio/logo.webp" alt="Airpeggio" />
+  </a>
+  <nav class="air-nav" aria-label="Airpeggio sections">
+    {
+      nav.map((item) => (
+        <div class="air-nav__group">
+          <a
+            class:list={["air-nav__item", active === item.id && "is-active"]}
+            href={item.href}
+            aria-haspopup="true"
+          >
+            <Icon name={item.icon} />
+            <span>{item.label}</span>
+          </a>
+          <div class="air-nav__menu" role="menu">
+            {item.menu.map((menuItem) => (
+              <a href={menuItem.href} role="menuitem">{menuItem.label}</a>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </nav>
+  <div class="air-user">
+    <Icon name="brain" />
+    <span class="air-bell"><Icon name="bell" /><b>24</b></span>
+    <a class="air-user-link" href={currentUserHref}>
+      <strong>{currentUserName}</strong>
+      <span class="air-avatar">{currentUserInitials}</span>
+    </a>
+  </div>
+</header>
+
+<style>
+  .air-topbar {
+    min-height: var(--air-topbar);
+    display: grid;
+    grid-template-columns: 210px minmax(560px, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    padding: 0 28px;
+    background: var(--air-purple);
+    color: #fff;
+    position: relative;
+    z-index: var(--z-popover, 3);
+
+    @media (max-width: 1180px) {
+      grid-template-columns: 1fr;
+      align-items: start;
+      gap: 14px;
+      padding: 22px;
+    }
+  }
+
+  .air-brand {
+    display: inline-flex;
+    align-items: center;
+    color: #fff;
+    text-decoration: none;
+
+    img {
+      height: 30px;
+      width: auto;
+      display: block;
+    }
+  }
+
+  .air-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    overflow: visible;
+
+    @media (max-width: 1180px) {
+      overflow-x: auto;
+      overflow-y: visible;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+  }
+
+  .air-nav__group {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 200px;
+      height: 18px;
+    }
+
+    &:hover,
+    &:focus-within {
+      .air-nav__item {
+        color: #fff;
+        background: var(--air-purple-dark);
+      }
+
+      .air-nav__menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+    }
+  }
+
+  .air-nav__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+
+    :global(.air-icon) {
+      width: 20px;
+      height: 20px;
+    }
+
+    &.is-active,
+    &:hover {
+      color: #fff;
+      background: var(--air-purple-dark);
+    }
+  }
+
+  .air-nav__menu {
+    position: absolute;
+    top: calc(100% + 18px);
+    left: 0;
+    width: 200px;
+    display: grid;
+    padding: 0;
+    border: 1px solid var(--air-line);
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(15, 23, 42, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    pointer-events: none;
+    z-index: 3;
+    transition:
+      opacity 120ms ease,
+      transform 120ms ease,
+      visibility 120ms ease;
+
+    a {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 0 13px;
+      color: var(--air-ink);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+      text-decoration: none;
+      background: #fff;
+
+      &:hover,
+      &:focus-visible {
+        background: var(--air-panel-soft);
+        outline: none;
+      }
+    }
+  }
+
+  .air-user {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+
+    :global(.air-icon) {
+      width: 24px;
+      height: 24px;
+      color: rgba(255, 255, 255, 0.76);
+    }
+
+    @media (max-width: 1180px) {
+      display: none;
+    }
+  }
+
+  .air-user-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    color: inherit;
+    text-decoration: none;
+
+    &:hover strong,
+    &:focus-visible strong {
+      text-decoration: underline;
+    }
+  }
+
+  .air-bell {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+
+    b {
+      position: absolute;
+      right: -11px;
+      top: -8px;
+      min-width: 22px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: #f52438;
+      color: #fff;
+      font-size: 10px;
+    }
+  }
+
+  .air-avatar {
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--air-ink);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+</style>

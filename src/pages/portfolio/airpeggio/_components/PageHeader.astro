@@ -1,0 +1,96 @@
+---
+import Icon from "./Icon.astro";
+import TextField from "./TextField.astro";
+
+interface Props {
+  search?: boolean;
+  searchLabel?: string;
+  searchTable?: string;
+}
+
+const { search = false, searchLabel = "Search inbox", searchTable } = Astro.props;
+const hasToolbar =
+  search || Astro.slots.has("filters") || Astro.slots.has("tools");
+---
+
+<header class="air-page-head">
+  <div class="air-title">
+    <slot name="title" />
+  </div>
+  {
+    Astro.slots.has("actions") && (
+      <div class="air-actions">
+        <slot name="actions" />
+      </div>
+    )
+  }
+</header>
+
+{
+  hasToolbar && (
+    <div class="air-toolbar">
+      <div class="air-actions">
+        {search && (
+          <TextField
+            label={searchLabel}
+            type="search"
+            placeholder="Search"
+            data-search-table={searchTable}
+          >
+            <Icon slot="rightIcon" name="search" />
+          </TextField>
+        )}
+        <slot name="filters" />
+      </div>
+      <div class="air-actions">
+        <slot name="tools" />
+      </div>
+    </div>
+  )
+}
+
+<script>
+  function escapeRegex(value: string) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function applyFilter(input: HTMLInputElement) {
+    const tableId = input.dataset.searchTable;
+    if (!tableId) return;
+    const target = document.getElementById(tableId);
+    if (!target) return;
+
+    const terms = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const pattern = terms.length
+      ? new RegExp(terms.map((t) => `(?=.*${escapeRegex(t)})`).join(""), "s")
+      : null;
+
+    if (target instanceof HTMLTableElement) {
+      for (const body of Array.from(target.tBodies)) {
+        for (const row of Array.from(body.rows)) {
+          if (!pattern) {
+            row.hidden = false;
+            continue;
+          }
+          const text = (row.textContent ?? "").toLowerCase();
+          row.hidden = !pattern.test(text);
+        }
+      }
+      return;
+    }
+
+    for (const item of Array.from(target.children)) {
+        if (!pattern) {
+          item.removeAttribute("hidden");
+          continue;
+        }
+        const text = (item.textContent ?? "").toLowerCase();
+        item.toggleAttribute("hidden", !pattern.test(text));
+    }
+  }
+
+  for (const input of document.querySelectorAll<HTMLInputElement>("input[data-search-table]")) {
+    input.addEventListener("input", () => applyFilter(input));
+    if (input.value) applyFilter(input);
+  }
+</script>

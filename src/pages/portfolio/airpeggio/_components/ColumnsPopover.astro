@@ -1,0 +1,173 @@
+---
+import { nanoid } from "nanoid";
+import Button from "./Button.astro";
+import IconButton from "./IconButton.astro";
+
+interface Props {
+  /** Column labels to list as toggles. */
+  columns: string[];
+}
+
+const { columns } = Astro.props;
+const id = `columns-${nanoid(8)}`;
+const anchorName = `--${id}-anchor`;
+---
+
+<IconButton
+  icon="more"
+  aria-label="Customize columns"
+  popovertarget={id}
+  style={`anchor-name: ${anchorName}`}
+/>
+
+<div
+  id={id}
+  popover
+  class="columns-popover"
+  style={`position-anchor: ${anchorName}`}
+>
+  <div class="columns-popover__arrow" aria-hidden="true"></div>
+  <header class="columns-popover__head">Customize Columns</header>
+  <div class="columns-popover__body">
+    <p class="columns-popover__intro">
+      Select the columns which you want to show in the table
+    </p>
+    <ul class="columns-popover__list">
+      {
+        columns.map((column, index) => (
+          <li>
+            <label class="columns-checkbox">
+              <input type="checkbox" checked autofocus={index === 0} />
+              <span class="columns-checkbox__box" aria-hidden="true" />
+              <span class="columns-checkbox__label">{column}</span>
+            </label>
+          </li>
+        ))
+      }
+    </ul>
+    <Button variant="primary" class="columns-popover__save">Save</Button>
+  </div>
+</div>
+
+<style>
+  .columns-popover {
+    width: 360px;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 1px solid var(--air-line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--air-ink);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.22);
+    position-area: bottom span-left;
+    margin-top: 10px;
+
+    .columns-popover__arrow {
+      position: absolute;
+      top: -7px;
+      right: 18px;
+      width: 0;
+      height: 0;
+      border-right: 7px solid transparent;
+      border-bottom: 7px solid var(--air-purple);
+      border-left: 7px solid transparent;
+    }
+
+    .columns-popover__head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--air-line);
+      color: #343d4c;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .columns-popover__body {
+      display: grid;
+      gap: 18px;
+      padding: 18px 18px 20px;
+    }
+
+    .columns-popover__intro {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .columns-popover__list {
+      display: grid;
+      gap: 14px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .columns-popover__save {
+      justify-self: start;
+      min-width: 96px;
+    }
+  }
+
+  .columns-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+
+    input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .columns-checkbox__box {
+      position: relative;
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      flex: 0 0 22px;
+      border: 1px solid var(--air-line);
+      border-radius: 6px;
+      background: #fff;
+
+      &::after {
+        content: "";
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
+        opacity: 0;
+      }
+    }
+
+    input:checked + .columns-checkbox__box {
+      background: var(--air-purple);
+      border-color: var(--air-purple);
+    }
+
+    input:checked + .columns-checkbox__box::after {
+      opacity: 1;
+    }
+
+    input:focus-visible + .columns-checkbox__box {
+      outline: 2px solid var(--air-purple);
+      outline-offset: 2px;
+    }
+
+    .columns-checkbox__label {
+      font-size: 15px;
+      font-weight: 500;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .columns-popover {
+      width: min(360px, calc(100vw - 36px));
+    }
+  }
+</style>

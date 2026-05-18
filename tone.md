@@ -53,6 +53,7 @@ Each chapter / post follows a loose three-part shape:
 ## 6. Sentence Style
 
 - **Short and direct.** Most sentences are short. Long ones happen, but they’re built from short clauses, not nested ones.
+- **Use contractions by default.** The voice says "don't," "can't," "it's," "we're," "you're," and "I'd" in normal prose. Avoid stiff phrasing like "You do not know" unless the formality is intentional.
 - **Plain words.** "Got the job." "He hit his head." "I had no words." Don’t reach for the fancier word.
 - **Mild humor in unexpected places.** A wry one-liner inside a heavy paragraph keeps the reader breathing. A line like "Now I was Christian, wet, and cold, but other than that I didn’t feel much different than before" fits the voice.
 - **Vary sentence length to control pace.** Cluster short sentences when something hits hard. Stretch out when you’re reflecting.

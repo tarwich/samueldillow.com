@@ -726,8 +726,138 @@ a.lane:focus-visible {
   color: var(--muted);
 }
 
+.article-prose {
+  border-color: rgba(199, 186, 165, 0.86);
+  padding: clamp(24px, 4vw, 46px);
+  background:
+    linear-gradient(90deg, rgba(101, 116, 102, 0.05), transparent 30%),
+    rgba(255, 253, 248, 0.82);
+}
+
+.article-prose h2 {
+  position: relative;
+  margin: 2em 0 0.55em;
+  padding-top: 0.55em;
+  border-top: 1px solid rgba(157, 85, 61, 0.28);
+  color: #2b251f;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  font-weight: 500;
+  line-height: 1.02;
+}
+
+.article-prose h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.article-prose h2::before {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 72px;
+  height: 3px;
+  background: var(--rust);
+  content: "";
+}
+
+.article-prose h2:first-child::before {
+  content: none;
+}
+
+.article-prose h3 {
+  margin: 1.65em 0 0.45em;
+  color: var(--steel);
+  font-family: var(--mono);
+  font-size: clamp(0.96rem, 1.5vw, 1.08rem);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+.article-prose p,
+.article-prose li {
+  color: #332e27;
+}
+
+.article-prose a {
+  color: #445f70;
+  text-decoration: underline;
+  text-decoration-color: rgba(82, 104, 120, 0.46);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.article-prose a:hover {
+  color: var(--rust);
+  text-decoration-color: rgba(157, 85, 61, 0.56);
+}
+
+.article-prose :not(pre) > code {
+  border: 1px solid rgba(101, 116, 102, 0.22);
+  border-radius: 3px;
+  padding: 0.08em 0.32em;
+  background: rgba(101, 116, 102, 0.09);
+  color: #3c503d;
+  font-family: var(--mono);
+  font-size: 0.86em;
+}
+
+.article-prose pre {
+  margin: 1.4em 0;
+  border: 1px solid rgba(34, 32, 28, 0.18);
+  border-radius: 4px;
+  padding: 18px 20px;
+  overflow-x: auto;
+  background: #2b2924 !important;
+  box-shadow: inset 4px 0 0 rgba(181, 138, 66, 0.72);
+}
+
+.article-prose pre code {
+  display: block;
+  min-width: max-content;
+  padding-right: 24px;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  line-height: 1.58;
+}
+
+.article-prose blockquote {
+  margin: 1.6em 0;
+  border-left: 4px solid var(--rust);
+  padding: 18px 22px;
+  background:
+    linear-gradient(90deg, rgba(157, 85, 61, 0.09), transparent 68%),
+    rgba(247, 243, 234, 0.58);
+  color: #2b251f;
+}
+
+.article-prose blockquote p {
+  margin: 0;
+  color: inherit;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.article-prose small {
+  display: block;
+  margin-top: 2.4em;
+  border-top: 1px solid rgba(199, 186, 165, 0.82);
+  padding-top: 1em;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.article-prose small a {
+  color: var(--rust);
+  text-decoration-color: rgba(157, 85, 61, 0.46);
+}
+
 /* Images inside long-form entries (writing, project pages) */
-.list-card:not(.list-card--with-image) img {
+:is(.article-prose, .project-prose) img {
   max-width: 100%;
   height: auto;
   display: block;
@@ -735,15 +865,15 @@ a.lane:focus-visible {
   border-radius: 4px;
 }
 
-.list-card figure {
+:is(.article-prose, .project-prose) figure {
   margin: 1.6em 0;
 }
 
-.list-card figure img {
+:is(.article-prose, .project-prose) figure img {
   margin: 0;
 }
 
-.list-card figcaption {
+:is(.article-prose, .project-prose) figcaption {
   font-size: 0.92rem;
   color: var(--muted);
   text-align: center;
@@ -755,9 +885,11 @@ a.lane:focus-visible {
   width: 100%;
   max-height: 520px;
   object-fit: contain;
-  border: 1px solid var(--line);
-  background: rgba(255, 253, 248, 0.76);
-  box-shadow: var(--shadow);
+  border: 1px solid rgba(199, 186, 165, 0.88);
+  background:
+    linear-gradient(135deg, rgba(101, 116, 102, 0.08), transparent 44%),
+    rgba(255, 253, 248, 0.82);
+  box-shadow: 0 18px 56px rgba(56, 46, 30, 0.08);
 }
 
 .project-detail-hero {
@@ -1078,14 +1210,14 @@ a.lane:focus-visible {
 
 /* `<figure class="float">` — alternating-side wrap. First float goes left,
    next right, next left, etc. Falls back to centered on narrow screens. */
-.list-card figure.float {
+:is(.article-prose, .project-prose) figure.float {
   max-width: min(48%, 360px);
   float: left;
   margin: 0.4em 1.6em 0.9em 0;
   shape-margin: 0.5em;
 }
 
-.list-card figure.float:nth-child(even of figure.float) {
+:is(.article-prose, .project-prose) figure.float:nth-child(even of figure.float) {
   float: right;
   margin: 0.4em 0 0.9em 1.6em;
 }
@@ -1120,8 +1252,31 @@ a.lane:focus-visible {
     flex: 1 1 0;
   }
 
-  .list-card figure.float,
-  .list-card figure.float:nth-child(even of figure.float) {
+  .article-prose {
+    padding: 22px 18px;
+  }
+
+  .article-prose h2 {
+    font-size: clamp(1.85rem, 9vw, 2.45rem);
+  }
+
+  .article-prose pre {
+    margin-right: -4px;
+    margin-left: -4px;
+    padding: 16px 14px;
+  }
+
+  .article-prose pre code {
+    padding-right: 18px;
+    font-size: 0.8rem;
+  }
+
+  .article-prose blockquote {
+    padding: 16px 18px;
+  }
+
+  :is(.article-prose, .project-prose) figure.float,
+  :is(.article-prose, .project-prose) figure.float:nth-child(even of figure.float) {
     float: none;
     max-width: 100%;
     margin: 1.6em auto;

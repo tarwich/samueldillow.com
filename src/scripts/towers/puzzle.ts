@@ -54,6 +54,35 @@ export function generateLatinSquare(rng: () => number): number[][] {
   return sol;
 }
 
+export function encodeCustom(clues: Clues, grid: number[][]): string {
+  const parts: string[] = [];
+  for (const side of ["top", "bottom", "left", "right"] as const) {
+    for (let i = 0; i < SIZE; i++) parts.push(String(clues[side][i] || 0));
+  }
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) parts.push(String(grid[r][c] || 0));
+  }
+  return parts.join("");
+}
+
+export function decodeCustom(
+  s: string,
+): { clues: Clues; grid: number[][] } | null {
+  const expected = 4 * SIZE + SIZE * SIZE;
+  if (s.length !== expected) return null;
+  if (!/^[0-5]+$/.test(s)) return null;
+  let p = 0;
+  const clues: Clues = { top: [], bottom: [], left: [], right: [] };
+  for (const side of ["top", "bottom", "left", "right"] as const) {
+    for (let i = 0; i < SIZE; i++) clues[side].push(Number(s[p++]));
+  }
+  const grid = makeGrid();
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) grid[r][c] = Number(s[p++]);
+  }
+  return { clues, grid };
+}
+
 export function computeClues(sol: number[][]): Clues {
   const top: number[] = [];
   const bottom: number[] = [];

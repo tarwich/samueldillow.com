@@ -121,10 +121,61 @@
   font-size: 1.15rem;
   font-weight: 400;
   transition: opacity 0.2s;
+  position: relative;
 }
 
 .towers-clue.satisfied {
   opacity: 0.25;
+}
+
+.towers-clue-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.towers-clue-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: 1px dashed transparent;
+  border-radius: 4px;
+  color: var(--tw-text);
+  font: inherit;
+  font-size: 1.15rem;
+  text-align: center;
+  padding: 0;
+  outline: none;
+  display: none;
+}
+
+.towers-board.editing .towers-clue-display {
+  display: none;
+}
+
+.towers-board.editing .towers-clue-input {
+  display: block;
+}
+
+.towers-board.editing .towers-clue-input:hover {
+  border-color: var(--tw-btn-hover);
+}
+
+.towers-board.editing .towers-clue-input:focus {
+  border-color: var(--tw-accent);
+  background: var(--tw-cell-active-bg);
+}
+
+.towers-board.editing .towers-cell:not(.has-answer) {
+  box-shadow: inset 0 0 0 1px var(--tw-btn);
+}
+
+.towers-board.editing .towers-cell.active {
+  box-shadow: inset 0 0 0 2px var(--tw-cell-active);
 }
 
 .towers-corner {

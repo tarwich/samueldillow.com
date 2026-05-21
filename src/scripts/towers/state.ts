@@ -44,6 +44,8 @@ export class TowersGame {
   autoClues = false;
   autoAnswer = true;
   currentSeed = 0;
+  editing = false;
+  puzzleIsCustom = false;
   undoStack: CellChange[][] = [];
   redoStack: CellChange[][] = [];
 
@@ -183,13 +185,21 @@ export class TowersGame {
       this.grid[r][c] = 0;
     } else {
       this.placeValue(batch, r, c, v);
-      if (this.autoAnswer) this.runAutoAnswer(batch);
+      if (this.autoAnswer && !this.editing) this.runAutoAnswer(batch);
     }
     if (this.commitBatch(batch)) {
-      this.checkWin();
+      if (!this.editing) this.checkWin();
       return true;
     }
     return false;
+  }
+
+  setClue(side: Side, i: number, v: number): boolean {
+    if (!this.editing) return false;
+    if (v < 0 || v > SIZE) return false;
+    if (this.clues[side][i] === v) return false;
+    this.clues[side][i] = v;
+    return true;
   }
 
   toggleCandidate(r: number, c: number, v: number): boolean {
@@ -269,12 +279,146 @@ export class TowersGame {
     return false;
   }
 
+  // ---------- Custom puzzle entry ----------
+
+  startCustom(): void {
+    this.editing = true;
+    this.puzzleIsCustom = false;
+    this.currentSeed = 0;
+    this.solution = null;
+    this.clues = {
+      top: Array(SIZE).fill(0),
+      bottom: Array(SIZE).fill(0),
+      left: Array(SIZE).fill(0),
+      right: Array(SIZE).fill(0),
+    };
+    this.grid = makeGrid();
+    this.candidates = makeCandidates();
+    this.removedCandidates = makeCandidates();
+    this.givens = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
+    this.undoStack.length = 0;
+    this.redoStack.length = 0;
+    this.active = null;
+    this.won = false;
+  }
+
+  // Re-enter edit mode on an already-finalized custom puzzle, preserving the
+  // clues and the original givens but clearing any in-progress solving.
+  editCustom(): void {
+    this.editing = true;
+    this.puzzleIsCustom = false;
+    this.solution = null;
+    this.removedCandidates = makeCandidates();
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        if (!this.givens[r][c]) this.grid[r][c] = 0;
+        this.candidates[r][c].clear();
+        this.givens[r][c] = false;
+      }
+    }
+    this.undoStack.length = 0;
+    this.redoStack.length = 0;
+    this.active = null;
+    this.won = false;
+  }
+
+  // Lock the entered clues + filled cells as the puzzle. Returns the number
+  // of valid completions (capped at 2). The caller can warn if it's not 1.
+  finalizeCustom(): number {
+    this.editing = false;
+    this.puzzleIsCustom = true;
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        if (this.grid[r][c] !== 0) {
+          this.givens[r][c] = true;
+          this.candidates[r][c].clear();
+        }
+      }
+    }
+    const solutions = countSolutions(this.grid, this.clues, 2);
+    if (solutions === 1) {
+      const solved = this.grid.map((row) => row.slice());
+      const rowUsed = Array.from({ length: SIZE }, () => new Set<number>());
+      const colUsed = Array.from({ length: SIZE }, () => new Set<number>());
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (solved[r][c]) {
+            rowUsed[r].add(solved[r][c]);
+            colUsed[c].add(solved[r][c]);
+          }
+        }
+      }
+      const fill = (idx: number): boolean => {
+        if (idx === SIZE * SIZE) return true;
+        const r = Math.floor(idx / SIZE);
+        const c = idx % SIZE;
+        if (solved[r][c] !== 0) return fill(idx + 1);
+        for (let v = 1; v <= SIZE; v++) {
+          if (rowUsed[r].has(v) || colUsed[c].has(v)) continue;
+          solved[r][c] = v;
+          rowUsed[r].add(v);
+          colUsed[c].add(v);
+          // Validate edge clues only when we finish a row/col.
+          let ok = true;
+          if (c === SIZE - 1) {
+            if (
+              (this.clues.left[r] &&
+                visibleCount(solved[r]) !== this.clues.left[r]) ||
+              (this.clues.right[r] &&
+                visibleCount(solved[r].slice().reverse()) !==
+                  this.clues.right[r])
+            ) {
+              ok = false;
+            }
+          }
+          if (ok && r === SIZE - 1) {
+            const col = solved.map((row) => row[c]);
+            if (
+              (this.clues.top[c] && visibleCount(col) !== this.clues.top[c]) ||
+              (this.clues.bottom[c] &&
+                visibleCount(col.slice().reverse()) !== this.clues.bottom[c])
+            ) {
+              ok = false;
+            }
+          }
+          if (ok && fill(idx + 1)) return true;
+          solved[r][c] = 0;
+          rowUsed[r].delete(v);
+          colUsed[c].delete(v);
+        }
+        return false;
+      };
+      fill(0);
+      this.solution = solved;
+    } else {
+      this.solution = null;
+    }
+    this.undoStack.length = 0;
+    this.redoStack.length = 0;
+    this.checkWin();
+    return solutions;
+  }
+
+  loadCustom(clues: Clues, grid: number[][]): number {
+    this.startCustom();
+    this.clues = {
+      top: clues.top.slice(),
+      bottom: clues.bottom.slice(),
+      left: clues.left.slice(),
+      right: clues.right.slice(),
+    };
+    this.grid = grid.map((row) => row.slice());
+    return this.finalizeCustom();
+  }
+
   // ---------- Generator ----------
 
   newGame(difficulty: Difficulty, seedOverride?: number): number {
     const seed =
       typeof seedOverride === "number" ? seedOverride >>> 0 : makeSeed();
     this.currentSeed = seed;
+    this.editing = false;
+    this.puzzleIsCustom = false;
     const rng = mulberry32(seed);
 
     let targetHide: number;
@@ -359,7 +503,7 @@ export class TowersGame {
   }
 
   checkWin(): void {
-    if (!this.solution) {
+    if (this.editing) {
       this.won = false;
       return;
     }

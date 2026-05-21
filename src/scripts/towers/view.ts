@@ -6,6 +6,8 @@ export interface BoardRefs {
   answerEls: HTMLElement[][];
   candEls: HTMLElement[][][];
   clueEls: Record<Side, HTMLElement[]>;
+  clueDisplayEls: Record<Side, HTMLElement[]>;
+  clueInputEls: Record<Side, HTMLInputElement[]>;
 }
 
 export interface RenderTargets {
@@ -15,10 +17,25 @@ export interface RenderTargets {
   redoBtn: HTMLButtonElement;
 }
 
-function makeClueEl(): HTMLElement {
-  const el = document.createElement("div");
-  el.className = "towers-clue";
-  return el;
+function makeClueEl(): {
+  wrap: HTMLElement;
+  display: HTMLElement;
+  input: HTMLInputElement;
+} {
+  const wrap = document.createElement("div");
+  wrap.className = "towers-clue";
+  const display = document.createElement("span");
+  display.className = "towers-clue-display";
+  wrap.appendChild(display);
+  const input = document.createElement("input");
+  input.className = "towers-clue-input";
+  input.type = "text";
+  input.maxLength = 1;
+  input.inputMode = "numeric";
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  wrap.appendChild(input);
+  return { wrap, display, input };
 }
 
 function makeCornerEl(): HTMLElement {
@@ -30,6 +47,7 @@ function makeCornerEl(): HTMLElement {
 export function buildBoard(
   board: HTMLElement,
   onCellClick: (r: number, c: number) => void,
+  onClueInput: (side: Side, i: number, raw: string) => void,
 ): BoardRefs {
   const cellEls: HTMLElement[][] = [];
   const answerEls: HTMLElement[][] = [];
@@ -40,19 +58,36 @@ export function buildBoard(
     left: [],
     right: [],
   };
+  const clueDisplayEls: Record<Side, HTMLElement[]> = {
+    top: [],
+    bottom: [],
+    left: [],
+    right: [],
+  };
+  const clueInputEls: Record<Side, HTMLInputElement[]> = {
+    top: [],
+    bottom: [],
+    left: [],
+    right: [],
+  };
+
+  function addClue(side: Side, i: number): HTMLElement {
+    const { wrap, display, input } = makeClueEl();
+    clueEls[side].push(wrap);
+    clueDisplayEls[side].push(display);
+    clueInputEls[side].push(input);
+    input.addEventListener("input", () => onClueInput(side, i, input.value));
+    return wrap;
+  }
 
   board.appendChild(makeCornerEl());
   for (let c = 0; c < SIZE; c++) {
-    const el = makeClueEl();
-    clueEls.top.push(el);
-    board.appendChild(el);
+    board.appendChild(addClue("top", c));
   }
   board.appendChild(makeCornerEl());
 
   for (let r = 0; r < SIZE; r++) {
-    const left = makeClueEl();
-    clueEls.left.push(left);
-    board.appendChild(left);
+    board.appendChild(addClue("left", r));
 
     cellEls.push([]);
     answerEls.push([]);
@@ -86,20 +121,16 @@ export function buildBoard(
       candEls[r].push(spans);
     }
 
-    const right = makeClueEl();
-    clueEls.right.push(right);
-    board.appendChild(right);
+    board.appendChild(addClue("right", r));
   }
 
   board.appendChild(makeCornerEl());
   for (let c = 0; c < SIZE; c++) {
-    const el = makeClueEl();
-    clueEls.bottom.push(el);
-    board.appendChild(el);
+    board.appendChild(addClue("bottom", c));
   }
   board.appendChild(makeCornerEl());
 
-  return { cellEls, answerEls, candEls, clueEls };
+  return { cellEls, answerEls, candEls, clueEls, clueDisplayEls, clueInputEls };
 }
 
 export function render(
@@ -127,14 +158,27 @@ export function render(
   }
   for (let i = 0; i < SIZE; i++) {
     for (const side of ["top", "bottom", "left", "right"] as const) {
-      const el = refs.clueEls[side][i];
-      el.textContent = String(game.clues[side][i] || "");
-      el.classList.toggle("satisfied", game.isClueSatisfied(side, i));
+      const wrap = refs.clueEls[side][i];
+      const display = refs.clueDisplayEls[side][i];
+      const input = refs.clueInputEls[side][i];
+      const v = game.clues[side][i];
+      const text = v ? String(v) : "";
+      display.textContent = text;
+      // Avoid clobbering the user's mid-edit cursor by only updating the input
+      // value when it actually differs.
+      if (input.value !== text) input.value = text;
+      wrap.classList.toggle("satisfied", !game.editing && game.isClueSatisfied(side, i));
+      wrap.classList.toggle("empty", !v);
     }
   }
   targets.board.classList.toggle("won", game.won);
+  targets.board.classList.toggle("editing", game.editing);
   targets.status.classList.toggle("won", game.won);
-  targets.status.textContent = game.won ? "Solved!" : "";
+  if (game.editing) {
+    targets.status.textContent = "Enter clues and any starting numbers from your puzzle.";
+  } else {
+    targets.status.textContent = game.won ? "Solved!" : "";
+  }
   targets.undoBtn.disabled = game.undoStack.length === 0;
   targets.redoBtn.disabled = game.redoStack.length === 0;
 }

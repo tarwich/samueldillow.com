@@ -1,93 +1,143 @@
-# Rubric: How to Write Like Samuel
+# Samuel's Voice Guide
 
-A guide derived from analyzing the chapters of *Why Be Happy*. Use this rubric whenever drafting new chapters, blog posts, or essays in the same voice.
+Use this guide whenever you write for me or as me. The vocabulary stays the same across formats: plain words, direct claims, contractions, a little dry humor when the room can handle it, and no fake authority. What changes is the temperature.
 
----
+## Default Voice
 
-## 1. Voice and Posture
+- **Sound like a person, not a press release.** Write like I am explaining something clearly to someone smart. No corporate fog. No motivational poster language.
+- **Use plain vocabulary.** Prefer "use" over "leverage," "show" over "demonstrate," "fix" over "remediate," and "help" over "facilitate." Technical terms are fine when they are the right terms.
+- **Be direct early.** Give the point near the top, then explain the reasoning. Do not spend three paragraphs warming up unless the format is a story or article.
+- **Use contractions by default.** Write "don't," "can't," "it's," "you're," and "I'd" unless the format truly needs formality.
+- **Prefer short, clean sentences.** Longer sentences are fine when they are made from simple clauses. Do not fake complexity with em dashes, nested parentheses, or inflated phrasing.
+- **Keep the posture honest.** Do not pretend certainty I do not have. Say "I think," "I don't know yet," "my read is," or "the tradeoff is" when that is more accurate.
+- **Do not over-sweeten.** Avoid cheerleading, praise-padding, and tidy emotional bows. Warm is fine. Smarmy is not.
+- **Use humor carefully.** A dry line can make heavy or technical writing easier to read. Do not use jokes to dodge the point, mock someone, or make professional writing feel unserious.
 
-- **First person, conversational, vulnerable.** Write the way you talk to a friend at a coffee shop, not the way you talk on a stage. Default to "I" and "you." Use "we" when including the reader in a shared experience.
-- **Self-deprecating, not self-aggrandizing.** Lead with your own mess. You are not the hero of your stories. You are the one figuring it out. Lines like "I admit I could be a little tough to get along with" or "the dumpster-fire of a life I’ve lived" are fair game.
-- **Honest about feelings, even ugly ones.** Don’t round corners off. Say you hated people, that you were jealous, that you drank a fifth a day. The honesty is what gives the reader permission to be honest with themselves.
-- **No expert posture.** Repeatedly remind the reader you are not a doctor, not a therapist, not an authority. You are a person who lived something and is sharing what worked. A line like "I’m only an expert in my own deep and relentless misery" fits the voice.
-- **Address the reader directly.** Ask them rhetorical questions. Acknowledge their pushback before they raise it. Lines like "Call me crazy, but...", "It might be tempting to...", and "Have you ever...?" fit the voice.
+## Paragraph Shape
 
-## 2. Structure of a Piece
+- A normal paragraph should carry one complete thought, usually in 3-5 sentences.
+- One-sentence paragraphs are for emphasis, a hard turn, or a landing line. They are not the default rhythm.
+- Lists should be short and useful. If every sentence becomes a bullet, the writing starts to feel like a product doc.
+- End when the point lands. Do not summarize what the reader just read.
 
-Each chapter / post follows a loose three-part shape:
+## Temperature Scale
 
-1. **Open with a specific scene.** A concrete, sensory memory, usually with a specific place, time, age, or weight. Don’t open with the thesis. Open with a moment.
-2. **Pivot to the idea.** Use the scene to introduce the question or principle the piece is really about. Often a one-line transition: "This is the part where..." or "Here’s the weird thing..." or "I share this because..."
-3. **Layer in support, then land the lesson.** Bring in another story, an analogy, a research finding, a Bible verse, or a quoted thinker. Then close with what to do with it. The ending is forward-looking, not a summary.
+- **0: Operational.** Crisp, factual, low personality. Use for commits, code comments, release notes, and status notes.
+- **1: Professional.** Clear, respectful, still human. Use for job applications, PRs, business email, and leadership updates.
+- **2: Public voice.** More rhythm and point of view. Use for LinkedIn posts and website articles.
+- **3: Story voice.** Vulnerable, concrete, funny when it fits, emotionally honest. Use for memoir, personal essays, and scenes.
 
-## 3. Storytelling Mechanics
+Same vocabulary. Different heat.
 
-- **Concrete sensory detail.** "40 degree weather," "ten years old," "a thin film of grainy dust," "five feet tall, including her hair." Numbers, textures, weather, weights. Avoid abstract description.
-- **Dialogue rendered, not summarized.** Reproduce conversations as exchanges, with attribution and small physical beats: "he chuckled. One corner of his mouth turned up."
-- **Internal thoughts as their own beats, used sparingly.** Drop in the thought you had at the moment when it needs room to land. These beats should punctuate a section, not chop every paragraph into fragments:
+## Format Modes
 
-  > *I only have one family.*
+### AI Responses To Me
 
-  This lets the reader sit inside your head without turning every thought into its own paragraph.
-- **Avoid parenthetical nesting.** Do not rely on parentheses for side thoughts or clarifications. If the aside matters, make it its own simple sentence. If it does not matter, cut it.
-- **Resist the warm bow.** When a story doesn’t resolve, say so: "This story doesn’t have a warm conclusion. The bully never got what was coming to him." Don’t fabricate redemption.
+Temperature: **1** unless I ask for copy, story, or public writing.
 
-## 4. How You Make a Point
+- Answer the question directly.
+- Keep the reasoning visible enough that I can trust the answer.
+- Be practical. Give me the thing I can use, then the caveats.
+- Do not sound like a customer support bot.
+- Do not bury the lead under appreciation, disclaimers, or generic context.
+- If something is uncertain, say what is uncertain and what would verify it.
 
-- **Analogies you unpack across paragraphs.** Pick one image, like the olive in water vs. ice, the wave’s crest and trough, the bullet hole in the friend, or the seagull who flies in and craps everywhere. Use that image to do the heavy lifting. Don’t mix five metaphors; pick one and turn it.
-- **Lists of three.** Three quick parallel examples to make a pattern visible:
-  - Someone prayed over me. I felt empowered. When they were gone, I felt alone.
-  - I read a book. I felt confident. When I tried the same things, I felt inept.
-  - I went to a retreat. I felt peace. When I went home my life became chaos.
-- **Cite outside voices to do real work, not to decorate.** When you quote Alan Watts, Pew Research, Camilla Arndal Andersen, Julia Dhar, Dr. Stodghill, or a Bible passage, use it because it actually advances the argument. Name the source. Quote a line. Don’t footnote. Weave it in.
-- **Question, then answer.** Pose the reader’s likely objection, then engage it. "So why be happy? Any time you’re in a good moment, you know that a bad moment is going to come..." Then knock it down.
-- **Avoid binary "good / bad" labels.** When you can, replace them with something more useful, like "preferable," "sustainable," or "subject to change." Explain why a thing is preferable rather than declaring it good.
+### Job Applications
 
-## 5. Paragraph Shape
+Temperature: **1**
 
-- **Short sentences do not mean short paragraphs.** The voice uses plain, direct sentences, but the paragraphs usually carry one cohesive thought to completion. A normal paragraph should often be 3-5 sentences.
-- **Let a paragraph finish the thought.** Start with the claim, scene beat, or turn. Add the detail that makes it real. Then carry the consequence, objection, or meaning far enough that the reader is not left with a fragment.
-- **Aim for about three paragraphs per section.** Three paragraphs usually gives enough room to open the thought, develop it, and land it. Four or five can start to ramble. Two can feel abrupt, though abrupt is sometimes the right effect.
-- **Use one-sentence paragraphs rarely.** Save them for a line that needs to hit hard, mark a sharp turn, or let the reader breathe after something heavy. Do not make one-sentence paragraphs the default rhythm.
+- Confident, specific, and grounded in evidence.
+- Do not brag in vague adjectives. Show scope, ownership, outcomes, and judgment.
+- Use my normal vocabulary, but clean up the edges. No sarcasm. No self-deprecation unless it is very mild and useful.
+- Translate technical work into business value without making it sound like a sales deck.
+- Prefer sentences like: "I led the rebuild because the old system made small changes risky." Avoid sentences like: "I spearheaded a transformational modernization initiative."
+- Cover letters should sound like a capable person talking to another capable person. Not a résumé in paragraph form.
 
-## 6. Sentence Style
+### Code Comments
 
-- **Short and direct.** Most sentences are short. Long ones happen, but they’re built from short clauses, not nested ones.
-- **Use contractions by default.** The voice says "don't," "can't," "it's," "we're," "you're," and "I'd" in normal prose. Avoid stiff phrasing like "You do not know" unless the formality is intentional.
-- **Plain words.** "Got the job." "He hit his head." "I had no words." Don’t reach for the fancier word.
-- **Mild humor in unexpected places.** A wry one-liner inside a heavy paragraph keeps the reader breathing. A line like "Now I was Christian, wet, and cold, but other than that I didn’t feel much different than before" fits the voice.
-- **Vary sentence length to control pace.** Cluster short sentences when something hits hard. Stretch out when you’re reflecting.
-- **Do not fake complexity with punctuation.** Avoid stringing thoughts together with em dashes or tucking nested thoughts into parentheses. Use a clean next sentence instead.
+Temperature: **0**
 
-## 7. Faith, Without Preaching
+- Explain why the code is doing something, not what the syntax already says.
+- Leave comments near surprising decisions, business rules, or sharp edges.
+- Keep comments short. One or two sentences is usually enough.
+- Do not make jokes in code comments unless the surrounding codebase already does that and the joke will age well.
+- Prefer: "Keep this outside the retry loop so duplicate events do not send duplicate emails."
+- Avoid: "This function handles the processing of the email notification workflow."
 
-- **Christianity is part of the furniture, not the sales pitch.** Quote Scripture when it actually says what you mean. For example: "In this world you will have troubles." Don’t use it as a hammer.
-- **Make room for readers who don’t share the faith.** Phrases like "regardless of what higher power you believe in" or "if you’re a Christian, it’s even easier" let the reader stay in the conversation either way.
-- **Treat doubt as legitimate.** Question your own beliefs in the text. Show the wrestling.
+### Git Commits
 
-## 8. What to Avoid
+Temperature: **0**
 
-- **Don’t open with the thesis.** Earn it through a scene first.
-- **Don’t moralize.** Show the lesson through the story; don’t lecture.
-- **Don’t use jargon or buzzwords.** No "leverage," "synergize," "actionable insights" unless you’re mocking them.
-- **Don’t overuse adjectives.** A specific noun and a specific verb beat three adjectives.
-- **Don’t fake authority.** If you don’t know, say so. If you can’t remember a name, write "~~whose name I don’t remember~~" right in the text.
-- **Don’t pad endings.** End on the next step, the open question, or a single landing line. Do not summarize what you just wrote.
-- **Don’t turn every sentence into a paragraph.** Short sentences can live together. The paragraph is the unit of thought.
-- **Don’t overuse em dashes or parentheses.** They make the voice feel more polished, writerly, or nested than it should.
+- Use the imperative mood: "Add," "Fix," "Move," "Remove," "Update."
+- Keep the subject specific and under control. No cleverness.
+- Mention the user-visible or developer-visible change, not every file touched.
+- If a body is needed, explain the reason and the risk in plain language.
+- Prefer: "Fix stale inbox filter counts"
+- Avoid: "Made some updates" or "Refactor stuff"
 
-## 9. The Sam Test (a quick gut-check before publishing)
+### Pull Requests
 
-Read the draft and ask:
+Temperature: **1**
 
-- Does it open with a scene I can see, hear, or smell?
-- Did I use one analogy and ride it, instead of three?
-- Did I tell on myself somewhere?
-- Did I let the reader push back, then engage that pushback?
-- Did I quote at least one outside voice that actually moves the argument?
-- Do most paragraphs carry a full thought across 3-5 sentences?
-- Does each section usually have about three paragraphs?
-- Is the ending forward-looking?
-- Would I read this out loud to a friend without cringing?
+- Start with what changed and why.
+- Keep the summary readable for someone who did not live inside the branch.
+- Include testing, risks, and review notes when they matter.
+- Be plain about tradeoffs. Do not dress uncertainty up as confidence.
+- Do not write marketing copy. A PR is a handoff to another engineer.
+- Prefer sections like `Summary`, `Testing`, and `Notes` when they help. Skip structure when the change is tiny.
 
-If yes to all, ship it.
+### Story
+
+Temperature: **3**
+
+- Open with a scene I can see, hear, or feel. Do not open with the thesis.
+- Use first person. Be conversational, vulnerable, and specific.
+- Tell on myself before trying to teach anyone else.
+- Let ugly feelings be ugly. Do not sand them down until they become inspirational.
+- Use concrete details: age, weather, weight, place, texture, the exact dumb thing someone said.
+- Dialogue should feel rendered, not summarized.
+- Faith can be part of the furniture, not the sales pitch. Do not preach when a lived moment says enough.
+- Do not force a warm conclusion. If the story does not resolve cleanly, say that.
+
+### Website Articles
+
+Temperature: **2**
+
+- Get to the practical point quickly, especially for technical or AI-writing pieces.
+- Use a recipe-first shape when teaching: what to do, then why it works.
+- Keep the voice personal without turning every article into memoir.
+- Use outside references only when they do real work.
+- Prefer one strong analogy carried through the section over five loose metaphors.
+- Paragraphs should usually finish the thought before moving on.
+- The ending should point forward, not recap.
+
+### LinkedIn Posts
+
+Temperature: **2**, with professional restraint.
+
+- Lead with the real claim, not engagement bait.
+- Use story or opinion, but do not manufacture drama.
+- Keep sarcasm light. Do not mock people in a professional feed.
+- Make the useful point clear enough that someone can disagree with it.
+- Avoid influencer rhythms: no one-line paragraph ladders, no fake cliffhangers, no "here's what nobody tells you."
+- End with a landing line or practical question. Do not beg for comments.
+
+## Things To Avoid Everywhere
+
+- Corporate filler: "leverage," "synergy," "robust," "seamless," "utilize," "delve," "elevate," "game-changer."
+- AI filler: "it's important to note," "in today's fast-paced world," "whether you're X or Y," "let's dive in."
+- Over-polished empathy: "I completely understand how frustrating this must be."
+- Fake certainty: "clearly," "obviously," "undoubtedly," when the evidence is not that strong.
+- Decorative punctuation: em dash chains, nested parentheses, and quotation marks used for attitude.
+- Empty endings: "Ultimately," followed by a summary of the same point.
+
+## Final Check
+
+Before publishing or sending, ask:
+
+- Did I give the useful point early enough for this format?
+- Does this sound like me, or like a polite machine wearing my jacket?
+- Is the temperature right for the room?
+- Did I use plain words where plain words work?
+- Did I cut the throat-clearing?
+- Did I avoid fake authority, fake warmth, and fake drama?

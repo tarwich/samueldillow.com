@@ -2,6 +2,8 @@
 import AirpeggioLayout from "../_layout.astro";
 import Button from "../_components/Button.astro";
 import ColumnsPopover from "../_components/ColumnsPopover.astro";
+import CompanyHoverCard from "../_components/CompanyHoverCard.astro";
+import CompanyModal from "../companies/_components/CompanyModal.astro";
 import CustomerModal from "./_components/CustomerModal.astro";
 import Icon from "../_components/Icon.astro";
 import PageHeader from "../_components/PageHeader.astro";
@@ -36,6 +38,7 @@ const rows = CONTACTS.slice(0, 10).map((contact) => {
 // contact so the form has realistic content; the page script swaps fields on
 // open per row.
 const editContact = CONTACTS[0];
+const editCompany = rows.find(({ company }) => company)?.company;
 ---
 
 <AirpeggioLayout
@@ -105,7 +108,20 @@ const editContact = CONTACTS[0];
                   <br />
                   <span class="text-muted">{emailFmt(contact.email)}</span>
                 </td>
-                <td>{company?.name ?? ""}</td>
+                <td>
+                  {
+                    company ? (
+                      <CompanyHoverCard
+                        company={company}
+                        triggerClass="customers-company-link"
+                      >
+                        <strong slot="trigger">{company.name}</strong>
+                      </CompanyHoverCard>
+                    ) : (
+                      ""
+                    )
+                  }
+                </td>
                 <td class="customers-cell-center">
                   {contact.hidePhone ? "" : contact.phone}
                 </td>
@@ -159,6 +175,11 @@ const editContact = CONTACTS[0];
 
     <CustomerModal id="add-customer" mode="add" />
     <CustomerModal id="edit-customer" mode="edit" customer={editContact} />
+    {
+      editCompany && (
+        <CompanyModal id="edit-company" mode="edit" company={editCompany} />
+      )
+    }
   </div>
 </AirpeggioLayout>
 
@@ -191,6 +212,12 @@ const editContact = CONTACTS[0];
     &:hover strong {
       text-decoration: underline;
     }
+  }
+
+  .customers-company-link {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: top;
   }
 
   .customers-row-action {

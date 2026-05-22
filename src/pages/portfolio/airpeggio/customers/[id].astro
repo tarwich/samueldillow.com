@@ -1,0 +1,420 @@
+---
+import AirpeggioLayout from "../_layout.astro";
+import Button from "../_components/Button.astro";
+import CustomerModal from "./_components/CustomerModal.astro";
+import Icon from "../_components/Icon.astro";
+import {
+  CONTACTS,
+  CUSTOMERS,
+  contactDisplayName,
+  getContact,
+} from "../_data";
+
+export function getStaticPaths() {
+  return CONTACTS.map((contact) => ({
+    params: { id: contact.id },
+    props: { contact },
+  }));
+}
+
+const contact = Astro.props.contact ?? getContact(Astro.params.id ?? "");
+
+if (!contact) {
+  return Astro.redirect("/portfolio/airpeggio/customers/");
+}
+
+const company = CUSTOMERS.find((c) => c.id === contact.customerId);
+const displayName = contactDisplayName(contact);
+
+const dateFmt = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const fmt = (value: unknown): string => {
+  if (value === undefined || value === null || value === "") return "N/A";
+  if (value instanceof Date) return dateFmt.format(value);
+  return String(value);
+};
+
+const personalFields = [
+  ["Date of Birth", fmt(contact.dateOfBirth)],
+  ["Gender", fmt(contact.gender)],
+  ["Weight", contact.weight !== undefined ? String(contact.weight) : "0"],
+  ["Passport Number", fmt(contact.passportNumber)],
+  ["Passport Country", fmt(contact.passportCountry)],
+  ["Passport Expiry", fmt(contact.passportExpiry)],
+  ["Drivers License", fmt(contact.driversLicense)],
+  ["Emergency Contact Name", fmt(contact.emergencyContactName)],
+  ["Emergency Contact", fmt(contact.emergencyContactPhone)],
+  ["Company Name", fmt(company?.name)],
+  ["Company Title", fmt(contact.companyTitle)],
+] as const;
+---
+
+<AirpeggioLayout
+  title={`Airpeggio Customer ${displayName} | Samuel Dillow`}
+  active="customers"
+>
+  <header class="customer-detail-head">
+    <a
+      class="customer-back"
+      href="/portfolio/airpeggio/customers/"
+      aria-label="Back to customers"
+    >
+      <Icon name="arrow-left" />
+    </a>
+    <div>
+      <h1>Customer Details</h1>
+      <nav aria-label="Breadcrumb">
+        <a href="/portfolio/airpeggio/customers/">Customer</a>
+        <span>›</span>
+        <strong>{displayName}</strong>
+      </nav>
+    </div>
+    <Button icon="edit" class="customer-edit" data-open-modal="edit-customer"
+      >Edit Details</Button
+    >
+  </header>
+
+  <section class="customer-name-card">
+    <h2>{displayName}</h2>
+    <p>
+      <Icon name="mail" />
+      <span>{contact.email}</span>
+    </p>
+  </section>
+
+  <section class="detail-panel">
+    <h2>Personal Details</h2>
+    <dl class="customer-fields">
+      {
+        personalFields.map(([label, value]) => (
+          <div>
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="detail-panel">
+    <h2>Documents</h2>
+    <div class="customer-documents-wrap">
+      <table class="customer-detail-docs">
+        <thead>
+          <tr><th>File Name</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="customer-detail-docs__empty">No results</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="detail-panel">
+    <h2>Customer Details</h2>
+    <div class="customer-records">
+      <div class="customer-record-tabs" role="tablist">
+        <button type="button" class="is-active">Reservations</button>
+        <button type="button">Change Logs</button>
+      </div>
+
+      <table class="datatable customer-records-table">
+        <colgroup>
+          <col style="width: 22%" />
+          <col style="width: 28%" />
+          <col style="width: 18%" />
+          <col style="width: 16%" />
+          <col style="width: 16%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Trip</th>
+            <th>Itinerary</th>
+            <th>Crew</th>
+            <th>Status</th>
+            <th>Assigned</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="customer-records__empty" colspan="5">No results</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <footer class="customer-records-pagination" aria-label="Pagination">
+        <div class="customer-records-page-size">
+          <span>Items per page</span>
+          <button type="button">20 <Icon name="chevron-down" /></button>
+          <strong>Records 1 - 0 of 0</strong>
+        </div>
+        <nav class="customer-records-page-nav" aria-label="Pages">
+          <button type="button" disabled>First</button>
+          <button type="button">Last</button>
+          <button type="button" disabled><Icon name="arrow-left" /></button>
+          <button type="button"><Icon name="arrow-right" /></button>
+        </nav>
+      </footer>
+    </div>
+  </section>
+
+  <CustomerModal id="edit-customer" mode="edit" customer={contact} />
+</AirpeggioLayout>
+
+<style>
+  .customer-detail-head {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 24px;
+
+    h1 {
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+      font-size: 16px;
+
+      a {
+        color: var(--air-ink);
+        text-decoration: none;
+      }
+    }
+
+    @media (max-width: 760px) {
+      grid-template-columns: 28px 1fr;
+
+      .customer-edit {
+        grid-column: 2;
+        justify-self: start;
+      }
+    }
+  }
+
+  .customer-back {
+    display: inline-grid;
+    place-items: center;
+    color: var(--air-ink);
+    text-decoration: none;
+  }
+
+  .customer-name-card {
+    margin-bottom: 22px;
+    padding: 22px 26px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    p {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      color: var(--air-ink);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    p :global(.air-icon) {
+      width: 16px;
+      height: 16px;
+      color: var(--air-muted);
+    }
+  }
+
+  .detail-panel {
+    overflow: hidden;
+    margin-bottom: 22px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+
+    > h2 {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--air-line);
+      color: var(--air-ink);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  }
+
+  .customer-fields {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 28px 24px;
+    margin: 0;
+    padding: 26px 26px 30px;
+
+    @media (max-width: 1280px) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    @media (max-width: 760px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    > div {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    dt {
+      color: var(--air-muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    dd {
+      color: var(--air-ink);
+      font-size: 16px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .customer-documents-wrap {
+    padding: 22px 22px 26px;
+  }
+
+  .customer-detail-docs {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    overflow: hidden;
+
+    thead {
+      background: #f3f5fa;
+
+      th {
+        padding: 14px 18px;
+        text-align: left;
+        color: var(--air-muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+    }
+
+    tbody td {
+      padding: 56px 18px;
+      border-top: 1px solid var(--air-line);
+      color: var(--air-muted);
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+    }
+  }
+
+  .customer-records {
+    padding: 22px 22px 22px;
+  }
+
+  .customer-record-tabs {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 18px;
+    padding: 4px;
+    border: 1px solid #cfd6e0;
+    border-radius: 7px;
+
+    button {
+      min-height: 34px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--air-ink);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+
+      &.is-active {
+        background: var(--air-purple);
+        color: #fff;
+      }
+    }
+  }
+
+  .customer-records-table {
+    th {
+      font-size: 13px;
+    }
+  }
+
+  .customer-records__empty {
+    padding: 56px 18px;
+    text-align: center;
+    color: var(--air-muted);
+    font-weight: 600;
+  }
+
+  .customer-records-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 0;
+    padding: 18px 4px 4px;
+
+    @media (max-width: 760px) {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  .customer-records-page-size,
+  .customer-records-page-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--air-ink);
+    font-size: 13px;
+  }
+
+  .customer-records-page-size button,
+  .customer-records-page-nav button {
+    min-width: 56px;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 12px;
+    border: 1px solid var(--air-line);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .customer-records-page-nav button[disabled] {
+    color: #b4bdca;
+    background: #fbfcfe;
+  }
+</style>

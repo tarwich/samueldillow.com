@@ -1,0 +1,511 @@
+---
+import Button from "../../_components/Button.astro";
+import Icon from "../../_components/Icon.astro";
+import Modal from "../../_components/Modal.astro";
+import SelectField from "./SelectField.astro";
+---
+
+<div
+  x-data="{
+      step: 1,
+      usePosition: false,
+      leaveOvernight: false,
+      next() {
+        if (this.step < 3) this.step++;
+      },
+      back() {
+        if (this.step > 1) this.step--;
+      },
+      setPosition(value) {
+        this.usePosition = value;
+      },
+      setOvernight(value) {
+        this.leaveOvernight = value;
+      }
+    }"
+>
+  <Modal id="quick-quote-modal" title="Quick Quote">
+    <div class="quick-quote-body">
+      <steps>
+        <step x-bind:class="{'active': step >= 1}">1</step>
+        <line x-bind:class="{'active': step > 1}"></line>
+        <step x-bind:class="{'active': step >= 2}">2</step>
+        <line x-bind:class="{'active': step > 2}"></line>
+        <step x-bind:class="{'active': step >= 3}">3</step>
+      </steps>
+
+      <div class="step-content" x-show="step === 1">
+        <h3 class="step-title">Select Aircraft and Pricing Profile</h3>
+
+        <SelectField label="Aircraft" placeholder="Select aircraft" />
+        <SelectField
+          label="Pricing Profile"
+          placeholder="Select pricing profile"
+        />
+      </div>
+
+      <div class="step-content" x-show="step === 2">
+        <h3 class="step-title">Build Itinerary</h3>
+
+        <div class="itinerary">
+          <h4 class="itinerary-label">Itinerary</h4>
+
+          <div class="itinerary-table">
+            <div class="itinerary-head">
+              <span>From <em>*</em></span>
+              <span>To <em>*</em></span>
+              <span>Pax</span>
+              <span>Depart</span>
+              <span>CDT</span>
+              <span>Arrive</span>
+              <span></span>
+              <span>Block</span>
+              <span>Duty</span>
+              <span></span>
+            </div>
+
+            <div class="itinerary-row">
+              <SelectField placeholder="KADS" />
+              <SelectField placeholder="To" />
+              <input class="cell" type="number" value="0" />
+              <input class="cell" type="date" />
+              <input class="cell" type="text" placeholder="hhmm CDT" />
+              <input class="cell" type="date" />
+              <input class="cell" type="text" placeholder="hhmm CDT" />
+              <span class="readonly">0h00m</span>
+              <span class="readonly">0h00m</span>
+              <button type="button" class="add-leg" aria-label="Add leg">
+                <Icon name="plus" />
+              </button>
+            </div>
+          </div>
+
+          <div class="totals">
+            <div>
+              <span class="totals-label">Block</span>
+              <span class="totals-value">0h00m</span>
+            </div>
+            <div>
+              <span class="totals-label">Duty</span>
+              <span class="totals-value">0h00m</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="step-title">Quote Settings</h3>
+
+        <div class="settings">
+          <div class="toggle-group">
+            <span class="toggle-label">Position Legs</span>
+            <div class="toggle">
+              <button
+                type="button"
+                class="toggle-option"
+                x-bind:class="{'is-active': usePosition}"
+                @click="setPosition(true)"
+              >
+                Use
+              </button>
+              <button
+                type="button"
+                class="toggle-option"
+                x-bind:class="{'is-active': !usePosition}"
+                @click="setPosition(false)"
+              >
+                Don't Use
+              </button>
+            </div>
+          </div>
+
+          <div class="toggle-group">
+            <span class="toggle-label">Overnight</span>
+            <div class="toggle">
+              <button
+                type="button"
+                class="toggle-option"
+                x-bind:class="{'is-active': !leaveOvernight}"
+                @click="setOvernight(false)">Return</button
+              >
+              <button
+                type="button"
+                class="toggle-option"
+                x-bind:class="{'is-active': leaveOvernight}"
+                @click="setOvernight(true)">Leave</button
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-content" x-show="step === 3">
+        <h3 class="step-title">Create Quote</h3>
+
+        <div class="field">
+          <span class="field-label">Customer</span>
+          <div class="field-row">
+            <SelectField placeholder="Select..." />
+            <button
+              type="button"
+              class="field-add"
+              aria-label="Add customer"
+            >
+              <Icon name="plus" />
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Quote Name (Optional)</span>
+          <input
+            type="text"
+            class="text-field"
+            placeholder="Enter quote name"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons" slot="footer">
+      <Button
+        variant="secondary"
+        icon="arrow-left"
+        @click="back()"
+        x-bind:disabled="step === 1"
+      >
+        Back
+      </Button>
+      <div class="buttons-right">
+        <Button
+          variant="primary"
+          icon="arrow-right"
+          @click="next()"
+          x-show="step < 3"
+        >
+          Next
+        </Button>
+        <Button
+          variant="ghost"
+          @click="document.getElementById('quick-quote-modal')?.close()"
+          x-show="step === 3"
+        >
+          Cancel
+        </Button>
+        <Button variant="primary" x-show="step === 3">Create Quote</Button>
+      </div>
+    </div>
+  </Modal>
+</div>
+
+<style>
+  :global(#quick-quote-modal.modal) {
+    max-width: min(960px, calc(100vw - 32px));
+  }
+
+  .quick-quote-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    margin-top: 1rem;
+
+    steps {
+      --step-color: color-mix(in srgb, var(--air-muted) 20%, transparent);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin: 0 auto;
+      gap: 1em;
+      width: 16rem;
+
+      step {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background-color: var(--step-color);
+        color: black;
+        font-weight: bold;
+
+        &.active {
+          background-color: var(--air-purple);
+          color: white;
+        }
+      }
+
+      line {
+        flex-grow: 1;
+        height: 2px;
+        background-color: var(--step-color);
+
+        &.active {
+          background-color: var(--air-purple);
+        }
+      }
+    }
+  }
+
+  .step-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .step-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--air-ink);
+  }
+
+  .itinerary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .itinerary-label {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--air-ink);
+    }
+  }
+
+  .itinerary-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: var(--air-panel-soft);
+  }
+
+  .itinerary-head,
+  .itinerary-row {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1.1fr)
+      minmax(0, 1.1fr)
+      56px
+      minmax(0, 1.2fr)
+      minmax(0, 1fr)
+      minmax(0, 1.2fr)
+      minmax(0, 1fr)
+      56px
+      56px
+      32px;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .itinerary-head {
+    padding: 0 0.25rem;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--air-muted);
+    text-transform: none;
+
+    em {
+      color: #c83b00;
+      font-style: normal;
+      margin-left: 2px;
+    }
+  }
+
+  .itinerary-row :global(.air-select-field__control) {
+    min-height: 36px;
+    padding: 0 0.5em;
+    font-size: 13px;
+  }
+
+  .cell {
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+    padding: 0 0.5em;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+
+    &::placeholder {
+      color: var(--air-muted);
+    }
+
+    &:focus {
+      outline: 0;
+      border-color: var(--air-ink);
+    }
+  }
+
+  .readonly {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--air-ink);
+    text-align: center;
+  }
+
+  .add-leg {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--air-muted);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--air-ink);
+      border-color: var(--air-ink);
+    }
+  }
+
+  .totals {
+    display: flex;
+    justify-content: flex-end;
+    gap: 2rem;
+    padding-right: calc(56px + 56px + 32px + 1rem);
+
+    .totals-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--air-muted);
+    }
+
+    .totals-value {
+      display: block;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--air-ink);
+    }
+  }
+
+  .settings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .toggle-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--air-ink);
+    }
+  }
+
+  .toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+
+    .toggle-option {
+      height: 48px;
+      border: 1px solid var(--air-line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--air-ink);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition:
+        background-color 120ms ease,
+        color 120ms ease,
+        border-color 120ms ease;
+
+      &:hover {
+        border-color: var(--air-ink);
+      }
+
+      &.is-active {
+        background: color-mix(in srgb, var(--air-purple) 45%, white);
+        border-color: transparent;
+        color: #fff;
+      }
+    }
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .field-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--air-ink);
+  }
+
+  .field-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+
+    :global(.air-select-field) {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .field-add {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    padding: 0;
+    border: 1px solid var(--air-line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--air-ink);
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--air-ink);
+    }
+  }
+
+  .text-field {
+    height: 44px;
+    padding: 0 1em;
+    border: 1px solid var(--air-line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+
+    &::placeholder {
+      color: var(--air-muted);
+    }
+
+    &:focus {
+      outline: 0;
+      border-color: var(--air-ink);
+    }
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .buttons-right {
+    display: flex;
+    gap: 8px;
+    margin-left: 2em;
+  }
+</style>

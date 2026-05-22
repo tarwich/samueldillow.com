@@ -1,0 +1,119 @@
+---
+import { nanoid } from "nanoid";
+import Button from "./Button.astro";
+
+interface Props {
+  /** The variant of the trigger button */
+  variant?: "primary" | "secondary" | "ghost" | "danger";
+  /** Optional icon for the trigger button */
+  icon?: string;
+  /** Optional label for the trigger button */
+  label?: string;
+  /** Which side of the trigger the popover should appear on */
+  orientation?: "top" | "bottom" | "left" | "right";
+}
+
+const {
+  variant = "ghost",  
+  icon,
+  label,
+  orientation = "bottom",
+} = Astro.props;
+
+const id = `popover-${nanoid(8)}`;
+---
+
+{/*
+  Trigger surface: Popover owns the <button>. When we need to trigger from a
+  non-button element (card, table row, avatar without button chrome), the
+  escape hatch is a companion <Trigger> component the caller wraps their
+  element in, which receives the popovertarget id from <Popover> (via
+  context, render prop, or by being a direct-child slot). Don't build it
+  until a real second use case lands — the abstraction will almost certainly
+  come out wrong if designed in advance.
+*/}
+<Button variant={variant} icon={icon} popovertarget={id}>
+  <slot name="trigger">
+    {label}
+  </slot>
+</Button>
+
+<div id={id} popover class="popover" data-orientation={orientation}>
+  <div class="popover__arrow" aria-hidden="true"></div>
+  <slot />
+</div>
+
+<style>
+  .popover {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 1px solid var(--air-line);
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: 0 5px 12px rgba(15, 23, 42, 0.18);
+
+    &[data-orientation="bottom"] {
+      position-area: bottom;
+      margin-top: 10px;
+
+      .popover__arrow {
+        top: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-right: 6px solid transparent;
+        border-bottom: 6px solid var(--air-purple);
+        border-left: 6px solid transparent;
+      }
+    }
+
+    &[data-orientation="top"] {
+      position-area: top;
+      margin-bottom: 10px;
+
+      .popover__arrow {
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-right: 6px solid transparent;
+        border-top: 6px solid var(--air-purple);
+        border-left: 6px solid transparent;
+      }
+    }
+
+    &[data-orientation="left"] {
+      position-area: left;
+      margin-right: 10px;
+
+      .popover__arrow {
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-top: 6px solid transparent;
+        border-left: 6px solid var(--air-purple);
+        border-bottom: 6px solid transparent;
+      }
+    }
+
+    &[data-orientation="right"] {
+      position-area: right;
+      margin-left: 10px;
+
+      .popover__arrow {
+        left: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-top: 6px solid transparent;
+        border-right: 6px solid var(--air-purple);
+        border-bottom: 6px solid transparent;
+      }
+    }
+
+    .popover__arrow {
+      position: absolute;
+      width: 0;
+      height: 0;
+    }
+  }
+</style>

@@ -1,0 +1,167 @@
+---
+import Button from "../../_components/Button.astro";
+import Modal from "../../_components/Modal.astro";
+import { type Customer } from "../../_data";
+
+interface Props {
+  id?: string;
+  mode?: "add" | "edit";
+  company?: Customer;
+}
+
+const { id = "company-modal", mode = "edit", company } = Astro.props;
+const isEdit = mode === "edit" && company;
+const title = isEdit ? "Edit Company" : "Add Company";
+---
+
+<Modal id={id} title={title}>
+  <form class="company-form" method="dialog">
+    <div class="company-form__grid">
+      <div class="company-form__field">
+        <label class="company-form__label" for={`${id}-name`}>
+          Company Name <em>*</em>
+        </label>
+        <input
+          id={`${id}-name`}
+          class="company-input"
+          type="text"
+          value={company?.name ?? ""}
+          placeholder="Enter the company name"
+          required
+        />
+      </div>
+      <div class="company-form__field">
+        <label class="company-form__label" for={`${id}-address`}>
+          Company Address
+        </label>
+        <input
+          id={`${id}-address`}
+          class="company-input"
+          type="text"
+          value={company?.address ?? ""}
+          placeholder="Enter the company address"
+        />
+      </div>
+      <div class="company-form__field">
+        <label class="company-form__label" for={`${id}-phone`}>
+          Company Phone
+        </label>
+        <input
+          id={`${id}-phone`}
+          class="company-input"
+          type="tel"
+          value={company?.phone ?? ""}
+          placeholder="Enter the company phone number"
+        />
+      </div>
+      <div class="company-form__field">
+        <label class="company-form__label" for={`${id}-email`}>
+          Company Email
+        </label>
+        <input
+          id={`${id}-email`}
+          class="company-input"
+          type="email"
+          value={company?.email ?? ""}
+          placeholder="Enter the company email"
+        />
+      </div>
+      <div class="company-form__field company-form__field--full">
+        <label class="company-form__label" for={`${id}-notes`}>Notes</label>
+        <textarea
+          id={`${id}-notes`}
+          class="company-input company-input--textarea"
+          placeholder="Add notes here">{company?.notes ?? ""}</textarea>
+      </div>
+    </div>
+  </form>
+
+  <Fragment slot="footer">
+    <Button variant="primary">
+      {isEdit ? "Update Company" : "Create Company"}
+    </Button>
+    <Button
+      variant="ghost"
+      onclick={`document.getElementById('${id}')?.close()`}
+    >
+      Cancel
+    </Button>
+  </Fragment>
+</Modal>
+
+<style>
+  :global(.modal:has(.company-form)) {
+    max-width: min(720px, calc(100vw - 32px));
+    width: 100%;
+  }
+
+  .company-form {
+    display: grid;
+    gap: 8px;
+    padding-top: 4px;
+  }
+
+  .company-form__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 28px;
+
+    @media (max-width: 720px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .company-form__field {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+
+    &--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .company-form__label {
+    color: var(--air-ink);
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1;
+
+    em {
+      color: #c83b00;
+      font-style: normal;
+      margin-left: 2px;
+    }
+  }
+
+  .company-input {
+    width: 100%;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    &::placeholder {
+      color: #98a3b3;
+      font-weight: 500;
+    }
+
+    &:focus {
+      outline: 0;
+      border-color: var(--air-ink);
+      box-shadow: 0 0 0 2px rgba(11, 18, 34, 0.08);
+    }
+  }
+
+  .company-input--textarea {
+    height: auto;
+    min-height: 110px;
+    padding: 12px 14px;
+    resize: vertical;
+  }
+</style>

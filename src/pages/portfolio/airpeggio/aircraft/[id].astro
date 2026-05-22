@@ -1,0 +1,388 @@
+---
+import AirpeggioLayout from "../_layout.astro";
+import AircraftModal from "./_components/AircraftModal.astro";
+import Button from "../_components/Button.astro";
+import Icon from "../_components/Icon.astro";
+import { AIRCRAFT, getAircraft } from "../_data";
+
+export function getStaticPaths() {
+  return AIRCRAFT.map((aircraft) => ({
+    params: { id: aircraft.id },
+    props: { aircraft },
+  }));
+}
+
+const aircraft = Astro.props.aircraft ?? getAircraft(Astro.params.id ?? "");
+
+if (!aircraft) {
+  return Astro.redirect("/portfolio/airpeggio/aircraft/");
+}
+
+const fields = [
+  ["Tail Number", aircraft.tail],
+  ["Serial Number", aircraft.serialNumber],
+  ["Model", aircraft.model],
+  ["Status", "Available"],
+  ["Privacy", aircraft.privacy],
+  ["Class", aircraft.class],
+  ["Seats", String(aircraft.seats)],
+  ["Homebase Airport", aircraft.location],
+  ["Require Owner Approval", aircraft.requireOwnerApproval ? "Yes" : "No"],
+  ["Hobbs", aircraft.hobbs],
+  ["Airframe Hours", aircraft.airframeHours],
+  ["Airframe Cycles", aircraft.airframeCycles],
+] as const;
+---
+
+<AirpeggioLayout
+  title={`Airpeggio Aircraft ${aircraft.tail} | Samuel Dillow`}
+  active="aircraft"
+>
+  <header class="aircraft-detail-head">
+    <a class="aircraft-back" href="/portfolio/airpeggio/aircraft/" aria-label="Back to aircraft">
+      <Icon name="arrow-left" />
+    </a>
+    <div>
+      <h1>Aircraft Details</h1>
+      <nav aria-label="Breadcrumb">
+        <a href="/portfolio/airpeggio/aircraft/">Aircraft</a>
+        <span>›</span>
+        <strong>{aircraft.tail}</strong>
+      </nav>
+    </div>
+    <Button icon="edit" class="aircraft-edit" data-open-modal="edit-aircraft">Edit Details</Button>
+  </header>
+
+  <section class="detail-panel">
+    <h2>Aircraft Details</h2>
+    <div class="aircraft-summary">
+      <img
+        src={aircraft.detailImage ?? aircraft.image}
+        alt={`${aircraft.tail} aircraft`}
+      />
+      <dl>
+        {
+          fields.map(([label, value]) => (
+            <div class:list={[`field-${label.toLowerCase().replaceAll(" ", "-")}`]}>
+              <dt>{label}</dt>
+              <dd>
+                {label === "Tail Number" && <Icon name="aircraft" />}
+                {label === "Status" && (
+                  <span class="aircraft-badge aircraft-badge--available">{value}</span>
+                )}
+                {label === "Privacy" && (
+                  <span class:list={["aircraft-badge", `aircraft-badge--${aircraft.privacy}`]}>
+                    {value}
+                  </span>
+                )}
+                {label !== "Status" && label !== "Privacy" && (
+                  <span>{value}</span>
+                )}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="detail-panel owner-panel">
+    <h2>Owner Details</h2>
+    <div class="owner-row">
+      <div>
+        <strong>{aircraft.owner}</strong>
+        <span>{aircraft.ownerEmail}</span>
+      </div>
+      <Button
+        href={`/portfolio/airpeggio/customers/${aircraft.ownerContactId}/`}
+        icon="eye">View Profile</Button>
+    </div>
+  </section>
+
+  <AircraftModal id="edit-aircraft" mode="edit" aircraft={aircraft} />
+
+  <section class="aircraft-tabs" aria-label="Aircraft records">
+    <div class="tab-list">
+      {
+        [
+          "Flight Logs",
+          "MX Reminders",
+          "Squawks",
+          "Performance Profile",
+          "Equipment",
+          "Amenities",
+          "Documents",
+          "VOR Checks",
+          "Reservations",
+          "FlightAware",
+          "Change Logs",
+        ].map((tab, index) => (
+          <button class:list={[index === 0 && "is-active"]} type="button">
+            {tab}
+          </button>
+        ))
+      }
+    </div>
+
+    <table class="datatable flight-log-table">
+      <thead>
+        <tr>
+          <th>Flight</th>
+          <th>Out/In</th>
+          <th>Off/On</th>
+          <th>Hobbs</th>
+          <th>Fuel</th>
+          <th>Pax</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <strong>KDTS - KADS</strong>
+            <span>05/09/26</span>
+          </td>
+          <td>
+            <strong>OUT:</strong>
+            <strong>IN:</strong>
+          </td>
+          <td>
+            <strong>OFF:</strong>
+            <strong>ON:</strong>
+          </td>
+          <td>
+            <strong>OUT: 0</strong>
+            <strong>IN: 0</strong>
+            <strong>TOTAL: 0.0 hrs</strong>
+          </td>
+          <td>
+            <strong>ADD: 0</strong>
+            <strong>OUT: 0</strong>
+            <strong>IN: 0</strong>
+          </td>
+          <td>0</td>
+          <td><Icon name="edit" /></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</AirpeggioLayout>
+
+<style>
+  .aircraft-detail-head {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 28px;
+
+    h1 {
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+      font-size: 16px;
+
+      a {
+        color: var(--air-ink);
+        text-decoration: none;
+      }
+    }
+
+    @media (max-width: 760px) {
+      grid-template-columns: 28px 1fr;
+
+      .aircraft-edit {
+        grid-column: 2;
+        justify-self: start;
+      }
+    }
+  }
+
+  .aircraft-back {
+    display: inline-grid;
+    place-items: center;
+    color: var(--air-ink);
+    text-decoration: none;
+  }
+
+  .detail-panel {
+    overflow: hidden;
+    margin-bottom: 24px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+
+    h2 {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--air-line);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  }
+
+  .aircraft-summary {
+    display: grid;
+    grid-template-columns: minmax(320px, 538px) 1fr;
+    gap: 70px;
+    padding: 44px 28px;
+
+    img {
+      width: 100%;
+      aspect-ratio: 538 / 360;
+      display: block;
+      object-fit: cover;
+    }
+
+    dl {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(150px, 1fr));
+      gap: 34px 72px;
+      align-content: start;
+    }
+
+    @media (max-width: 1180px) {
+      grid-template-columns: 1fr;
+      gap: 36px;
+
+      dl {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+    }
+  }
+
+  .aircraft-summary dt {
+    margin-bottom: 8px;
+    color: #465164;
+    font-size: 14px;
+  }
+
+  .aircraft-summary dd {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 28px;
+    font-size: 16px;
+    line-height: 1.2;
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+      color: #b24b4a;
+    }
+  }
+
+  .field-require-owner-approval dd {
+    color: #bf861f;
+  }
+
+  .aircraft-badge {
+    min-height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .aircraft-badge--available {
+    border-color: #168244;
+    background: #168244;
+    color: #fff;
+  }
+
+  .aircraft-badge--private {
+    color: #b65a2d;
+  }
+
+  .aircraft-badge--charter {
+    color: #2550ad;
+  }
+
+  .owner-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 20px;
+
+    div {
+      display: grid;
+      gap: 2px;
+    }
+
+    strong {
+      font-size: 18px;
+    }
+
+    span {
+      font-size: 14px;
+    }
+  }
+
+  .aircraft-tabs {
+    padding: 16px 20px 26px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+  }
+
+  .tab-list {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    max-width: 100%;
+    overflow-x: auto;
+    margin-bottom: 24px;
+    padding: 4px;
+    border: 1px solid #cfd6e0;
+    border-radius: 7px;
+
+    button {
+      min-height: 34px;
+      padding: 0 13px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: #5a6475;
+      font: inherit;
+      font-size: 14px;
+      white-space: nowrap;
+
+      &.is-active {
+        background: var(--air-purple);
+        color: #fff;
+      }
+    }
+  }
+
+  .flight-log-table {
+    th {
+      font-size: 13px;
+    }
+
+    td {
+      font-size: 14px;
+
+      > * {
+        display: block;
+      }
+
+      &:last-child {
+        text-align: right;
+      }
+    }
+  }
+</style>

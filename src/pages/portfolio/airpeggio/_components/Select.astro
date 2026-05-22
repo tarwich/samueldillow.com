@@ -1,0 +1,120 @@
+---
+import Icon from "./Icon.astro";
+
+type Option = string | { value: string; label: string };
+
+interface Props {
+  options: Option[];
+  label?: string;
+  placeholder?: string;
+  value?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  options,
+  label,
+  placeholder,
+  value,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const normalized = options.map((opt) =>
+  typeof opt === "string" ? { value: opt, label: opt } : opt,
+);
+---
+
+{label ? (
+  <label class:list={["air-field", className]}>
+    <span class="air-field__label">{label}</span>
+    <span class="air-select">
+      <select {...rest}>
+        {placeholder && (
+          <option value="" selected={value === undefined || value === ""}>
+            {placeholder}
+          </option>
+        )}
+        {normalized.map((opt) => (
+          <option value={opt.value} selected={value === opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+      <Icon name="chevron-down" />
+    </span>
+  </label>
+) : (
+  <span class:list={["air-select", className]}>
+    <select {...rest}>
+      {placeholder && (
+        <option value="" selected={value === undefined || value === ""}>
+          {placeholder}
+        </option>
+      )}
+      {normalized.map((opt) => (
+        <option value={opt.value} selected={value === opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+    <Icon name="chevron-down" />
+  </span>
+)}
+
+<style>
+  .air-field {
+    display: grid;
+    gap: 8px;
+  }
+
+  .air-field__label {
+    color: var(--air-ink);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .air-select {
+    position: relative;
+    display: block;
+
+    select {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 36px 0 14px;
+      border: 1px solid var(--air-line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--air-ink);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      appearance: none;
+      cursor: pointer;
+
+      &:focus {
+        outline: 0;
+        border-color: var(--air-ink);
+        box-shadow: 0 0 0 2px var(--air-ink);
+      }
+
+      &:has(option[value=""]:checked) {
+        color: #777;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .air-select :global(.air-icon) {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    width: 14px;
+    height: 14px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--air-ink);
+  }
+</style>

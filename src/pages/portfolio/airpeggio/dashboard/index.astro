@@ -1,0 +1,1025 @@
+---
+import AirpeggioLayout from "../_layout.astro";
+import Badge from "../_components/Badge.astro";
+import Button from "../_components/Button.astro";
+import Icon from "../_components/Icon.astro";
+import {
+  ACCOUNTS,
+  AIRCRAFT,
+  INBOX_REQUESTS,
+  RESERVATIONS,
+  formatLegDate,
+  formatLegTime,
+  formatLegTimezone,
+  getTrainingRequirement,
+  legArrival,
+  recordEffectiveDate,
+  reservationAircraft,
+  reservationAssignedLabel,
+  reservationContact,
+  reservationCrewLabel,
+  reservationCustomer,
+  trainingStatus,
+  type Account,
+} from "../_data";
+
+// Pin "now" to the same reference moment the seed data uses so KPI counts and
+// duty status line up with the rest of the demo.
+const NOW = new Date("2026-05-14T12:00:00Z");
+const DAY = 86_400_000;
+const QUALIFICATION_WINDOW_DAYS = 90;
+
+const stampFmt = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+});
+const lastUpdated = stampFmt.format(NOW);
+
+// --- Top KPI counts -------------------------------------------------------
+
+const within24h = (date: Date) =>
+  NOW.getTime() - date.getTime() <= DAY && date.getTime() <= NOW.getTime();
+
+const recentInbox = INBOX_REQUESTS.filter((r) => within24h(r.receivedAt));
+const allRequests = recentInbox.length || INBOX_REQUESTS.length;
+const qualifiedRequests = INBOX_REQUESTS.filter(
+  (r) => r.status === "qualified",
+).length;
+const quotedRequests = INBOX_REQUESTS.filter((r) => r.status === "quoted").length;
+const scheduledRequests = RESERVATIONS.filter(
+  (r) => r.lifecycle === "scheduled" && r.approval === "quoted",
+).length;
+
+// --- Operational counts ---------------------------------------------------
+
+const tripsInProgress = RESERVATIONS.filter((r) =>
+  r.legs.some((leg) => {
+    const arr = legArrival(leg);
+    return leg.departure <= NOW && arr >= NOW;
+  }),
+);
+
+const inFlightLegs = tripsInProgress
+  .flatMap((trip) =>
+    trip.legs
+      .filter((leg) => leg.departure <= NOW && legArrival(leg) >= NOW)
+      .map((leg) => ({ trip, leg })),
+  )
+  .slice(0, 4);
+
+const aircraftInFlightIds = new Set(tripsInProgress.map((t) => t.aircraftId));
+const aircraftInFlight = aircraftInFlightIds.size;
+
+const onDutyPilotIds = new Set(
+  tripsInProgress.flatMap((t) => t.crewAccountIds),
+);
+const pilotsOnDuty = onDutyPilotIds.size;
+
+const openSquawks = 0;
+
+// Per-pilot duty hours so far today, derived from the longest active leg.
+const dutyHoursFor = (accountId: string): string | undefined => {
+  const trip = tripsInProgress.find((t) =>
+    t.crewAccountIds.includes(accountId),
+  );
+  if (!trip) return undefined;
+  const activeLeg = trip.legs.find(
+    (leg) => leg.departure <= NOW && legArrival(leg) >= NOW,
+  );
+  if (!activeLeg) return undefined;
+  const minutes = Math.max(
+    0,
+    Math.round((NOW.getTime() - activeLeg.departure.getTime()) / 60_000),
+  );
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}h${m.toString().padStart(2, "0")}m`;
+};
+
+// --- Fleet overview -------------------------------------------------------
+
+const totalAircraft = AIRCRAFT.length;
+const inFlightCount = aircraftInFlight;
+const aogCount = 0;
+const maintenanceCount = 0;
+const availableCount = totalAircraft - inFlightCount;
+
+interface AircraftTileInfo {
+  aircraft: (typeof AIRCRAFT)[number];
+  activeLeg?: { origin: string; destination: string };
+}
+
+const aircraftTiles: AircraftTileInfo[] = AIRCRAFT.map((aircraft) => {
+  const trip = tripsInProgress.find((t) => t.aircraftId === aircraft.id);
+  const leg = trip?.legs.find(
+    (l) => l.departure <= NOW && legArrival(l) >= NOW,
+  );
+  return {
+    aircraft,
+    activeLeg: leg
+      ? { origin: leg.origin, destination: leg.destination }
+      : undefined,
+  };
+});
+
+// --- Crew overview --------------------------------------------------------
+
+const pilots = ACCOUNTS.filter((a) => a.roles.includes("pilot"));
+const totalPilots = pilots.length;
+const onDutyCount = pilotsOnDuty;
+
+const pilotInitials = (a: Account) =>
+  (a.firstName[0] + a.lastName[0]).toUpperCase();
+
+const pilotRoleLabel = (a: Account): "PIC" | "SIC" | "" => {
+  if (a.qualifications.some((q) => q.positions.includes("PIC"))) return "PIC";
+  if (a.qualifications.some((q) => q.positions.includes("SIC"))) return "SIC";
+  return "";
+};
+
+interface PilotStatus {
+  label: "On" | "Off" | "Rest" | "Available";
+  tone: "on" | "off" | "rest" | "available";
+}
+
+const pilotStatus = (a: Account): PilotStatus => {
+  if (onDutyPilotIds.has(a.id)) return { label: "On", tone: "on" };
+  if (!a.lastActive) return { label: "Off", tone: "off" };
+  const daysSince = (NOW.getTime() - a.lastActive.getTime()) / DAY;
+  if (daysSince < 1) return { label: "Available", tone: "available" };
+  if (daysSince < 3) return { label: "Rest", tone: "rest" };
+  return { label: "Off", tone: "off" };
+};
+
+const trainingDueSoonFor = (a: Account): boolean => {
+  // Each pilot's training records are summarized per-requirement: the most
+  // recent record wins. A pilot is "due soon" if any of those wins are due.
+  const latestByReq = new Map<string, (typeof a.trainings)[number]>();
+  for (const record of a.trainings) {
+    const current = latestByReq.get(record.requirementId);
+    if (
+      !current ||
+      recordEffectiveDate(record) > recordEffectiveDate(current)
+    ) {
+      latestByReq.set(record.requirementId, record);
+    }
+  }
+  for (const [reqId, record] of latestByReq) {
+    const req = getTrainingRequirement(reqId);
+    if (!req) continue;
+    if (trainingStatus(record, req, NOW) === "due-soon") return true;
+  }
+  return false;
+};
+
+const qualificationsDueSoonFor = (a: Account): boolean =>
+  a.qualifications.some((q) => {
+    const days = (q.expirationDate.getTime() - NOW.getTime()) / DAY;
+    return days > 0 && days <= QUALIFICATION_WINDOW_DAYS;
+  });
+
+const pilotRows = pilots.map((p) => ({
+  account: p,
+  initials: pilotInitials(p),
+  name: `${p.firstName} ${p.lastName[0]}.`,
+  role: pilotRoleLabel(p),
+  status: pilotStatus(p),
+  duty: dutyHoursFor(p.id),
+  trainingDue: trainingDueSoonFor(p),
+  qualDue: qualificationsDueSoonFor(p),
+  href: `/portfolio/airpeggio/accounts/${p.id}/`,
+}));
+
+const trainingDueCount = pilotRows.filter((p) => p.trainingDue).length;
+const qualDueCount = pilotRows.filter((p) => p.qualDue).length;
+
+// --- Upcoming scheduled reservations --------------------------------------
+
+const firstLegDeparture = (
+  r: (typeof RESERVATIONS)[number],
+): number =>
+  Math.min(...r.legs.map((l) => l.departure.getTime()));
+
+const upcomingReservations = RESERVATIONS.filter(
+  (r) =>
+    (r.lifecycle === "scheduled" || r.lifecycle === "planned") &&
+    r.legs.some((l) => l.departure >= NOW),
+)
+  .sort((a, b) => firstLegDeparture(a) - firstLegDeparture(b))
+  .slice(0, 5);
+
+const formatLeg = (leg: { departure: Date; origin: string }) =>
+  `${formatLegDate(leg.departure)}, ${formatLegTime(leg.departure)} ${formatLegTimezone(leg.origin)}`;
+
+const truncateEmail = (email: string, max = 28) =>
+  email.length > max ? `${email.slice(0, max - 1)}…` : email;
+---
+
+<AirpeggioLayout
+  title="Airpeggio Dashboard | Samuel Dillow"
+  description="Airpeggio fleet management dashboard."
+  active="dashboard"
+>
+  <div class="dash">
+    <header class="dash__head">
+      <h1>Dashboard</h1>
+      <div class="dash__head-tools">
+        <span class="dash__stamp">Last Updated: {lastUpdated}</span>
+        <Button icon="refresh">Refresh</Button>
+      </div>
+    </header>
+
+    <section class="dash__kpis" aria-label="Today's activity">
+      <article class="kpi">
+        <div class="kpi__row">
+          <span class="kpi__icon kpi__icon--purple"><Icon name="search" /></span>
+          <span class="kpi__number">{allRequests}</span>
+        </div>
+        <h2 class="kpi__label">All Trip Requests <Icon name="alert" /></h2>
+        <p class="kpi__sub">Previous 24 Hours</p>
+      </article>
+
+      <article class="kpi">
+        <div class="kpi__row">
+          <span class="kpi__icon kpi__icon--green"><Icon name="check" /></span>
+          <span class="kpi__number">{qualifiedRequests}</span>
+        </div>
+        <h2 class="kpi__label">Qualified Requests <Icon name="alert" /></h2>
+        <p class="kpi__sub">Previous 24 Hours</p>
+      </article>
+
+      <article class="kpi">
+        <div class="kpi__row">
+          <span class="kpi__icon kpi__icon--muted"><Icon name="receipt" /></span>
+          <span class="kpi__number">{quotedRequests}</span>
+        </div>
+        <h2 class="kpi__label">Quoted Requests <Icon name="alert" /></h2>
+        <p class="kpi__sub">Previous 24 Hours</p>
+      </article>
+
+      <article class="kpi">
+        <div class="kpi__row">
+          <span class="kpi__icon kpi__icon--muted"><Icon name="calendar" /></span>
+          <span class="kpi__number">{scheduledRequests}</span>
+        </div>
+        <h2 class="kpi__label">Scheduled Requests <Icon name="alert" /></h2>
+        <p class="kpi__sub">Previous 24 Hours</p>
+      </article>
+
+      <article class="kpi">
+        <div class="kpi__row">
+          <span class="kpi__icon kpi__icon--purple"><Icon name="calendar" /></span>
+          <span class="kpi__number">{tripsInProgress.length}</span>
+        </div>
+        <h2 class="kpi__label">Trips In Progress <Icon name="alert" /></h2>
+        {
+          tripsInProgress.length > 0 ? (
+            <ul class="kpi__list">
+              {tripsInProgress.slice(0, 4).map((trip) => (
+                <li>
+                  <b># {trip.tripNumber}</b>
+                  <span>
+                    {trip.legs.map((leg) => leg.origin).join(" → ")} →{" "}
+                    {trip.legs[trip.legs.length - 1].destination}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="kpi__sub">No trips active right now.</p>
+          )
+        }
+      </article>
+
+      <article class="kpi">
+        <div class="kpi__row">
+          <span class="kpi__icon kpi__icon--blue"><Icon name="aircraft" /></span>
+          <span class="kpi__number">{aircraftInFlight}</span>
+        </div>
+        <h2 class="kpi__label">Aircraft In Flight <Icon name="alert" /></h2>
+        {
+          inFlightLegs.length > 0 ? (
+            <ul class="kpi__list">
+              {inFlightLegs.map(({ trip, leg }) => {
+                const aircraft = reservationAircraft(trip);
+                return (
+                  <li>
+                    <Icon name="aircraft" />
+                    <b>{aircraft?.tail ?? "—"}</b>
+                    <span>
+                      {leg.origin} → {leg.destination}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p class="kpi__sub">Hangar is quiet.</p>
+          )
+        }
+      </article>
+
+      <article class="kpi">
+        <div class="kpi__row">
+          <span class="kpi__icon kpi__icon--blue"><Icon name="clock" /></span>
+          <span class="kpi__number">{pilotsOnDuty}</span>
+        </div>
+        <h2 class="kpi__label">Pilots On Duty <Icon name="alert" /></h2>
+        {
+          pilotsOnDuty > 0 ? (
+            <ul class="kpi__list">
+              {Array.from(onDutyPilotIds).slice(0, 4).map((id) => {
+                const account = ACCOUNTS.find((a) => a.id === id);
+                if (!account) return null;
+                return (
+                  <li>
+                    <Icon name="account" />
+                    <b>{pilotInitials(account)}</b>
+                    <span>{dutyHoursFor(id) ?? ""}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p class="kpi__sub">Nobody clocked in.</p>
+          )
+        }
+      </article>
+
+      <article class="kpi">
+        <div class="kpi__row">
+          <span class="kpi__icon kpi__icon--muted"><Icon name="alert" /></span>
+          <span class="kpi__number">{openSquawks}</span>
+        </div>
+        <h2 class="kpi__label">Open Squawks <Icon name="alert" /></h2>
+        <p class="kpi__sub">Across the fleet.</p>
+      </article>
+    </section>
+
+    <section class="dash__panel" aria-label="Fleet overview">
+      <header class="dash__panel-head">
+        <h2>Fleet Overview</h2>
+        <Icon name="alert" />
+      </header>
+      <div class="dash__stats">
+        <div class="stat">
+          <span class="stat__label">Total Aircraft:</span>
+          <span class="stat__value">{totalAircraft}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">In Flight:</span>
+          <span class="stat__value">{inFlightCount}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">AOG:</span>
+          <span class="stat__value">{aogCount}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Maintenance:</span>
+          <span class="stat__value">{maintenanceCount}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Available:</span>
+          <span class="stat__value">{availableCount}</span>
+        </div>
+      </div>
+      <div class="dash__grid">
+        {
+          aircraftTiles.map(({ aircraft, activeLeg }) => (
+            <a
+              class="tile"
+              href={`/portfolio/airpeggio/aircraft/${aircraft.id}/`}
+              data-status={aircraft.status}
+            >
+              <header class="tile__head">
+                <Icon name="aircraft" />
+                <b>{aircraft.tail}</b>
+              </header>
+              <div class="tile__chips">
+                {activeLeg && (
+                  <span class="chip chip--active">
+                    {activeLeg.origin} to {activeLeg.destination}
+                  </span>
+                )}
+                <span class="chip"><Icon name="pin" />{aircraft.baseAirport}</span>
+                <span class="chip"><Icon name="hash" />{aircraft.model}</span>
+                <span class="chip"><Icon name="briefcase" />{aircraft.class}</span>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="dash__panel" aria-label="Crew overview">
+      <header class="dash__panel-head">
+        <h2>Crew Overview</h2>
+        <Icon name="alert" />
+      </header>
+      <div class="dash__stats">
+        <div class="stat">
+          <span class="stat__label">Total Pilots:</span>
+          <span class="stat__value">{totalPilots}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">On Duty:</span>
+          <span class="stat__value">{onDutyCount}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Training Due Soon:</span>
+          <span class="stat__value">{trainingDueCount}</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">Qualification Due Soon:</span>
+          <span class="stat__value">{qualDueCount}</span>
+        </div>
+      </div>
+      <div class="dash__grid dash__grid--3">
+        {
+          pilotRows.map((p) => (
+            <a class="tile tile--pilot" href={p.href}>
+              <header class="tile__head">
+                <Icon name="account" />
+                <b>{p.name}</b>
+                {p.role && <span class="role-pill">{p.role}</span>}
+              </header>
+              <div class="tile__chips">
+                <span class={`chip chip--status chip--${p.status.tone}`}>
+                  {p.status.label}
+                </span>
+                {p.duty && (
+                  <span class="chip chip--duty">
+                    <Icon name="clock" />
+                    {p.duty}
+                  </span>
+                )}
+                {p.trainingDue && (
+                  <span class="chip chip--warn">Training Due Soon</span>
+                )}
+                {p.qualDue && (
+                  <span class="chip chip--warn">Qualifications Due Soon</span>
+                )}
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="dash__panel" aria-label="Upcoming scheduled reservations">
+      <header class="dash__panel-head">
+        <h2>Upcoming Scheduled Reservations</h2>
+        <Icon name="alert" />
+      </header>
+      {
+        upcomingReservations.length === 0 ? (
+          <p class="dash__empty">Nothing on the schedule yet.</p>
+        ) : (
+          <table class="datatable dash__table">
+            <colgroup>
+              <col style="width: 12%" />
+              <col style="width: 20%" />
+              <col style="width: 30%" />
+              <col style="width: 8%" />
+              <col style="width: 14%" />
+              <col style="width: 8%" />
+              <col style="width: 8%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Trip</th>
+                <th>Customer</th>
+                <th>Itinerary</th>
+                <th>Crew</th>
+                <th>Status</th>
+                <th>Assigned</th>
+                <th>Tags</th>
+              </tr>
+            </thead>
+            <tbody>
+              {upcomingReservations.map((r) => {
+                const aircraft = reservationAircraft(r);
+                const cust = reservationCustomer(r);
+                const c = reservationContact(r);
+                const crew = reservationCrewLabel(r);
+                const assigned = reservationAssignedLabel(r);
+                return (
+                  <tr>
+                    <td>
+                      <a
+                        class="trip-pill"
+                        href={`/portfolio/airpeggio/reservations/${r.id}/`}
+                      >
+                        Trip #{r.tripNumber}
+                      </a>
+                      {aircraft && (
+                        <div class="trip-tail">
+                          <Icon name="aircraft" />
+                          {aircraft.tail}
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      {c ? (
+                        <>
+                          <strong>{c.firstName} {c.lastName}</strong>
+                          {c.email && (
+                            <div class="text-muted">{truncateEmail(c.email)}</div>
+                          )}
+                          {cust && (
+                            <div class="text-muted">{cust.name}</div>
+                          )}
+                        </>
+                      ) : (
+                        <span class="text-muted">—</span>
+                      )}
+                    </td>
+                    <td>
+                      <ul class="itinerary">
+                        {r.legs.slice(0, 5).map((leg) => (
+                          <li>
+                            <b>{leg.origin} - {leg.destination}</b>
+                            <span class="text-muted">
+                              {" "}
+                              {formatLeg(leg)} | {leg.passengers} pax
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td>
+                      <div class="crew-list">
+                        {crew.map((initials) => (
+                          <span>{initials}</span>
+                        ))}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="status-cell">
+                        <Badge variant={r.lifecycle === "scheduled" ? "scheduled" : "manual"}>
+                          {r.lifecycle.toUpperCase()}
+                        </Badge>
+                        {r.approval === "quoted" && (
+                          <Badge variant="quoted">QUOTED</Badge>
+                        )}
+                      </div>
+                    </td>
+                    <td>{assigned}</td>
+                    <td>
+                      {r.tags.length === 0 ? (
+                        <span class="text-muted">—</span>
+                      ) : (
+                        <div class="tag-list">
+                          {r.tags.map((tag) => (
+                            <span class={`tag tag--${tag.toLowerCase().replace(/\s+/g, "-")}`}>
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )
+      }
+    </section>
+  </div>
+</AirpeggioLayout>
+
+<style>
+  .dash {
+    display: grid;
+    gap: 22px;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .dash__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .dash__head h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .dash__head-tools {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .dash__stamp {
+    color: var(--air-muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* ----- KPI cards ----- */
+
+  .dash__kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+
+    @media (max-width: 1180px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 640px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .kpi {
+    min-height: 168px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px 22px;
+    border: 1px solid var(--air-line);
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .kpi__row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .kpi__icon {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    color: var(--air-muted);
+
+    :global(.air-icon) {
+      width: 30px;
+      height: 30px;
+    }
+
+    &.kpi__icon--purple { color: var(--air-purple); }
+    &.kpi__icon--green { color: var(--air-green); }
+    &.kpi__icon--blue { color: var(--air-blue); }
+    &.kpi__icon--muted { color: #8b8b8b; }
+  }
+
+  .kpi__number {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .kpi__label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--air-ink);
+
+    :global(.air-icon) {
+      width: 14px;
+      height: 14px;
+      color: var(--air-muted);
+    }
+  }
+
+  .kpi__sub {
+    color: var(--air-muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .kpi__list {
+    list-style: none;
+    padding: 0;
+    margin: 4px 0 0;
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--air-muted);
+
+      b {
+        color: var(--air-ink);
+        font-weight: 700;
+      }
+
+      :global(.air-icon) {
+        width: 14px;
+        height: 14px;
+        color: var(--air-muted);
+      }
+    }
+  }
+
+  /* ----- Panels (Fleet / Crew / Reservations) ----- */
+
+  .dash__panel {
+    display: flex;
+    flex-direction: column;
+    padding: 22px 24px;
+    border: 1px solid var(--air-line);
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .dash__panel-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--air-line);
+    margin-bottom: 18px;
+
+    h2 {
+      flex: 1;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--air-ink);
+    }
+
+    :global(.air-icon) {
+      width: 16px;
+      height: 16px;
+      color: var(--air-muted);
+    }
+  }
+
+  .dash__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px 56px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--air-line);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .stat__label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--air-muted);
+    }
+
+    .stat__value {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.01em;
+    }
+  }
+
+  .dash__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+
+    @media (max-width: 880px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    &.dash__grid--3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+
+      @media (max-width: 1180px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      @media (max-width: 720px) {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  }
+
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 16px;
+    border: 1px solid var(--air-line);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--air-ink);
+    text-decoration: none;
+    transition: border-color 100ms ease, background 100ms ease;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--air-purple);
+      background: #faf6fb;
+      outline: none;
+    }
+  }
+
+  .tile__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+
+    b { font-weight: 800; }
+
+    :global(.air-icon) {
+      width: 16px;
+      height: 16px;
+      color: var(--air-purple);
+    }
+  }
+
+  .tile__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--air-muted);
+    font-size: 11px;
+    font-weight: 600;
+
+    :global(.air-icon) {
+      width: 12px;
+      height: 12px;
+    }
+
+    &.chip--active {
+      border-color: var(--air-blue);
+      color: var(--air-blue);
+      background: #eef0ff;
+    }
+  }
+
+  .chip--status {
+    border-radius: 999px;
+    padding: 2px 10px;
+
+    &.chip--on {
+      border-color: var(--air-green);
+      color: var(--air-green);
+      background: #e8f5ee;
+    }
+    &.chip--off { color: var(--air-muted); }
+    &.chip--rest {
+      border-color: #c98313;
+      color: #c98313;
+      background: #fdf3e1;
+    }
+    &.chip--available {
+      border-color: var(--air-blue);
+      color: var(--air-blue);
+      background: #eef0ff;
+    }
+  }
+
+  .chip--duty {
+    border-color: var(--air-purple);
+    color: var(--air-purple);
+  }
+
+  .chip--warn {
+    border-color: #c98313;
+    background: #fdf3e1;
+    color: #8b5a0a;
+  }
+
+  .role-pill {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 5px;
+    background: var(--air-purple-soft);
+    color: var(--air-purple);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  /* ----- Upcoming reservations table tweaks ----- */
+
+  .dash__table {
+    border: 1px solid var(--air-line);
+  }
+
+  .dash__table td {
+    vertical-align: top;
+    font-weight: 500;
+  }
+
+  .trip-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #f2f5f9;
+    color: var(--air-ink);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover { background: var(--air-purple-soft); }
+  }
+
+  .trip-tail {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    color: var(--air-purple);
+    font-size: 13px;
+    font-weight: 700;
+
+    :global(.air-icon) {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .itinerary {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 2px;
+    font-size: 13px;
+    line-height: 1.4;
+
+    li b { font-weight: 700; }
+  }
+
+  .crew-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-weight: 700;
+  }
+
+  .status-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #1f1f1f;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .tag--executive { background: #d6e0ff; color: #1c3199; }
+  .tag--broker { background: #ffe2c8; color: #9c5d10; }
+
+  .dash__empty {
+    padding: 28px;
+    text-align: center;
+    color: var(--air-muted);
+    font-weight: 500;
+  }
+</style>

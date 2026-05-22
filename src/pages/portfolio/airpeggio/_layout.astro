@@ -1,0 +1,40 @@
+---
+import "./_styles.css";
+import TopNav from "./_components/TopNav.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  active?: string;
+}
+
+const {
+  title = "Airpeggio Inbox | Samuel Dillow",
+  description = "Airpeggio fleet-management software reconstruction.",
+  active = "inbox",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="portfolio--airpeggio">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <script>
+      import Alpine from "alpinejs";
+      // @ts-ignore
+      window.Alpine = Alpine;
+      Alpine.start();
+    </script>
+  </head>
+  <body class="air-app">
+    <TopNav active={active} />
+    <main class="air-main">
+      <slot />
+    </main>
+  </body>
+</html>

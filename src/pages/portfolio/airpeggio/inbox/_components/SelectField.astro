@@ -1,0 +1,65 @@
+---
+import Icon from "../../_components/Icon.astro";
+
+interface Props {
+  label?: string;
+  placeholder?: string;
+  focused?: boolean;
+  class?: string;
+}
+
+const {
+  label,
+  placeholder = "Select...",
+  focused = false,
+  class: className,
+} = Astro.props;
+---
+
+<label class:list={["air-select-field", focused && "is-focused", className]}>
+  {label && <span class="air-select-field__label">{label}</span>}
+  <span class="air-select-field__control">
+    <span>{placeholder}</span>
+    <Icon name="chevron-down" />
+  </span>
+</label>
+
+<style>
+  .air-select-field {
+    display: grid;
+    gap: 8px;
+  }
+
+  .air-select-field__label {
+    color: var(--air-ink);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .air-select-field__control {
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 11px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    color: #777;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .air-select-field.is-focused .air-select-field__control {
+    border-color: var(--air-ink);
+    box-shadow: 0 0 0 2px var(--air-ink);
+  }
+
+  .air-select-field :global(.air-icon) {
+    width: 14px;
+    height: 14px;
+    color: var(--air-ink);
+  }
+</style>

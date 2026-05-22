@@ -1,0 +1,1373 @@
+---
+import AirpeggioLayout from "../_layout.astro";
+import Button from "../_components/Button.astro";
+import Icon from "../_components/Icon.astro";
+import ChecklistItem from "./_components/ChecklistItem.astro";
+import EditTripLegModal from "./_components/EditTripLegModal.astro";
+import ReservationHero from "./_components/ReservationHero.astro";
+import ReservationTabNav, {
+  type ReservationTab,
+} from "./_components/ReservationTabNav.astro";
+import {
+  ACCOUNTS,
+  RESERVATIONS,
+  accountFullName,
+  contactFullName,
+  getContact,
+  formatBlockDuration,
+  formatLegItineraryDate,
+  formatLegTimezone,
+  formatQuoteAmount,
+  getReservation,
+  legArrival,
+  legBlockMinutes,
+  legDutyMinutes,
+  legRegulation,
+  pilotConflicts,
+  reservationAircraft,
+  reservationContact,
+  reservationCustomer,
+  reservationPassengers,
+  reservationPilots,
+  reservationSalesperson,
+} from "../_data";
+
+export function getStaticPaths() {
+  return RESERVATIONS.map((reservation) => ({
+    params: { id: reservation.id },
+    props: { reservation },
+  }));
+}
+
+const reservation = Astro.props.reservation ?? getReservation(Astro.params.id ?? "");
+
+if (!reservation) {
+  return Astro.redirect("/portfolio/airpeggio/reservations/");
+}
+
+const aircraft = reservationAircraft(reservation);
+const contact = reservationContact(reservation);
+const company = reservationCustomer(reservation);
+const salesperson = reservationSalesperson(reservation);
+const pilots = reservationPilots(reservation);
+const passengers = reservationPassengers(reservation);
+
+const pilotAccount = (id: string) => ACCOUNTS.find((a) => a.id === id);
+
+const tabs: ReservationTab[] = [
+  { id: "checklist", label: "Checklist", icon: "receipt" },
+  { id: "details", label: "Details", icon: "grid" },
+  { id: "itinerary", label: "Itinerary", icon: "pin" },
+  { id: "people", label: "People", icon: "users" },
+  { id: "flight-logs", label: "Flight Logs", icon: "receipt" },
+  { id: "quotes", label: "Quotes", icon: "receipt" },
+  { id: "documents", label: "Documents", icon: "upload" },
+  { id: "audit", label: "Audit", icon: "clock" },
+];
+
+const dobFmt = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const checklistAircraftStatus = aircraft ? "complete" : "warning";
+const checklistItineraryStatus =
+  reservation.legs.length === 0 ? "warning" : "warning";
+const checklistQuoteStatus = reservation.quote
+  ? reservation.quote.status === "paid"
+    ? "complete"
+    : "warning"
+  : "warning";
+
+interface ConflictGroup {
+  legIndices: number[];
+  message: string;
+}
+
+const pilotConflictsList = pilots.map((p) => {
+  const account = pilotAccount(p.accountId);
+  const conflicts = account
+    ? pilotConflicts(account, p.position, reservation, p)
+    : [];
+  // Group "(message) for legs X, Y" so a pilot missing one qual across both
+  // legs reads as a single line instead of duplicated.
+  const messageMap = new Map<string, Set<number>>();
+  for (const c of conflicts) {
+    const set = messageMap.get(c.message) ?? new Set<number>();
+    set.add(c.legIndex);
+    messageMap.set(c.message, set);
+  }
+  const groups: ConflictGroup[] = Array.from(messageMap.entries()).map(
+    ([message, set]) => ({
+      message,
+      legIndices: Array.from(set).sort((a, b) => a - b),
+    }),
+  );
+  return { pilot: p, account, conflicts, groups };
+});
+const anyPilotConflict = pilotConflictsList.some((p) => p.conflicts.length > 0);
+const checklistPilotStatus = anyPilotConflict ? "warning" : "complete";
+const checklistPassengerStatus = passengers.length > 0 ? "complete" : "pending";
+---
+
+<AirpeggioLayout
+  title={`Airpeggio Reservation #${reservation.tripNumber} | Samuel Dillow`}
+  active="reservations"
+>
+  <header class="reservation-detail-head">
+    <a
+      class="reservation-back"
+      href="/portfolio/airpeggio/reservations/"
+      aria-label="Back to reservations"
+    >
+      <Icon name="arrow-left" />
+    </a>
+    <div>
+      <h1>Reservation Details</h1>
+      <nav aria-label="Breadcrumb">
+        <a href="/portfolio/airpeggio/reservations/">Reservation</a>
+        <span>›</span>
+        <strong>#{reservation.tripNumber}</strong>
+      </nav>
+    </div>
+    <div class="reservation-detail-head__actions">
+      <Button>Send Trip Sheet</Button>
+      <Button icon="edit">Edit Details</Button>
+      <Button icon="receipt">Notes</Button>
+    </div>
+  </header>
+
+  <ReservationHero reservation={reservation} />
+
+  <div class="reservation-tab-nav-wrap">
+    <ReservationTabNav tabs={tabs} active="checklist" />
+  </div>
+
+  {/* ───────── Checklist ───────── */}
+  <section data-reservation-panel="checklist" class="reservation-panel">
+    <div class="reservation-panel__head">
+      <h2>Checklist</h2>
+    </div>
+    <div class="reservation-panel__body reservation-checklist">
+      <ChecklistItem status={checklistAircraftStatus} label="Aircraft">
+        <strong>{aircraft?.tail ?? "—"}</strong>
+        <Fragment slot="actions">
+          <a href="#">Change Plane</a>
+          <a href={`/portfolio/airpeggio/aircraft/${aircraft?.id ?? ""}/`}>
+            Edit Aircraft
+          </a>
+        </Fragment>
+      </ChecklistItem>
+
+      <ChecklistItem status={checklistItineraryStatus} label="Itinerary">
+        <div class="reservation-checklist__itinerary">
+          {
+            reservation.legs.slice(0, 4).map((leg, i) => (
+              <div>
+                <span class="itinerary-pill">{i + 1}</span>
+                <strong>{leg.origin}</strong>
+                <span>-</span>
+                <strong>{leg.destination}</strong>
+                <span class="text-muted">
+                  {new Intl.DateTimeFormat("en-US", {
+                    weekday: "short",
+                  }).format(leg.departure)}{" "}
+                  {formatLegItineraryDate(leg.departure)}
+                </span>
+              </div>
+            ))
+          }
+        </div>
+        <Fragment slot="actions">
+          <a href="#" data-reservation-tab-link="itinerary">View Itinerary</a>
+        </Fragment>
+      </ChecklistItem>
+
+      <ChecklistItem status={checklistQuoteStatus} label="Quote">
+        {
+          reservation.quote ? (
+            <span class="quote-summary">
+              <span>
+                <strong>Quote #{reservation.quote.number}:</strong>{" "}
+                {formatQuoteAmount(reservation.quote.amount)}
+              </span>
+              <span
+                class:list={[
+                  "quote-status-pill",
+                  `quote-status-pill--${reservation.quote.status}`,
+                ]}
+              >
+                {reservation.quote.status === "paid" ? "Paid" : "Unpaid"}
+              </span>
+            </span>
+          ) : (
+            <span class="text-muted">No quote attached</span>
+          )
+        }
+        <Fragment slot="actions">
+          <button type="button" class="checklist-icon-btn" aria-label="Copy quote link">
+            <Icon name="copy" />
+          </button>
+          <button type="button" class="checklist-icon-btn" aria-label="Send quote">
+            <Icon name="mail" /><span>Send</span>
+          </button>
+          <button type="button" class="checklist-icon-btn" aria-label="Download quote">
+            <Icon name="download" />
+          </button>
+          <a href="#">View Quotes</a>
+        </Fragment>
+      </ChecklistItem>
+
+      <div class="checklist-pilots-wrap">
+        <ChecklistItem status={checklistPilotStatus} label="Pilots">
+          <div class="checklist-pilot-list">
+            {
+              pilotConflictsList.map(({ pilot, account }) => {
+                if (!account) return null;
+                return (
+                  <div class="checklist-pilot">
+                    <span class="checklist-pilot__pos">{pilot.position}</span>
+                    <span class="checklist-pilot__name">
+                      {accountFullName(account)}
+                    </span>
+                    <span class="checklist-pilot__legs">Legs</span>
+                    {reservation.legs.map((leg) => (
+                      <span
+                        class:list={[
+                          "checklist-leg-check",
+                          pilot.legIds.includes(leg.id) && "is-on",
+                        ]}
+                        aria-label={`Leg ${leg.origin}-${leg.destination}: ${pilot.legIds.includes(leg.id) ? "assigned" : "unassigned"}`}
+                      >
+                        {pilot.legIds.includes(leg.id) && <Icon name="check" />}
+                      </span>
+                    ))}
+                  </div>
+                );
+              })
+            }
+          </div>
+          {
+            anyPilotConflict && (
+              <div class="pilot-conflicts" role="note">
+                {pilotConflictsList
+                  .filter((p) => p.groups.length > 0 && p.account)
+                  .map(({ account, groups }) => (
+                    <div class="pilot-conflicts__person">
+                      <strong>{accountFullName(account!)}</strong>
+                      <ul>
+                        {groups.map((g) => (
+                          <li>
+                            Legs {g.legIndices.map((i) => i + 1).join(", ")}:
+                            has conflicts: {g.message}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+              </div>
+            )
+          }
+          <Fragment slot="actions">
+            <a href="#" data-reservation-tab-link="people">View Pilots</a>
+          </Fragment>
+        </ChecklistItem>
+      </div>
+
+      <ChecklistItem status={checklistPassengerStatus} label="Passengers">
+        {
+          passengers.length === 0 ? (
+            <span class="text-muted">No passengers added</span>
+          ) : (
+            <span>
+              {passengers.length} passenger{passengers.length === 1 ? "" : "s"}
+              {contact && (
+                <span class="text-muted"> · primary: {contactFullName(contact)}</span>
+              )}
+            </span>
+          )
+        }
+        <Fragment slot="actions">
+          <a href="#" data-reservation-tab-link="people">View Passengers</a>
+        </Fragment>
+      </ChecklistItem>
+    </div>
+  </section>
+
+  {/* ───────── Details ───────── */}
+  <section
+    data-reservation-panel="details"
+    class="reservation-panel"
+    hidden
+  >
+    <div class="reservation-panel__head">
+      <h2>Reservation Details</h2>
+    </div>
+    <dl class="reservation-fields">
+      <div>
+        <dt>Aircraft</dt>
+        <dd>
+          {
+            aircraft && (
+              <>
+                <Icon name="aircraft" />
+                <span>{aircraft.tail}</span>
+              </>
+            )
+          }
+        </dd>
+      </div>
+      <div>
+        <dt>Type</dt>
+        <dd>{reservation.activity}</dd>
+      </div>
+      <div>
+        <dt>Company</dt>
+        <dd>{company?.name ?? "-"}</dd>
+      </div>
+      <div>
+        <dt>Customer</dt>
+        <dd>{contact ? contactFullName(contact) : "-"}</dd>
+      </div>
+      <div>
+        <dt>Salesperson</dt>
+        <dd>{salesperson?.name ?? "-"}</dd>
+      </div>
+      <div></div>
+      <div>
+        <dt>Order #</dt>
+        <dd>{reservation.orderNumber ?? "-"}</dd>
+      </div>
+      <div>
+        <dt>Tags</dt>
+        <dd>{reservation.tags.length > 0 ? reservation.tags.join(", ") : "-"}</dd>
+      </div>
+    </dl>
+  </section>
+
+  {/* ───────── Itinerary ───────── */}
+  <section
+    data-reservation-panel="itinerary"
+    class="reservation-panel"
+    hidden
+  >
+    <div class="reservation-panel__head">
+      <h2>Itinerary</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <div class="itinerary-actions">
+        <Button icon="edit">Edit Itinerary</Button>
+        <Button icon="plus">Add Trip Leg</Button>
+      </div>
+      <table class="datatable itinerary-table">
+        <colgroup>
+          <col style="width: 16%" />
+          <col style="width: 24%" />
+          <col style="width: 24%" />
+          <col style="width: 28%" />
+          <col style="width: 8%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Depart</th>
+            <th>Arrive</th>
+            <th>Info</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            reservation.legs.map((leg) => {
+              const tz = formatLegTimezone(leg.origin);
+              const arrival = legArrival(leg);
+              const block = legBlockMinutes(leg);
+              const duty = legDutyMinutes(leg);
+              const reg = legRegulation(leg);
+              const departLabel = `${formatLegItineraryDate(leg.departure).slice(2, 4)}/${formatLegItineraryDate(leg.departure).slice(4, 6)}/${formatLegItineraryDate(leg.departure).slice(6, 8)}`;
+              const arriveLabel = `${formatLegItineraryDate(arrival).slice(2, 4)}/${formatLegItineraryDate(arrival).slice(4, 6)}/${formatLegItineraryDate(arrival).slice(6, 8)}`;
+              const hm = (d: Date) =>
+                new Intl.DateTimeFormat("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                }).format(d);
+              return (
+                <tr>
+                  <td>
+                    <div class="itinerary-cell-trip">
+                      <strong>
+                        #{leg.flightNumber ?? leg.id.slice(0, 4).toUpperCase()}
+                      </strong>
+                      <span class="itinerary-flag" title="Flight bundle">
+                        <Icon name="copy" />
+                        <span>FB</span>
+                      </span>
+                    </div>
+                    <span class="itinerary-cell-sub">Part {reg}</span>
+                  </td>
+                  <td>
+                    <strong>{leg.origin}</strong>
+                    <span class="itinerary-cell-sub">
+                      {departLabel} {hm(leg.departure)} {tz}
+                    </span>
+                  </td>
+                  <td>
+                    <strong>{leg.destination}</strong>
+                    <span class="itinerary-cell-sub">
+                      {arriveLabel} {hm(arrival)} {tz}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="itinerary-info">
+                      <span><strong>Block:</strong> {formatBlockDuration(block)}</span>
+                      <span><strong>Duty:</strong> {formatBlockDuration(duty)}</span>
+                      <span><strong>PAX:</strong> {leg.passengers}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="datatable-actions">
+                      <button
+                        type="button"
+                        class="reservation-row-action"
+                        data-open-modal={`edit-leg-${leg.id}`}
+                        aria-label="Edit trip leg"
+                      >
+                        <Icon name="edit" />
+                      </button>
+                      <button
+                        type="button"
+                        class="reservation-row-action"
+                        aria-label="Delete trip leg"
+                      >
+                        <Icon name="trash" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+      <div class="itinerary-totals">
+        <p>
+          <strong>Total Block:</strong>{" "}
+          {formatBlockDuration(
+            reservation.legs.reduce((sum, l) => sum + legBlockMinutes(l), 0),
+          )}
+        </p>
+        <p>
+          <strong>Total Duty:</strong>{" "}
+          {formatBlockDuration(
+            reservation.legs.reduce((sum, l) => sum + legDutyMinutes(l), 0),
+          )}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* ───────── People ───────── */}
+  <section data-reservation-panel="people" class="reservation-panel" hidden>
+    <div class="reservation-panel__head">
+      <h2>Pilots</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <table class="datatable people-table">
+        <colgroup>
+          <col style="width: 16%" />
+          <col style="width: 8%" />
+          <col style="width: 18%" />
+          <col style="width: 22%" />
+          {reservation.legs.map(() => <col />)}
+          <col style="width: 6%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Pilot</th>
+            <th>Position</th>
+            <th>Info</th>
+            <th>Contact</th>
+            {
+              reservation.legs.map((leg) => (
+                <th class="people-leg-th">
+                  <span class="people-leg-th__date">
+                    {new Intl.DateTimeFormat("en-US", {
+                      month: "short",
+                      day: "2-digit",
+                    })
+                      .format(leg.departure)
+                      .toUpperCase()}
+                  </span>
+                  <span class="people-leg-th__route">
+                    {leg.origin} <Icon name="arrow-right" /> {leg.destination}
+                  </span>
+                </th>
+              ))
+            }
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            pilots.map((pilot) => {
+              const account = pilotAccount(pilot.accountId);
+              if (!account) return null;
+              return (
+                <tr>
+                  <td><strong>{accountFullName(account)}</strong></td>
+                  <td>
+                    <span class="position-pill">{pilot.position}</span>
+                  </td>
+                  <td>
+                    <div class="people-info">
+                      <span>
+                        <strong>DOB:</strong>{" "}
+                        {account.birthDate ? dobFmt.format(account.birthDate) : "-"}
+                      </span>
+                      <span><strong>Gender:</strong> {account.gender ?? ""}</span>
+                      <span><strong>Weight:</strong> {account.weight ?? ""}</span>
+                    </div>
+                  </td>
+                  <td>{account.email}</td>
+                  {reservation.legs.map((leg) => (
+                    <td class="people-leg-cell">
+                      <span
+                        class:list={[
+                          "checklist-leg-check",
+                          pilot.legIds.includes(leg.id) && "is-on",
+                        ]}
+                      >
+                        {pilot.legIds.includes(leg.id) && <Icon name="check" />}
+                      </span>
+                    </td>
+                  ))}
+                  <td>
+                    <button
+                      type="button"
+                      class="reservation-row-action"
+                      aria-label={`Remove ${accountFullName(account)}`}
+                    >
+                      <Icon name="trash" />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="reservation-panel__head reservation-panel__head--gap">
+      <h2>Passengers</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <div class="people-actions">
+        <Button icon="plus">Add Passenger</Button>
+      </div>
+      <table class="datatable people-table">
+        <colgroup>
+          <col style="width: 18%" />
+          <col style="width: 24%" />
+          <col style="width: 22%" />
+          {reservation.legs.map(() => <col />)}
+          <col style="width: 6%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Passenger</th>
+            <th>Info</th>
+            <th>Contact</th>
+            {
+              reservation.legs.map((leg) => (
+                <th class="people-leg-th">
+                  <span class="people-leg-th__date">
+                    {new Intl.DateTimeFormat("en-US", {
+                      month: "short",
+                      day: "2-digit",
+                    })
+                      .format(leg.departure)
+                      .toUpperCase()}
+                  </span>
+                  <span class="people-leg-th__route">
+                    {leg.origin} <Icon name="arrow-right" /> {leg.destination}
+                  </span>
+                </th>
+              ))
+            }
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            passengers.length === 0 ? (
+              <tr>
+                <td colspan={4 + reservation.legs.length} class="empty-row">
+                  No passengers added
+                </td>
+              </tr>
+            ) : (
+              passengers.map((pax) => {
+                const c = getContact(pax.contactId);
+                if (!c) return null;
+                return (
+                  <tr>
+                    <td><strong>{contactFullName(c)}</strong></td>
+                    <td>
+                      <div class="people-info">
+                        <span>
+                          <strong>DOB:</strong>{" "}
+                          {c.dateOfBirth ? dobFmt.format(c.dateOfBirth) : "-"}
+                        </span>
+                        <span><strong>Gender:</strong> {c.gender ?? ""}</span>
+                        <span><strong>Weight:</strong> {c.weight ?? ""}</span>
+                      </div>
+                    </td>
+                    <td>{c.email || (!c.hidePhone && c.phone) || ""}</td>
+                    {reservation.legs.map((leg) => (
+                      <td class="people-leg-cell">
+                        <span
+                          class:list={[
+                            "checklist-leg-check",
+                            pax.legIds.includes(leg.id) && "is-on",
+                          ]}
+                        >
+                          {pax.legIds.includes(leg.id) && <Icon name="check" />}
+                        </span>
+                      </td>
+                    ))}
+                    <td>
+                      <button
+                        type="button"
+                        class="reservation-row-action"
+                        aria-label={`Remove ${contactFullName(c)}`}
+                      >
+                        <Icon name="trash" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {/* ───────── Flight Logs ───────── */}
+  <section
+    data-reservation-panel="flight-logs"
+    class="reservation-panel"
+    hidden
+  >
+    <div class="reservation-panel__head">
+      <h2>Flight Logs</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <table class="datatable flight-log-table">
+        <colgroup>
+          <col style="width: 16%" />
+          <col style="width: 14%" />
+          <col style="width: 14%" />
+          <col style="width: 20%" />
+          <col style="width: 22%" />
+          <col style="width: 8%" />
+          <col style="width: 6%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Flight</th>
+            <th>Out/In</th>
+            <th>Off/On</th>
+            <th>Hobbs</th>
+            <th>Fuel</th>
+            <th>Pax</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            reservation.legs.map((leg) => {
+              const log = reservation.flightLogs?.find((l) => l.legId === leg.id);
+              const hobbsOut = log?.hobbsOut ?? 0;
+              const hobbsIn = log?.hobbsIn ?? 0;
+              const total = log?.totalHours ?? 0;
+              const fuelAdd = log?.fuelAdd ?? 0;
+              const fuelOut = log?.fuelOut ?? 0;
+              const fuelIn = log?.fuelIn ?? 0;
+              const fuelBurn = log?.fuelBurn ?? 0;
+              const pax = log?.pax ?? 0;
+              const dateLabel = `${formatLegItineraryDate(leg.departure).slice(2, 4)}/${formatLegItineraryDate(leg.departure).slice(4, 6)}/${formatLegItineraryDate(leg.departure).slice(6, 8)}`;
+              return (
+                <tr>
+                  <td>
+                    <strong>
+                      {leg.origin} - {leg.destination}
+                    </strong>
+                    <span class="itinerary-cell-sub">{dateLabel}</span>
+                  </td>
+                  <td>
+                    <div class="flight-log-pair">
+                      <strong>OUT:</strong>
+                      <strong>IN:</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flight-log-pair">
+                      <strong>OFF:</strong>
+                      <strong>ON:</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flight-log-pair">
+                      <strong>OUT: {hobbsOut}</strong>
+                      <strong>IN: {hobbsIn}</strong>
+                      <strong>TOTAL: {total.toFixed(1)} hrs</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flight-log-pair">
+                      <strong>ADD: {fuelAdd}</strong>
+                      <strong>OUT: {fuelOut}</strong>
+                      <strong>IN: {fuelIn}</strong>
+                      <strong>BURN: {fuelBurn} lbs</strong>
+                    </div>
+                  </td>
+                  <td>{pax}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="reservation-row-action"
+                      aria-label="Edit flight log"
+                    >
+                      <Icon name="edit" />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {/* ───────── Quotes ───────── */}
+  <section data-reservation-panel="quotes" class="reservation-panel" hidden>
+    <div class="reservation-panel__head">
+      <h2>Quotes</h2>
+    </div>
+    <div class="reservation-panel__body">
+      {
+        reservation.quote ? (
+          <table class="datatable">
+            <thead>
+              <tr>
+                <th>Quote</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong>#{reservation.quote.number}</strong>
+                </td>
+                <td>{formatQuoteAmount(reservation.quote.amount)}</td>
+                <td>
+                  <span
+                    class:list={[
+                      "quote-status-pill",
+                      `quote-status-pill--${reservation.quote.status}`,
+                    ]}
+                  >
+                    {reservation.quote.status === "paid" ? "Paid" : "Unpaid"}
+                  </span>
+                </td>
+                <td>
+                  <div class="datatable-actions">
+                    <button type="button" class="reservation-row-action" aria-label="View quote">
+                      <Icon name="eye" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        ) : (
+          <p class="empty-row">No quotes yet.</p>
+        )
+      }
+    </div>
+  </section>
+
+  {/* ───────── Documents ───────── */}
+  <section
+    data-reservation-panel="documents"
+    class="reservation-panel"
+    hidden
+  >
+    <div class="reservation-panel__head">
+      <h2>Documents</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <table class="datatable">
+        <thead>
+          <tr><th>File Name</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="empty-row">No results</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {/* ───────── Audit ───────── */}
+  <section data-reservation-panel="audit" class="reservation-panel" hidden>
+    <div class="reservation-panel__head">
+      <h2>Audit</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <p class="empty-row">Audit log not implemented in this reconstruction.</p>
+    </div>
+  </section>
+
+  {
+    reservation.legs.map((leg) => (
+      <EditTripLegModal id={`edit-leg-${leg.id}`} leg={leg} />
+    ))
+  }
+</AirpeggioLayout>
+
+<script>
+  const buttons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-reservation-tab]"),
+  );
+  const panels = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-reservation-panel]"),
+  );
+
+  const activate = (target: string) => {
+    for (const button of buttons) {
+      const isActive = button.dataset.reservationTab === target;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    }
+    for (const panel of panels) {
+      panel.hidden = panel.dataset.reservationPanel !== target;
+    }
+  };
+
+  for (const button of buttons) {
+    button.addEventListener("click", () => {
+      const target = button.dataset.reservationTab;
+      if (target) activate(target);
+    });
+  }
+
+  // Inline anchor links inside the checklist that jump to a specific tab.
+  document
+    .querySelectorAll<HTMLAnchorElement>("[data-reservation-tab-link]")
+    .forEach((link) => {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        const target = link.dataset.reservationTabLink;
+        if (target) activate(target);
+      });
+    });
+</script>
+
+<style>
+  .reservation-detail-head {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 12px;
+
+    h1 {
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+      font-size: 15px;
+
+      a {
+        color: var(--air-muted);
+        text-decoration: none;
+      }
+
+      strong {
+        color: var(--air-ink);
+      }
+    }
+
+    @media (max-width: 880px) {
+      grid-template-columns: 28px 1fr;
+
+      .reservation-detail-head__actions {
+        grid-column: 1 / -1;
+        flex-wrap: wrap;
+      }
+    }
+  }
+
+  .reservation-back {
+    display: inline-grid;
+    place-items: center;
+    color: var(--air-ink);
+    text-decoration: none;
+  }
+
+  .reservation-detail-head__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .reservation-tab-nav-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0 22px;
+  }
+
+  .reservation-panel {
+    overflow: hidden;
+    margin-bottom: 22px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+  }
+
+  .reservation-panel__head {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--air-line);
+    color: var(--air-ink);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    h2 {
+      margin: 0;
+      font-size: inherit;
+      font-weight: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+    }
+  }
+
+  .reservation-panel__head--gap {
+    margin-top: 22px;
+    border-top: 1px solid var(--air-line);
+  }
+
+  .reservation-panel__body {
+    padding: 18px 22px 22px;
+  }
+
+  /* Checklist tab uses its own zero-padding body */
+  .reservation-checklist {
+    padding: 0;
+  }
+
+  .reservation-checklist__itinerary {
+    display: grid;
+    gap: 4px;
+    font-size: 14px;
+
+    > div {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .itinerary-pill {
+      display: inline-grid;
+      place-items: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border: 1px solid var(--air-line);
+      border-radius: 4px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+  }
+
+  .checklist-pilots-wrap {
+    position: relative;
+  }
+
+  .checklist-pilot-list {
+    display: grid;
+    gap: 6px;
+  }
+
+  .checklist-pilot {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .checklist-pilot__pos {
+    min-width: 30px;
+    color: var(--air-ink);
+    font-weight: 800;
+  }
+
+  .checklist-pilot__name {
+    color: var(--air-ink);
+  }
+
+  .checklist-pilot__legs {
+    margin-left: 8px;
+    color: var(--air-muted);
+    font-weight: 600;
+  }
+
+  .checklist-leg-check {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--air-line);
+    border-radius: 4px;
+    background: #fff;
+    color: transparent;
+
+    :global(.air-icon) {
+      width: 14px;
+      height: 14px;
+    }
+
+    &.is-on {
+      background: var(--air-purple);
+      border-color: var(--air-purple);
+      color: #fff;
+    }
+  }
+
+  .pilot-conflicts {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border: 1px solid #f3d8a2;
+    border-radius: 6px;
+    background: #fff8e8;
+    color: var(--air-ink);
+    font-size: 13px;
+    line-height: 1.45;
+
+    strong {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 800;
+    }
+
+    ul {
+      margin: 0 0 8px;
+      padding-left: 18px;
+    }
+
+    .pilot-conflicts__person + .pilot-conflicts__person {
+      margin-top: 8px;
+    }
+  }
+
+  .quote-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 14px;
+  }
+
+  .quote-status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .quote-status-pill--unpaid {
+    background: #2550ad;
+    color: #fff;
+  }
+
+  .quote-status-pill--paid {
+    background: var(--air-green);
+    color: #fff;
+  }
+
+  .checklist-icon-btn {
+    display: inline-grid;
+    grid-auto-flow: column;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border: 0;
+    background: transparent;
+    color: var(--air-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      color: var(--air-purple);
+    }
+  }
+
+  /* Details panel */
+  .reservation-fields {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 28px 24px;
+    margin: 0;
+    padding: 24px 22px 28px;
+
+    @media (max-width: 760px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    > div {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    dt {
+      color: var(--air-muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    dd {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--air-ink);
+      font-size: 16px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+      margin: 0;
+
+      :global(.air-icon) {
+        width: 18px;
+        height: 18px;
+        color: #b24b4a;
+      }
+    }
+  }
+
+  /* Itinerary */
+  .itinerary-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .itinerary-table {
+    td {
+      vertical-align: middle;
+    }
+  }
+
+  .itinerary-cell-trip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+
+    strong {
+      font-weight: 800;
+    }
+  }
+
+  .itinerary-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 14px;
+    background: #e3f6ea;
+    color: #138645;
+    font-size: 11px;
+    font-weight: 800;
+
+    :global(.air-icon) {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  .itinerary-cell-sub {
+    display: block;
+    color: var(--air-muted);
+    font-weight: 500;
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  .itinerary-info {
+    display: grid;
+    gap: 2px;
+    font-size: 13.5px;
+  }
+
+  .itinerary-totals {
+    display: flex;
+    gap: 26px;
+    margin-top: 18px;
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--air-ink);
+    }
+  }
+
+  /* People */
+  .people-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 14px;
+  }
+
+  .people-table {
+    th,
+    td {
+      vertical-align: middle;
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+  }
+
+  .people-leg-th {
+    text-align: center;
+    font-weight: 800;
+
+    > span {
+      display: block;
+    }
+  }
+
+  .people-leg-th__date {
+    font-size: 11px;
+    color: var(--air-muted);
+    letter-spacing: 0.08em;
+  }
+
+  .people-leg-th__route {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 2px;
+    color: var(--air-ink);
+    font-size: 12px;
+    text-transform: none;
+    letter-spacing: 0;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  .people-leg-cell {
+    text-align: center;
+  }
+
+  .position-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 46px;
+    padding: 4px 10px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    font-weight: 800;
+  }
+
+  .people-info {
+    display: grid;
+    gap: 2px;
+    font-size: 13px;
+
+    strong {
+      font-weight: 800;
+    }
+  }
+
+  .empty-row {
+    padding: 36px 18px;
+    text-align: center;
+    color: var(--air-muted);
+    font-weight: 600;
+  }
+
+  /* Flight logs */
+  .flight-log-table td {
+    vertical-align: middle;
+  }
+
+  .flight-log-pair {
+    display: grid;
+    gap: 2px;
+    font-size: 13px;
+
+    strong {
+      font-weight: 800;
+    }
+  }
+
+  /* Row action buttons shared by tabs */
+  .reservation-row-action {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--air-ink);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--air-panel-soft);
+    }
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+</style>

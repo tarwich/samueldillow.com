@@ -1,0 +1,268 @@
+---
+import AirpeggioLayout from "../_layout.astro";
+import Button from "../_components/Button.astro";
+import ColumnsPopover from "../_components/ColumnsPopover.astro";
+import CustomerModal from "./_components/CustomerModal.astro";
+import Icon from "../_components/Icon.astro";
+import PageHeader from "../_components/PageHeader.astro";
+import {
+  CONTACTS,
+  CUSTOMERS,
+  SALESPEOPLE,
+  contactDisplayName,
+} from "../_data";
+
+const customerById = new Map(CUSTOMERS.map((c) => [c.id, c]));
+const salespersonById = new Map(SALESPEOPLE.map((s) => [s.id, s]));
+
+const emailFmt = (email: string, max = 28) =>
+  email.length > max ? email.slice(0, max - 3) + "..." : email;
+
+const lastActiveFmt = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
+
+const rows = CONTACTS.slice(0, 10).map((contact) => {
+  const company = customerById.get(contact.customerId);
+  const salesperson = contact.salespersonId
+    ? salespersonById.get(contact.salespersonId)
+    : undefined;
+  return { contact, company, salesperson };
+});
+
+// Edit drawer reuses one CustomerModal instance. Server-render with the first
+// contact so the form has realistic content; the page script swaps fields on
+// open per row.
+const editContact = CONTACTS[0];
+---
+
+<AirpeggioLayout
+  title="Airpeggio Customers | Samuel Dillow"
+  active="customers"
+>
+  <div class="customers-view">
+    <PageHeader
+      search
+      searchLabel="Search customers"
+      searchTable="customers-table"
+    >
+      <h1 slot="title">Customers</h1>
+      <Fragment slot="actions">
+        <Button href="/portfolio/airpeggio/companies/">Manage Companies</Button>
+        <Button variant="primary" icon="plus" data-open-modal="add-customer"
+          >Add Customer</Button
+        >
+      </Fragment>
+      <Fragment slot="tools">
+        <ColumnsPopover
+          columns={[
+            "Name",
+            "Company",
+            "Mobile Number",
+            "Trips",
+            "Salesperson",
+            "Last Active",
+          ]}
+        />
+      </Fragment>
+    </PageHeader>
+
+    <section aria-label="Customers list">
+      <table id="customers-table" class="datatable customers-table">
+        <colgroup>
+          <col style="width: 22%" />
+          <col style="width: 18%" />
+          <col style="width: 14%" />
+          <col style="width: 8%" />
+          <col style="width: 14%" />
+          <col style="width: 14%" />
+          <col style="width: 10%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Company</th>
+            <th>Mobile Number</th>
+            <th>Trips</th>
+            <th>Salesperson</th>
+            <th>Last Active</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            rows.map(({ contact, company, salesperson }) => (
+              <tr data-customer-id={contact.id}>
+                <td>
+                  <a
+                    class="customers-name-link"
+                    href={`/portfolio/airpeggio/customers/${contact.id}/`}
+                  >
+                    <strong>{contactDisplayName(contact)}</strong>
+                  </a>
+                  <br />
+                  <span class="text-muted">{emailFmt(contact.email)}</span>
+                </td>
+                <td>{company?.name ?? ""}</td>
+                <td class="customers-cell-center">
+                  {contact.hidePhone ? "" : contact.phone}
+                </td>
+                <td class="customers-cell-center">{contact.tripsCount}</td>
+                <td class="customers-cell-center">{salesperson?.name ?? "-"}</td>
+                <td class="customers-cell-center">
+                  {contact.lastActive
+                    ? lastActiveFmt.format(contact.lastActive)
+                    : "-"}
+                </td>
+                <td style={{ verticalAlign: "middle" }}>
+                  <div class="datatable-actions">
+                    <a
+                      class="customers-row-action"
+                      href={`/portfolio/airpeggio/customers/${contact.id}/`}
+                      aria-label={`View ${contactDisplayName(contact)}`}
+                    >
+                      <Icon name="eye" />
+                    </a>
+                    <button
+                      type="button"
+                      class="customers-row-action"
+                      aria-label={`Edit ${contactDisplayName(contact)}`}
+                      data-open-modal="edit-customer"
+                    >
+                      <Icon name="edit" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="customers-pagination" aria-label="Pagination">
+      <div class="customers-page-size">
+        <span>Items per page</span>
+        <button type="button">20 <Icon name="chevron-down" /></button>
+        <strong>Records 1 - {Math.min(20, rows.length)} of {rows.length}</strong>
+      </div>
+      <nav class="customers-page-nav" aria-label="Customer pages">
+        <button type="button" disabled>First</button>
+        <button type="button">Last</button>
+        <button type="button" class="is-current">1</button>
+        <button type="button" disabled><Icon name="arrow-left" /></button>
+        <button type="button"><Icon name="arrow-right" /></button>
+      </nav>
+    </footer>
+
+    <CustomerModal id="add-customer" mode="add" />
+    <CustomerModal id="edit-customer" mode="edit" customer={editContact} />
+  </div>
+</AirpeggioLayout>
+
+<style>
+  .customers-table {
+    margin-top: 6px;
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+
+    td {
+      vertical-align: middle;
+    }
+
+    .text-muted {
+      font-weight: 500;
+    }
+  }
+
+  .customers-cell-center {
+    text-align: center;
+  }
+
+  .customers-name-link {
+    color: var(--air-ink);
+    text-decoration: none;
+
+    &:hover strong {
+      text-decoration: underline;
+    }
+  }
+
+  .customers-row-action {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--air-ink);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--air-panel-soft);
+    }
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .customers-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 40px;
+    padding: 0 16px;
+
+    @media (max-width: 760px) {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  .customers-page-size,
+  .customers-page-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--air-ink);
+    font-size: 13px;
+  }
+
+  .customers-page-size button,
+  .customers-page-nav button {
+    min-width: 64px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid var(--air-line);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+  }
+
+  .customers-page-nav button {
+    min-width: 48px;
+
+    &[disabled] {
+      color: #b4bdca;
+      background: #fbfcfe;
+    }
+
+    &.is-current {
+      border-color: var(--air-purple);
+      color: var(--air-purple);
+    }
+  }
+</style>

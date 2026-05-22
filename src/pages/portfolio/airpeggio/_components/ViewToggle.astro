@@ -1,0 +1,59 @@
+---
+import Icon from "./Icon.astro";
+
+interface Option {
+  icon: string;
+  label: string;
+  value?: string;
+  active?: boolean;
+}
+
+interface Props {
+  label: string;
+  options: Option[];
+}
+
+const { label, options } = Astro.props;
+---
+
+<div class="air-view-toggle" aria-label={label}>
+  {
+    options.map((option) => (
+      <button
+        class:list={[{ "is-active": option.active }]}
+        type="button"
+        aria-label={option.label}
+        aria-pressed={option.active ? "true" : "false"}
+        {...(option.value ? { "data-view-option": option.value } : {})}
+      >
+        <Icon name={option.icon} />
+      </button>
+    ))
+  }
+</div>
+
+<style>
+  .air-view-toggle {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.12);
+
+    button {
+      width: 44px;
+      height: 44px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid transparent;
+      background: #fff;
+      color: var(--air-ink);
+      cursor: pointer;
+
+      &:first-child { border-radius: 9px 0 0 9px; }
+      &:last-child { border-radius: 0 9px 9px 0; }
+
+      &.is-active { background: #dfe5ed; }
+    }
+  }
+</style>

@@ -1,0 +1,235 @@
+---
+import AirpeggioLayout from "../_layout.astro";
+import Button from "../_components/Button.astro";
+import ColumnsPopover from "../_components/ColumnsPopover.astro";
+import CompanyModal from "./_components/CompanyModal.astro";
+import CompanyViewModal from "./_components/CompanyViewModal.astro";
+import Icon from "../_components/Icon.astro";
+import PageHeader from "../_components/PageHeader.astro";
+import { CUSTOMERS } from "../_data";
+
+const companies = [...CUSTOMERS].sort((a, b) =>
+  a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+);
+
+// Edit drawer reuses one CompanyModal instance. Server-render with the first
+// company so the form has realistic content; the page script swaps fields on
+// open per row.
+const editCompany = companies[0];
+---
+
+<AirpeggioLayout
+  title="Airpeggio Companies | Samuel Dillow"
+  active="customers"
+>
+  <div class="companies-view">
+    <PageHeader
+      search
+      searchLabel="Search companies"
+      searchTable="companies-table"
+    >
+      <h1 slot="title">Companies</h1>
+      <Fragment slot="actions">
+        <Button variant="primary" icon="plus" data-open-modal="add-company">
+          Add Company
+        </Button>
+      </Fragment>
+      <Fragment slot="tools">
+        <ColumnsPopover columns={["Name", "Address", "Phone", "Email"]} />
+      </Fragment>
+    </PageHeader>
+
+    <section aria-label="Companies list">
+      <table id="companies-table" class="datatable companies-table">
+        <colgroup>
+          <col style="width: 26%" />
+          <col style="width: 30%" />
+          <col style="width: 16%" />
+          <col style="width: 20%" />
+          <col style="width: 8%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            companies.map((company) => {
+              const popId = `delete-company-${company.id}`;
+              return (
+                <tr
+                  data-company-id={company.id}
+                  data-company-name={company.name}
+                  data-company-address={company.address ?? ""}
+                  data-company-phone={company.phone ?? ""}
+                  data-company-email={company.email ?? ""}
+                  data-company-notes={company.notes ?? ""}
+                >
+                  <td>
+                    <strong>{company.name}</strong>
+                  </td>
+                  <td class="text-muted">{company.address ?? ""}</td>
+                  <td class="text-muted">{company.phone ?? ""}</td>
+                  <td class="text-muted">{company.email ?? ""}</td>
+                  <td style={{ verticalAlign: "middle" }}>
+                    <div class="datatable-actions">
+                      <button
+                        type="button"
+                        class="companies-row-action"
+                        data-open-modal={`view-company-${company.id}`}
+                        aria-label={`View ${company.name}`}
+                      >
+                        <Icon name="eye" />
+                      </button>
+                      <button
+                        type="button"
+                        class="companies-row-action"
+                        data-edit-company
+                        aria-label={`Edit ${company.name}`}
+                      >
+                        <Icon name="edit" />
+                      </button>
+                      <button
+                        type="button"
+                        class="companies-row-action"
+                        popovertarget={popId}
+                        aria-label={`Delete ${company.name}`}
+                      >
+                        <Icon name="trash" />
+                      </button>
+                      <div id={popId} popover class="company-delete-confirm">
+                        <p>
+                          Are you sure you want to delete the "{company.name}"
+                          company?
+                        </p>
+                        <div class="company-delete-confirm__actions">
+                          <Button variant="ghost" popovertarget={popId}>
+                            Cancel
+                          </Button>
+                          <Button variant="danger">Delete</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <CompanyModal id="add-company" mode="add" />
+    <CompanyModal id="edit-company" mode="edit" company={editCompany} />
+
+    {
+      companies.map((company) => (
+        <CompanyViewModal
+          id={`view-company-${company.id}`}
+          company={company}
+        />
+      ))
+    }
+  </div>
+</AirpeggioLayout>
+
+<script>
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-edit-company]")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const row = btn.closest<HTMLTableRowElement>("tr[data-company-id]");
+        if (!row) return;
+        const modal = document.getElementById("edit-company");
+        if (!(modal instanceof HTMLDialogElement)) return;
+
+        const fields = ["name", "address", "phone", "email", "notes"] as const;
+        for (const key of fields) {
+          const datasetKey =
+            "company" + key.charAt(0).toUpperCase() + key.slice(1);
+          const value = row.dataset[datasetKey] ?? "";
+          const field = modal.querySelector<
+            HTMLInputElement | HTMLTextAreaElement
+          >(`#edit-company-${key}`);
+          if (field) field.value = value;
+        }
+        modal.showModal();
+      });
+    });
+
+</script>
+
+<style>
+  .companies-table {
+    margin-top: 6px;
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+
+    td {
+      vertical-align: middle;
+    }
+
+    .text-muted {
+      font-weight: 500;
+    }
+  }
+
+  .companies-row-action {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--air-ink);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--air-panel-soft);
+    }
+
+    :global(.air-icon) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .company-delete-confirm {
+    margin: 0;
+    padding: 20px 22px 18px;
+    width: 320px;
+    border: 1px solid var(--air-line);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--air-ink);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+    /* Browser sets the trash button as the implicit anchor via popovertarget. */
+    position-area: top span-left;
+    margin-bottom: 10px;
+
+    p {
+      margin: 0 0 16px;
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.3;
+      text-align: left;
+      max-width: 100%;
+      white-space: initial;
+    }
+  }
+
+  .company-delete-confirm__actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+</style>

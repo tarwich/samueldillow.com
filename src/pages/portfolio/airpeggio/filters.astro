@@ -1,0 +1,150 @@
+---
+import AirpeggioLayout from "./_layout.astro";
+import AddFilterModal from "./_components/AddFilterModal.astro";
+import Button from "./_components/Button.astro";
+import ColumnsPopover from "./_components/ColumnsPopover.astro";
+import Icon from "./_components/Icon.astro";
+import PageHeader from "./_components/PageHeader.astro";
+import { INBOX_FILTERS, inboxFilterToDisplay } from "./_data";
+
+const sourceFilters = INBOX_FILTERS.slice(0, 10);
+const filters = sourceFilters.map(inboxFilterToDisplay);
+const defaultFilter = sourceFilters[0];
+---
+
+<AirpeggioLayout title="Airpeggio Inbox Filters | Samuel Dillow" active="inbox">
+  <PageHeader search searchTable="filters-table">
+    <Fragment slot="title">
+      <a class="air-back" href="/portfolio/airpeggio/" aria-label="Back to inbox"><Icon name="arrow-left" /></a>
+      <h1>Inbox Filters</h1>
+    </Fragment>
+    <Fragment slot="actions">
+      <Button variant="primary" icon="plus" data-open-modal="add-filter">Add Inbox Filter</Button>
+    </Fragment>
+    <Fragment slot="tools">
+      <ColumnsPopover columns={["Name", "Priority", "Emails", "Criteria"]} />
+    </Fragment>
+  </PageHeader>
+
+  <section aria-label="Inbox filters">
+    <table id="filters-table" class="datatable filters-table">
+      <colgroup>
+        <col style="width: 12%" />
+        <col style="width: 8%" />
+        <col style="width: 22%" />
+        <col style="width: 54%" />
+        <col style="width: 4%" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Priority</th>
+          <th>Emails</th>
+          <th>Criteria</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          filters.map((filter) => (
+            <tr>
+              <td>{filter.name}</td>
+              <td>{filter.priority}</td>
+              <td>
+                <dl class="filter-emails">
+                  {filter.emails.map(([label, address]) => (
+                    <>
+                      <dt>{label}</dt>
+                      <dd class="truncate" title={address}>
+                        {address}
+                      </dd>
+                    </>
+                  ))}
+                </dl>
+              </td>
+              <td>
+                <dl class="filter-criteria">
+                  {filter.criteria.map(([name, value]) => (
+                    <>
+                      <dt>{name}</dt>
+                      <dd class="truncate" title={value}>
+                        {value}
+                      </dd>
+                    </>
+                  ))}
+                </dl>
+              </td>
+              <td class="filter-edit">
+                <button
+                  type="button"
+                  data-open-modal="add-filter"
+                  aria-label={`Edit ${filter.name}`}
+                >
+                  <Icon name="edit" />
+                </button>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <footer class="pagination">
+      <span>Items per page</span>
+      <Button variant="ghost">20 ⌄</Button>
+      <span>Records 1 - {filters.length} of {filters.length}</span>
+      <div class="pagination-nav">
+        <Button disabled>First</Button>
+        <Button disabled>Last</Button>
+        <Button variant="ghost">1</Button>
+        <Button disabled>‹</Button>
+        <Button disabled>›</Button>
+      </div>
+    </footer>
+  </section>
+
+  <AddFilterModal filter={defaultFilter} />
+</AirpeggioLayout>
+
+<style>
+  .filters-table {
+    .filter-emails,
+    .filter-criteria {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 10px 16px;
+      margin: 0;
+
+      dt,
+      dd {
+        margin: 0;
+        font-weight: 500;
+      }
+
+      dd {
+        font-weight: 700;
+      }
+    }
+
+    .filter-edit {
+      vertical-align: middle;
+
+      button {
+        display: inline-grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: 1px solid var(--air-line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--air-muted);
+        cursor: pointer;
+      }
+
+      button:hover {
+        color: var(--air-ink);
+        border-color: var(--air-ink);
+      }
+    }
+  }
+</style>

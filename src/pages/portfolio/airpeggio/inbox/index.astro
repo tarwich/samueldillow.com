@@ -1,0 +1,589 @@
+---
+import AirpeggioLayout from "../_layout.astro";
+import Badge from "../_components/Badge.astro";
+import Button from "../_components/Button.astro";
+import ColumnsPopover from "../_components/ColumnsPopover.astro";
+import CustomerHoverCard from "../_components/CustomerHoverCard.astro";
+import Icon from "../_components/Icon.astro";
+import PageHeader from "../_components/PageHeader.astro";
+import ViewToggle from "../_components/ViewToggle.astro";
+import Popover from "../_components/Popover.astro";
+import CustomerModal from "../customers/_components/CustomerModal.astro";
+import SelectField from "./_components/SelectField.astro";
+import TextField from "../_components/TextField.astro";
+import QuickQuoteModal from "./_components/QuickQuoteModal.astro";
+import {
+  INBOX_REQUESTS,
+  contactFullName,
+  getAirport,
+  getContact,
+  getCustomer,
+} from "../_data";
+
+const dateFmt = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+const timeFmt = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "UTC",
+});
+const shortDateFmt = new Intl.DateTimeFormat("en-US", {
+  month: "2-digit",
+  day: "2-digit",
+  year: "2-digit",
+  timeZone: "UTC",
+});
+
+const formatDeparture = (date: Date, originIcao: string) => {
+  const tz = getAirport(originIcao)?.timezone ?? "UTC";
+  return `${shortDateFmt.format(date)}, ${timeFmt.format(date)} ${tz}`;
+};
+
+const truncateEmail = (email: string, max = 26) =>
+  email.length > max ? email.slice(0, max - 3) + "..." : email;
+
+const requests = [...INBOX_REQUESTS]
+  .sort((a, b) => b.receivedAt.getTime() - a.receivedAt.getTime())
+  .slice(0, 12)
+  .map((req) => {
+    const contact = getContact(req.contactId);
+    const customer = contact ? getCustomer(contact.customerId) : undefined;
+    return { req, contact, customer };
+  });
+
+const editContact = requests.find(({ contact }) => contact)?.contact;
+
+const airportPositions: Record<string, { x: number; y: number }> = {
+  KVNY: { x: 276, y: 184 },
+  KSDL: { x: 310, y: 205 },
+  KASE: { x: 392, y: 142 },
+  KAPA: { x: 409, y: 156 },
+  KADS: { x: 475, y: 174 },
+  KAUS: { x: 480, y: 198 },
+  KHOU: { x: 510, y: 210 },
+  KBGE: { x: 614, y: 190 },
+  KPBI: { x: 684, y: 220 },
+  KBWI: { x: 668, y: 162 },
+  KTEB: { x: 692, y: 145 },
+  KBED: { x: 713, y: 131 },
+};
+
+const mapLayer = {
+  viewBox: "200 170 300 120",
+  imageX: 24,
+  imageY: 30,
+  imageHeight: 700,
+};
+
+const routeLayer = {
+  viewBox: "180 35 700 405",
+};
+
+const mapLegs = requests
+  .flatMap(({ req }) =>
+    req.legs.map((leg) => ({
+      ...leg,
+      requestId: req.id,
+      status: req.status,
+      originPoint: airportPositions[leg.origin],
+      destinationPoint: airportPositions[leg.destination],
+    })),
+  )
+  .filter((leg) => leg.originPoint && leg.destinationPoint)
+  .slice(0, 28);
+
+const mapAirports = Array.from(
+  new Set(mapLegs.flatMap((leg) => [leg.origin, leg.destination])),
+)
+  .map((icao) => ({ icao, ...airportPositions[icao] }))
+  .filter((airport) => airport.x && airport.y);
+
+const routePath = (
+  origin: { x: number; y: number },
+  destination: { x: number; y: number },
+  index: number,
+) => {
+  const x1 = origin.x;
+  const y1 = origin.y;
+  const x2 = destination.x;
+  const y2 = destination.y;
+  const distance = Math.hypot(x2 - x1, y2 - y1);
+  const curve = Math.min(130, Math.max(34, distance * 0.22));
+  const direction = index % 2 === 0 ? -1 : 1;
+  const cx = (x1 + x2) / 2;
+  const cy = (y1 + y2) / 2 + curve * direction;
+
+  return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+};
+---
+
+<AirpeggioLayout title="Airpeggio Inbox | Samuel Dillow" active="inbox">
+  <div class="inbox-view" data-inbox-view="list">
+    <PageHeader search searchTable="inbox-table">
+      <h1 slot="title">Inbox</h1>
+      <Fragment slot="actions">
+        <Button variant="primary" data-open-modal="quick-quote-modal"
+          >Quick Quote</Button
+        >
+        <Button href="/portfolio/airpeggio/filters/"
+          >Manage Inbox Filters</Button
+        >
+      </Fragment>
+      <div slot="filters">
+        <Popover icon="filter" label="Filter" orientation="bottom">
+          <div class="inbox-filters" aria-label="Filter results">
+            <header class="inbox-filters__head">Filter Results</header>
+            <div class="inbox-filters__body">
+              <div class="inbox-filters__grid">
+                <SelectField label="Type" />
+                <SelectField label="Status" />
+                <SelectField label="Action" />
+                <SelectField label="Inbox Filter" />
+              </div>
+
+              <div class="inbox-filters__section">
+                <h3>Received Between</h3>
+                <div class="inbox-filters__grid">
+                  <TextField
+                    label="Received start date"
+                    placeholder="mm/dd/yyyy"
+                  >
+                    <Icon slot="rightIcon" name="calendar" />
+                  </TextField>
+                  <TextField label="Received end date" placeholder="mm/dd/yyyy">
+                    <Icon slot="rightIcon" name="calendar" />
+                  </TextField>
+                </div>
+              </div>
+
+              <div class="inbox-filters__section">
+                <h3>Date Range</h3>
+                <div class="inbox-filters__grid">
+                  <TextField label="Start date" placeholder="mm/dd/yyyy">
+                    <Icon slot="rightIcon" name="calendar" />
+                  </TextField>
+                  <TextField label="End date" placeholder="mm/dd/yyyy">
+                    <Icon slot="rightIcon" name="calendar" />
+                  </TextField>
+                </div>
+              </div>
+
+              <div class="inbox-filters__grid">
+                <SelectField label="Departs" placeholder="Any Airport" />
+                <SelectField label="Arrives" placeholder="Any Airport" />
+              </div>
+            </div>
+          </div>
+        </Popover>
+      </div>
+
+      <Fragment slot="filters" slot="tools">
+        <ViewToggle
+          label="View mode"
+          options={[
+            { icon: "list", label: "List view", value: "list", active: true },
+            { icon: "pin", label: "Map view", value: "map" },
+          ]}
+        />
+        <ColumnsPopover
+          columns={["Received", "Type", "From", "Itinerary", "Status"]}
+        />
+      </Fragment>
+    </PageHeader>
+
+    <section aria-label="Inbox requests" data-inbox-panel="list">
+      <table id="inbox-table" class="datatable inbox-table">
+        <colgroup>
+          <col style="width: 15%" />
+          <col style="width: 11%" />
+          <col style="width: 23%" />
+          <col style="width: 34%" />
+          <col style="width: 10%" />
+          <col style="width: 7%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Received</th>
+            <th>Type</th>
+            <th>From</th>
+            <th>Itinerary</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            requests.map(({ req, contact, customer }) => (
+              <tr>
+                <td>
+                  <>
+                    <strong>{dateFmt.format(req.receivedAt)}</strong>
+                    <br />
+                    <span class="text-muted">
+                      {timeFmt.format(req.receivedAt)}
+                    </span>
+                  </>
+                </td>
+                <td>Request</td>
+                <td>
+                  <>
+                    {
+                      contact ? (
+                        <CustomerHoverCard
+                          contact={contact}
+                          customer={customer}
+                          triggerClass="inbox-customer-link"
+                        >
+                          <strong slot="trigger">{contactFullName(contact)}</strong>
+                        </CustomerHoverCard>
+                      ) : (
+                        <strong>Unknown</strong>
+                      )
+                    }
+                    <br />
+                    <span class="text-muted">
+                      {contact ? truncateEmail(contact.email) : ""}
+                    </span>
+                    <br />
+                    <span class="text-muted">{customer?.name ?? ""}</span>
+                  </>
+                </td>
+                <td>
+                  <div class="flex-col gap-1">
+                    {req.legs.map((leg) => (
+                      <div class="flex-row gap-2">
+                        <b>
+                          {leg.origin} - {leg.destination}
+                        </b>
+                        <span class="font-normal text-muted">
+                          {formatDeparture(leg.departure, leg.origin)} |{" "}
+                          {leg.passengers} pax
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </td>
+                <td style={{ verticalAlign: "middle" }}>
+                  <Badge variant={req.status}>{req.status.toUpperCase()}</Badge>
+                </td>
+                <td style={{ verticalAlign: "middle" }}>
+                  <div class="datatable-actions items-center">
+                    <Icon name="receipt" />
+                    <Icon name="calendar" />
+                    <Icon name="ban" />
+                  </div>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section
+      class="inbox-map-view"
+      aria-label="Inbox request map"
+      data-inbox-panel="map"
+      hidden
+    >
+      <div class="inbox-map-shell">
+        <svg
+          class="inbox-map-layer inbox-map-base-layer"
+          viewBox="200 170 300 120"
+          aria-hidden="true"
+        >
+          <rect x="180" y="35" width="680" height="405" fill="#fff"></rect>
+          <image
+            class="map-base"
+            href="/portfolio/airpeggio/blank-map-americas.svg"
+            x={mapLayer.imageX}
+            y={mapLayer.imageY}
+            height={mapLayer.imageHeight}
+          />
+        </svg>
+        <svg
+          class="inbox-map-layer inbox-map-route-layer"
+          viewBox={routeLayer.viewBox}
+          role="img"
+          aria-labelledby="route-map-title route-map-desc"
+        >
+          <title id="route-map-title">Proof-of-concept inbox trip map</title>
+          <desc id="route-map-desc"
+            >A simplified Americas map with generated inbox request routes and
+            airport labels.</desc
+          >
+          <path
+            class="map-line-soft"
+            d="M276 184 C394 204 514 188 614 190 C654 194 686 169 713 131"
+          ></path>
+          <path
+            class="map-line-soft"
+            d="M392 142 C438 158 475 174 510 210 C552 235 626 241 684 220"
+          ></path>
+          <path class="map-line-soft" d="M310 205 C440 190 574 168 692 145"
+          ></path>
+          <path class="map-line-soft" d="M475 174 C532 173 610 166 668 162"
+          ></path>
+          {
+            mapLegs.map((leg, index) => (
+              <path
+                class:list={["map-route", index % 7 === 0 && "is-emphasis"]}
+                d={routePath(leg.originPoint, leg.destinationPoint, index)}
+              />
+            ))
+          }
+          {
+            mapAirports.map((airport) => (
+              <g class="map-airport">
+                <rect
+                  x={airport.x - 4}
+                  y={airport.y - 4}
+                  width="8"
+                  height="8"
+                />
+                <text x={airport.x + 7} y={airport.y + 4}>
+                  {airport.icao}
+                </text>
+              </g>
+            ))
+          }
+          <g
+            class="map-aircraft map-aircraft--active"
+            transform="translate(510 210)"
+          >
+            <path class="map-plane" d="M0 10 L24 0 L19 10 L24 20 Z"></path>
+            <text x="15" y="21">N20AS</text>
+          </g>
+          <g
+            class="map-aircraft map-aircraft--secondary"
+            transform="translate(632 187)"
+          >
+            <path class="map-plane" d="M0 10 L24 0 L19 10 L24 20 Z"></path>
+            <text x="-8" y="31">N889LB</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="air-case-note">
+      <h2>Case Study Reconstruction</h2>
+      <p>
+        This mini-site recreates the Airpeggio inbox from local screenshots: the
+        request queue, filter controls, saved inbox filters, and the quick-quote
+        modal. The goal is to show the reusable product patterns I work in
+        without exposing a live customer system.
+      </p>
+      <p>
+        Open <a href="/portfolio/airpeggio/filters/">Inbox Filters</a> for the filter-management
+        table and add-filter modal, or return to the <a
+          href="/projects/airpeggio/">case study</a
+        >.
+      </p>
+    </section>
+
+    <QuickQuoteModal />
+    {editContact && <CustomerModal id="edit-customer" mode="edit" customer={editContact} />}
+  </div>
+</AirpeggioLayout>
+
+<style>
+  .inbox-customer-link {
+    display: inline-flex;
+    max-width: 100%;
+  }
+
+  .inbox-filters {
+    width: 384px;
+
+    > * {
+      padding: 1em;
+    }
+
+    .inbox-filters__head {
+      padding: 16px 17px;
+      border-bottom: 1px solid var(--air-line);
+      color: #343d4c;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .inbox-filters__body {
+      display: grid;
+      gap: 18px;
+      padding: 22px 17px 17px;
+    }
+
+    .inbox-filters__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px 8px;
+    }
+
+    .inbox-filters__section {
+      display: grid;
+      gap: 13px;
+    }
+
+    .inbox-filters__section h3 {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    @media (max-width: 640px) {
+      .inbox-filters {
+        width: min(384px, calc(100vw - 36px));
+      }
+
+      .inbox-filters__grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+
+  .inbox-map-view {
+    min-height: 620px;
+    display: block;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .inbox-map-shell {
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .inbox-map-layer {
+    width: 100%;
+    min-width: 820px;
+    height: auto;
+    display: block;
+  }
+
+  .inbox-map-route-layer {
+    position: absolute;
+    inset: 0;
+  }
+
+  .map-base {
+    opacity: 0.54;
+  }
+
+  .map-line-soft {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.88);
+    stroke-width: 2;
+  }
+
+  .map-route {
+    fill: none;
+    stroke: rgba(18, 118, 38, 0.28);
+    stroke-width: 1.5;
+
+    &.is-emphasis {
+      stroke: rgba(18, 118, 38, 0.72);
+      stroke-width: 2;
+    }
+  }
+
+  .map-airport {
+    color: #8d9395;
+
+    rect {
+      fill: currentColor;
+    }
+
+    text {
+      fill: currentColor;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  .map-aircraft {
+    color: var(--air-purple);
+
+    .map-plane {
+      fill: currentColor;
+      transform: rotate(-38deg);
+      transform-origin: center;
+    }
+
+    text {
+      fill: currentColor;
+      font-size: 13px;
+      font-weight: 900;
+    }
+  }
+
+  .map-aircraft--active {
+    color: #c62828;
+  }
+
+  .map-aircraft--secondary {
+    color: #2f3dab;
+  }
+
+  @media (max-width: 980px) {
+    .inbox-map-shell {
+      min-height: 440px;
+      overflow-x: auto;
+    }
+  }
+</style>
+
+<script>
+  const inboxView = document.querySelector<HTMLElement>("[data-inbox-view]");
+  const viewButtons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-view-option]"),
+  );
+  const panels = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-inbox-panel]"),
+  );
+
+  function setInboxView(view: string, updateUrl = true) {
+    const nextView = view === "map" ? "map" : "list";
+    if (inboxView) inboxView.dataset.inboxView = nextView;
+
+    for (const panel of panels) {
+      panel.hidden = panel.dataset.inboxPanel !== nextView;
+    }
+
+    for (const button of viewButtons) {
+      const active = button.dataset.viewOption === nextView;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
+
+    if (updateUrl) {
+      const url = new URL(window.location.href);
+      if (nextView === "map") {
+        url.searchParams.set("view", "map");
+      } else {
+        url.searchParams.delete("view");
+      }
+      history.replaceState(null, "", url);
+    }
+  }
+
+  for (const button of viewButtons) {
+    button.addEventListener("click", () =>
+      setInboxView(button.dataset.viewOption ?? "list"),
+    );
+  }
+
+  setInboxView(
+    new URLSearchParams(window.location.search).get("view") ?? "list",
+    false,
+  );
+</script>

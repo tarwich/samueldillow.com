@@ -1,0 +1,83 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  href?: string;
+  variant?: "primary" | "secondary" | "ghost" | "danger";
+  icon?: string;
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  href,
+  variant,
+  icon,
+  type = "button",
+  disabled,
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+{
+  href ? (
+    <a class:list={["air-button", variant, className]} href={href} {...rest}>
+      {icon && <Icon name={icon} />}
+      <slot />
+    </a>
+  ) : (
+    <button
+      class:list={["air-button", variant, className]}
+      type={type}
+      disabled={disabled}
+      {...rest}
+    >
+      {icon && <Icon name={icon} />}
+      <slot />
+    </button>
+  )
+}
+
+<style>
+  .air-button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: #eef2f7;
+    color: var(--air-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+
+    &.primary {
+      background: var(--air-purple);
+      color: #fff;
+    }
+
+    &.ghost {
+      background: #fff;
+      border-color: #aeb9c9;
+    }
+
+    &.danger {
+      background: #e25c5c;
+      color: #fff;
+    }
+
+    &[disabled] {
+      color: #9ca6b5;
+      background: #f8fafc;
+      cursor: not-allowed;
+    }
+  }
+</style>

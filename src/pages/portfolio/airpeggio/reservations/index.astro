@@ -19,6 +19,7 @@ import {
   reservationContact,
   reservationCrewLabel,
   reservationCustomer,
+  reservationTagStyle,
 } from "../_data";
 
 const tailColors: Record<string, string> = {
@@ -75,17 +76,17 @@ const editReservation = RESERVATIONS[0];
       </Fragment>
     </PageHeader>
 
-    <section aria-label="Reservations list">
+    <section class="reservations-table-wrap" aria-label="Reservations list">
       <table id="reservations-table" class="datatable reservations-table">
         <colgroup>
-          <col style="width: 9%" />
-          <col style="width: 16%" />
-          <col style="width: 32%" />
-          <col style="width: 6%" />
-          <col style="width: 16%" />
-          <col style="width: 6%" />
-          <col style="width: 6%" />
-          <col style="width: 9%" />
+          <col data-name="Trip" />
+          <col data-name="Customer" />
+          <col data-name="Itinerary" />
+          <col data-name="Crew" />
+          <col data-name="Status" />
+          <col data-name="Assigned" />
+          <col data-name="Tags" />
+          <col data-name="Actions" />
         </colgroup>
         <thead>
           <tr>
@@ -203,7 +204,23 @@ const editReservation = RESERVATIONS[0];
                     <span class="reservation-assigned">{assigned}</span>
                   </td>
                   <td>
-                    <span class="text-muted">-</span>
+                    {reservation.tags.length > 0 ? (
+                      <ul class="reservation-tags">
+                        {reservation.tags.map((tag) => {
+                          const style = reservationTagStyle(tag);
+                          return (
+                            <li
+                              class="reservation-tag"
+                              style={`--tag-bg: ${style.background}; --tag-fg: ${style.color}`}
+                            >
+                              {tag}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <span class="text-muted">-</span>
+                    )}
                   </td>
                   <td style={{ verticalAlign: "middle" }}>
                     <div class="datatable-actions">
@@ -244,7 +261,9 @@ const editReservation = RESERVATIONS[0];
         <span>Items per page</span>
         <button type="button">20 <Icon name="chevron-down" /></button>
         <strong>
-          Records 1 - {Math.min(20, RESERVATIONS.length)} of {RESERVATIONS.length}
+          Records 1 - {Math.min(20, RESERVATIONS.length)} of {
+            RESERVATIONS.length
+          }
         </strong>
       </div>
       <nav class="reservations-page-nav" aria-label="Reservation pages">
@@ -262,8 +281,20 @@ const editReservation = RESERVATIONS[0];
 </AirpeggioLayout>
 
 <style>
+  .reservations-table-wrap {
+    overflow-x: auto;
+  }
+
   .reservations-table {
     margin-top: 6px;
+    min-width: 1350px;
+
+    th {
+      max-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     th:last-child,
     td:last-child {
@@ -271,7 +302,37 @@ const editReservation = RESERVATIONS[0];
     }
 
     td {
-      vertical-align: top;
+      vertical-align: middle;
+    }
+
+    /* prettier-ignore */
+    col[data-name="Trip"] { width: 140px; } /* prettier-ignore */
+    col[data-name="Customer"] { width: 220px; } /* prettier-ignore */
+    col[data-name="Itinerary"] { width: auto; } /* prettier-ignore */
+    col[data-name="Crew"] { width: 90px; } /* prettier-ignore */
+    col[data-name="Status"] { width: 150px; } /* prettier-ignore */
+    col[data-name="Assigned"] { width: 130px; } /* prettier-ignore */
+    col[data-name="Tags"] { width: 140px; } /* prettier-ignore */
+    col[data-name="Actions"] { width: 140px; } /* prettier-ignore */
+
+    @media (max-width: 1445px) {
+      min-width: 1200px;
+
+      col[data-name="Assigned"],
+      th:nth-child(6),
+      td:nth-child(6) {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1295px) {
+      min-width: 1125px;
+
+      col[data-name="Crew"],
+      th:nth-child(4),
+      td:nth-child(4) {
+        display: none;
+      }
     }
   }
 
@@ -285,13 +346,14 @@ const editReservation = RESERVATIONS[0];
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 3px 10px;
+    padding: 0.5em 0.75em;
     border-radius: 6px;
-    background: #eef0f5;
+    background: #d9dde9;
     color: var(--air-ink);
     font-size: 13px;
     font-weight: 700;
     width: fit-content;
+    white-space: nowrap;
   }
 
   .reservation-trip__tail {
@@ -378,11 +440,34 @@ const editReservation = RESERVATIONS[0];
     font-weight: 700;
   }
 
+  .reservation-tags {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .reservation-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--tag-bg, #d9dde9);
+    color: var(--tag-fg, var(--air-ink));
+    font-size: 0.8em;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
   .reservation-row-action {
     display: inline-grid;
     place-items: center;
-    width: 32px;
+    width: auto;
+    min-width: 40px;
     height: 32px;
+    padding-inline: 8px;
     border: 0;
     border-radius: 6px;
     background: transparent;
@@ -451,4 +536,3 @@ const editReservation = RESERVATIONS[0];
     }
   }
 </style>
-

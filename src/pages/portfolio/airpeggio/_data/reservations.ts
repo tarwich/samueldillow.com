@@ -175,6 +175,25 @@ const initialsFor = (account: Account): string =>
 
 export const reservationInitials = initialsFor;
 
+export interface ReservationTagStyle {
+  background: string;
+  color: string;
+}
+
+export const RESERVATION_TAG_STYLES: Record<string, ReservationTagStyle> = {
+  Organ: { background: "#0b0b0d", color: "#ffffff" },
+  Executive: { background: "#3f8a96", color: "#ffffff" },
+  Broker: { background: "#c7d533", color: "#1a1a1a" },
+  VIP: { background: "#510c62", color: "#ffffff" },
+  Owner: { background: "#d4a017", color: "#1a1a1a" },
+  Repeat: { background: "#d9dde9", color: "#1a1a1a" },
+};
+
+const TAG_NAMES = Object.keys(RESERVATION_TAG_STYLES);
+
+export const reservationTagStyle = (name: string): ReservationTagStyle =>
+  RESERVATION_TAG_STYLES[name] ?? { background: "#d9dde9", color: "#1a1a1a" };
+
 const RESERVATION_SEEDS: Reservation[] = [
   {
     id: nanoid(),
@@ -287,7 +306,7 @@ const RESERVATION_SEEDS: Reservation[] = [
         passengers: 1,
       },
     ],
-    tags: [],
+    tags: ["Organ"],
     autoCalculate: true,
   },
   {
@@ -310,7 +329,7 @@ const RESERVATION_SEEDS: Reservation[] = [
         passengers: 0,
       },
     ],
-    tags: [],
+    tags: ["Executive", "Broker"],
     autoCalculate: true,
   },
   {
@@ -423,6 +442,18 @@ const generatedFiller: Reservation[] = (() => {
     const customer = faker.helpers.arrayElement(CUSTOMERS);
     const contact =
       CONTACTS.find((c) => c.customerId === customer.id) ?? CONTACTS[0];
+    const tags: string[] =
+      faker.helpers.maybe<string[]>(
+        () => {
+          const first = faker.helpers.arrayElement(TAG_NAMES);
+          const second = faker.helpers.maybe(
+            () => faker.helpers.arrayElement(TAG_NAMES.filter((t) => t !== first)),
+            { probability: 0.2 },
+          );
+          return second ? [first, second] : [first];
+        },
+        { probability: 0.3 },
+      ) ?? [];
     out.push({
       id: nanoid(),
       tripNumber: trip,
@@ -440,7 +471,7 @@ const generatedFiller: Reservation[] = (() => {
         start,
         aircraft.paxCapacity,
       ),
-      tags: [],
+      tags,
       autoCalculate: true,
     });
   }
@@ -656,4 +687,3 @@ const yyyymmddFmt = new Intl.DateTimeFormat("en-CA", {
 
 export const formatLegItineraryDate = (date: Date): string =>
   yyyymmddFmt.format(date).replace(/-/g, "");
-

@@ -1,0 +1,72 @@
+---
+import Icon from "./Icon.astro";
+
+interface Props {
+  icon?: string;
+  label?: string;
+  value?: string | number | null;
+  fallback?: string;
+}
+
+const { icon, label, value, fallback = "" } = Astro.props;
+const hasValue = value !== undefined && value !== null && String(value) !== "";
+---
+
+<div class:list={["preview-field", !hasValue && "is-empty"]}>
+  <div class="preview-field__text">
+    {label && <span class="preview-field__label">{label}</span>}
+    <span class="air-truncate">{hasValue ? value : fallback}</span>
+  </div>
+  {icon && <Icon name={icon} />}
+</div>
+
+<style>
+  .preview-field {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    color: var(--air-ink);
+    font-size: 15.5px;
+    font-weight: 600;
+    line-height: 1.2;
+
+    &.is-empty {
+      color: #737b8d;
+      font-weight: 500;
+    }
+
+    :global(.air-icon) {
+      width: 17px;
+      height: 17px;
+      color: currentColor;
+    }
+  }
+
+  .preview-field__text {
+    min-width: 0;
+    max-width: 100%;
+    display: grid;
+    gap: 3px;
+    font-weight: 500;
+  }
+
+  .preview-field__label {
+    color: var(--air-muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 640px) {
+    .preview-field {
+      font-size: 15px;
+
+      :global(.air-icon) {
+        width: 17px;
+        height: 17px;
+      }
+    }
+  }
+</style>

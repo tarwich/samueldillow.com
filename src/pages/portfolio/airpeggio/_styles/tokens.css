@@ -64,6 +64,23 @@
     white-space: nowrap;
   }
 
+  .air-truncate {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .air-truncate-2 {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
   .z-sticky { z-index: 1; }
   .z-modal { z-index: 2; }
   .z-popover { z-index: 3; }

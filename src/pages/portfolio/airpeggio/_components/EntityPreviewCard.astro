@@ -1,0 +1,193 @@
+---
+import HoverCard from "./HoverCard.astro";
+import Icon from "./Icon.astro";
+
+interface Props {
+  title: string;
+  icon?: string;
+  viewHref?: string;
+  editModalId?: string;
+  editEvent?: string;
+  editLabel?: string;
+  viewLabel?: string;
+  width?: string;
+  placement?: "top" | "bottom";
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  title,
+  icon,
+  viewHref,
+  editModalId,
+  editEvent,
+  editLabel = `Edit ${title}`,
+  viewLabel = `View ${title}`,
+  width = "260px",
+  placement = "bottom",
+  class: className,
+  ...editAttrs
+} = Astro.props;
+---
+
+<HoverCard width={width} placement={placement}>
+  <Fragment slot="trigger">
+    <slot name="trigger" />
+  </Fragment>
+
+  <article class:list={["entity-preview-card", className]}>
+    <div class="entity-preview-card__body">
+      <header class="entity-preview-card__head">
+        <h2 class="air-truncate">{title}</h2>
+        {icon && <Icon name={icon} />}
+      </header>
+      <div class="entity-preview-card__fields">
+        <slot />
+      </div>
+    </div>
+
+    <footer class="entity-preview-card__actions" aria-label={`${title} actions`}>
+      {
+        (editModalId || editEvent) && (
+          <button
+            type="button"
+            class="entity-preview-card__action"
+            aria-label={editLabel}
+            data-open-modal={editEvent ? undefined : editModalId}
+            data-entity-preview-edit-event={editEvent}
+            {...editAttrs}
+          >
+            <Icon name="edit" />
+          </button>
+        )
+      }
+      {
+        viewHref && (
+          <a
+            class="entity-preview-card__action"
+            href={viewHref}
+            aria-label={viewLabel}
+          >
+            <Icon name="external-link" />
+          </a>
+        )
+      }
+      <slot name="actions" />
+    </footer>
+  </article>
+</HoverCard>
+
+<script>
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-entity-preview-edit-event]")
+    .forEach((button) => {
+      if (button.dataset.entityPreviewReady) return;
+      button.dataset.entityPreviewReady = "true";
+
+      button.addEventListener("click", () => {
+        const eventName = button.dataset.entityPreviewEditEvent;
+        if (!eventName) return;
+        button.dispatchEvent(
+          new CustomEvent(eventName, {
+            bubbles: true,
+            detail: { trigger: button },
+          }),
+        );
+      });
+    });
+</script>
+
+<style>
+  .entity-preview-card {
+    overflow: hidden;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+    font-weight: 400;
+  }
+
+  .entity-preview-card__body {
+    padding: 17px 19px 20px;
+  }
+
+  .entity-preview-card__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+
+    h2 {
+      margin: 0;
+      color: var(--air-ink);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    :global(.air-icon) {
+      width: 17px;
+      height: 17px;
+      color: var(--air-ink);
+    }
+  }
+
+  .entity-preview-card__fields {
+    display: grid;
+    gap: 14px;
+  }
+
+  .entity-preview-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-height: 45px;
+    padding: 0 19px;
+    border-top: 1px solid #eef1f5;
+    background: #f8fafc;
+  }
+
+  .entity-preview-card__action {
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--air-ink);
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      background: #edf1f6;
+    }
+
+    :global(.air-icon) {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .entity-preview-card__body {
+      padding: 16px 18px 19px;
+    }
+
+    .entity-preview-card__head {
+      margin-bottom: 14px;
+
+      h2 {
+        font-size: 16px;
+      }
+    }
+
+    .entity-preview-card__actions {
+      min-height: 45px;
+      padding: 0 16px;
+    }
+  }
+</style>

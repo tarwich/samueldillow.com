@@ -3,10 +3,12 @@ import AirpeggioLayout from "../_layout.astro";
 import Badge from "../_components/Badge.astro";
 import Button from "../_components/Button.astro";
 import ColumnsPopover from "../_components/ColumnsPopover.astro";
+import CustomerHoverCard from "../_components/CustomerHoverCard.astro";
 import Icon from "../_components/Icon.astro";
 import PageHeader from "../_components/PageHeader.astro";
 import ViewToggle from "../_components/ViewToggle.astro";
 import Popover from "../_components/Popover.astro";
+import CustomerModal from "../customers/_components/CustomerModal.astro";
 import SelectField from "./_components/SelectField.astro";
 import TextField from "../_components/TextField.astro";
 import QuickQuoteModal from "./_components/QuickQuoteModal.astro";
@@ -52,6 +54,8 @@ const requests = [...INBOX_REQUESTS]
     const customer = contact ? getCustomer(contact.customerId) : undefined;
     return { req, contact, customer };
   });
+
+const editContact = requests.find(({ contact }) => contact)?.contact;
 
 const airportPositions: Record<string, { x: number; y: number }> = {
   KVNY: { x: 276, y: 184 },
@@ -227,9 +231,19 @@ const routePath = (
                 <td>Request</td>
                 <td>
                   <>
-                    <strong>
-                      {contact ? contactFullName(contact) : "Unknown"}
-                    </strong>
+                    {
+                      contact ? (
+                        <CustomerHoverCard
+                          contact={contact}
+                          customer={customer}
+                          triggerClass="inbox-customer-link"
+                        >
+                          <strong slot="trigger">{contactFullName(contact)}</strong>
+                        </CustomerHoverCard>
+                      ) : (
+                        <strong>Unknown</strong>
+                      )
+                    }
                     <br />
                     <span class="text-muted">
                       {contact ? truncateEmail(contact.email) : ""}
@@ -372,10 +386,16 @@ const routePath = (
     </section>
 
     <QuickQuoteModal />
+    {editContact && <CustomerModal id="edit-customer" mode="edit" customer={editContact} />}
   </div>
 </AirpeggioLayout>
 
 <style>
+  .inbox-customer-link {
+    display: inline-flex;
+    max-width: 100%;
+  }
+
   .inbox-filters {
     width: 384px;
 

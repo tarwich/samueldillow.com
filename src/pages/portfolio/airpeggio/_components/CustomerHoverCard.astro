@@ -27,8 +27,7 @@ const editPayload = customerEditPayload(customer, company);
   title={name}
   icon="customer"
   viewHref={viewHref}
-  editButton
-  data-edit-customer={JSON.stringify(editPayload)}
+  onEdit={`$store.customerModal.open(${customerEditPayload(customer, company)})`}
   placement={placement}
   width="260px"
 >

@@ -7,9 +7,13 @@ interface Props {
   icon?: string;
   viewHref?: string;
   editModalId?: string;
+  /** @deprecated */
   editEvent?: string;
+  /** @deprecated */
   editButton?: boolean;
+  /** @deprecated */
   editLabel?: string;
+  onEdit?: string;
   viewLabel?: string;
   width?: string;
   placement?: "top" | "bottom";
@@ -25,10 +29,12 @@ const {
   editEvent,
   editButton,
   editLabel = `Edit ${title}`,
+  onEdit,
   viewLabel = `View ${title}`,
   width = "260px",
   placement = "bottom",
   class: className,
+  // deprecated
   ...editAttrs
 } = Astro.props;
 ---
@@ -58,6 +64,19 @@ const {
             aria-label={editLabel}
             data-open-modal={editEvent || editButton ? undefined : editModalId}
             data-entity-preview-edit-event={editEvent}
+            {...editAttrs}
+          >
+            <Icon name="edit" />
+          </button>
+        )
+      }
+      {
+        onEdit && (
+          <button
+            type="button"
+            class="entity-preview-card__action"
+            aria-label={editLabel}
+            @click={onEdit}
             {...editAttrs}
           >
             <Icon name="edit" />

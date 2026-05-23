@@ -1,0 +1,78 @@
+---
+import Icon from '../../_components/Icon.astro';
+import ReservationDetailLayout from '../_components/ReservationDetailLayout.astro';
+import {
+  RESERVATIONS,
+  formatQuoteAmount,
+  getReservation,
+} from '../../_data';
+
+export function getStaticPaths() {
+  return RESERVATIONS.map((reservation) => ({
+    params: { id: reservation.id },
+    props: { reservation },
+  }));
+}
+
+const reservation =
+  Astro.props.reservation ?? getReservation(Astro.params.id ?? '');
+
+if (!reservation) {
+  return Astro.redirect('/portfolio/airpeggio/reservations/');
+}
+---
+
+<ReservationDetailLayout reservation={reservation} active="quotes">
+  <section class="reservation-panel">
+    <div class="reservation-panel__head">
+      <h2>Quotes</h2>
+    </div>
+    <div class="reservation-panel__body">
+      {
+        reservation.quote ? (
+          <table class="datatable">
+            <thead>
+              <tr>
+                <th>Quote</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong>#{reservation.quote.number}</strong>
+                </td>
+                <td>{formatQuoteAmount(reservation.quote.amount)}</td>
+                <td>
+                  <span
+                    class:list={[
+                      'quote-status-pill',
+                      `quote-status-pill--${reservation.quote.status}`,
+                    ]}
+                  >
+                    {reservation.quote.status === 'paid' ? 'Paid' : 'Unpaid'}
+                  </span>
+                </td>
+                <td>
+                  <div class="datatable-actions">
+                    <button
+                      type="button"
+                      class="reservation-row-action"
+                      aria-label="View quote"
+                    >
+                      <Icon name="eye" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        ) : (
+          <p class="empty-row">No quotes yet.</p>
+        )
+      }
+    </div>
+  </section>
+</ReservationDetailLayout>

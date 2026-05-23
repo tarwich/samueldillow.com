@@ -1,0 +1,124 @@
+---
+import Icon from '../../_components/Icon.astro';
+import ReservationDetailLayout from '../_components/ReservationDetailLayout.astro';
+import {
+  RESERVATIONS,
+  getReservation,
+  reservationAircraft,
+  reservationCompany,
+  reservationCustomer,
+  reservationSalesperson,
+} from '../../_data';
+
+export function getStaticPaths() {
+  return RESERVATIONS.map((reservation) => ({
+    params: { id: reservation.id },
+    props: { reservation },
+  }));
+}
+
+const reservation =
+  Astro.props.reservation ?? getReservation(Astro.params.id ?? '');
+
+if (!reservation) {
+  return Astro.redirect('/portfolio/airpeggio/reservations/');
+}
+
+const aircraft = reservationAircraft(reservation);
+const customer = reservationCustomer(reservation);
+const company = reservationCompany(reservation);
+const salesperson = reservationSalesperson(reservation);
+---
+
+<ReservationDetailLayout reservation={reservation} active="details">
+  <section class="reservation-panel">
+    <div class="reservation-panel__head">
+      <h2>Reservation Details</h2>
+    </div>
+    <dl class="reservation-fields">
+      <div>
+        <dt>Aircraft</dt>
+        <dd>
+          {
+            aircraft && (
+              <>
+                <Icon name="aircraft" />
+                <span>{aircraft.tail}</span>
+              </>
+            )
+          }
+        </dd>
+      </div>
+      <div>
+        <dt>Type</dt>
+        <dd>{reservation.activity}</dd>
+      </div>
+      <div>
+        <dt>Company</dt>
+        <dd>{company?.name ?? '-'}</dd>
+      </div>
+      <div>
+        <dt>Customer</dt>
+        <dd>{customer ? customer.fullName : '-'}</dd>
+      </div>
+      <div>
+        <dt>Salesperson</dt>
+        <dd>{salesperson?.fullName ?? '-'}</dd>
+      </div>
+      <div></div>
+      <div>
+        <dt>Order #</dt>
+        <dd>{reservation.orderNumber ?? '-'}</dd>
+      </div>
+      <div>
+        <dt>Tags</dt>
+        <dd>
+          {reservation.tags.length > 0 ? reservation.tags.join(', ') : '-'}
+        </dd>
+      </div>
+    </dl>
+  </section>
+</ReservationDetailLayout>
+
+<style>
+  .reservation-fields {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 28px 24px;
+    margin: 0;
+    padding: 24px 22px 28px;
+
+    @media (max-width: 760px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    > div {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    dt {
+      color: var(--air-muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    dd {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--air-ink);
+      font-size: 16px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+      margin: 0;
+
+      :global(.air-icon) {
+        width: 18px;
+        height: 18px;
+        color: #b24b4a;
+      }
+    }
+  }
+</style>

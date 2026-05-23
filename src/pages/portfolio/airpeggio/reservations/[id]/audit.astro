@@ -1,0 +1,29 @@
+---
+import ReservationDetailLayout from '../_components/ReservationDetailLayout.astro';
+import { RESERVATIONS, getReservation } from '../../_data';
+
+export function getStaticPaths() {
+  return RESERVATIONS.map((reservation) => ({
+    params: { id: reservation.id },
+    props: { reservation },
+  }));
+}
+
+const reservation =
+  Astro.props.reservation ?? getReservation(Astro.params.id ?? '');
+
+if (!reservation) {
+  return Astro.redirect('/portfolio/airpeggio/reservations/');
+}
+---
+
+<ReservationDetailLayout reservation={reservation} active="audit">
+  <section class="reservation-panel">
+    <div class="reservation-panel__head">
+      <h2>Audit</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <p class="empty-row">Audit log not implemented in this reconstruction.</p>
+    </div>
+  </section>
+</ReservationDetailLayout>

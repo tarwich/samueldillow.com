@@ -1,32 +1,56 @@
 ---
-import Icon from "../../_components/Icon.astro";
-
-export interface ReservationTab {
-  id: string;
-  label: string;
-  icon: string;
-}
+import Icon from '../../_components/Icon.astro';
 
 interface Props {
-  tabs: ReservationTab[];
+  reservationId: string;
   active: string;
 }
 
-const { tabs, active } = Astro.props;
+const { reservationId, active } = Astro.props;
+
+const base = `/portfolio/airpeggio/reservations/${reservationId}`;
+
+const tabs = [
+  { id: 'checklist', label: 'Checklist', icon: 'receipt', href: `${base}/` },
+  { id: 'details', label: 'Details', icon: 'grid', href: `${base}/details/` },
+  {
+    id: 'itinerary',
+    label: 'Itinerary',
+    icon: 'pin',
+    href: `${base}/itinerary/`,
+  },
+  { id: 'people', label: 'People', icon: 'users', href: `${base}/people/` },
+  {
+    id: 'flight-logs',
+    label: 'Flight Logs',
+    icon: 'receipt',
+    href: `${base}/flight-logs/`,
+  },
+  { id: 'quotes', label: 'Quotes', icon: 'receipt', href: `${base}/quotes/` },
+  {
+    id: 'documents',
+    label: 'Documents',
+    icon: 'upload',
+    href: `${base}/documents/`,
+  },
+  { id: 'audit', label: 'Audit', icon: 'clock', href: `${base}/audit/` },
+];
 ---
 
 <nav class="reservation-tab-nav" aria-label="Reservation sections">
   {
     tabs.map((tab) => (
-      <button
-        type="button"
-        data-reservation-tab={tab.id}
-        class:list={[active === tab.id && "is-active"]}
-        aria-pressed={active === tab.id ? "true" : "false"}
+      <a
+        href={tab.href}
+        class:list={[
+          'reservation-tab-nav__link',
+          active === tab.id && 'is-active',
+        ]}
+        aria-current={active === tab.id ? 'page' : undefined}
       >
         <Icon name={tab.icon} />
         <span>{tab.label}</span>
-      </button>
+      </a>
     ))
   }
 </nav>
@@ -41,35 +65,36 @@ const { tabs, active } = Astro.props;
     border: 1px solid var(--air-line);
     border-radius: 8px;
     background: #fff;
+  }
 
-    button {
-      min-height: 38px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0 14px;
-      border: 0;
-      border-radius: 5px;
-      background: transparent;
-      color: var(--air-ink);
-      font: inherit;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
+  .reservation-tab-nav__link {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--air-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+
+    :global(.air-icon) {
+      width: 16px;
+      height: 16px;
+      color: var(--air-muted);
+    }
+
+    &.is-active {
+      background: var(--air-purple);
+      color: #fff;
 
       :global(.air-icon) {
-        width: 16px;
-        height: 16px;
-        color: var(--air-muted);
-      }
-
-      &.is-active {
-        background: var(--air-purple);
-        color: #fff;
-
-        :global(.air-icon) {
-          color: rgba(255, 255, 255, 0.85);
-        }
+        color: rgba(255, 255, 255, 0.85);
       }
     }
   }

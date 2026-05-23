@@ -1,0 +1,320 @@
+---
+import Button from '../../_components/Button.astro';
+import Icon from '../../_components/Icon.astro';
+import ReservationDetailLayout from '../_components/ReservationDetailLayout.astro';
+import {
+  ACCOUNTS,
+  RESERVATIONS,
+  accountFullName,
+  getCustomer,
+  getReservation,
+  reservationPassengers,
+  reservationPilots,
+} from '../../_data';
+
+export function getStaticPaths() {
+  return RESERVATIONS.map((reservation) => ({
+    params: { id: reservation.id },
+    props: { reservation },
+  }));
+}
+
+const reservation =
+  Astro.props.reservation ?? getReservation(Astro.params.id ?? '');
+
+if (!reservation) {
+  return Astro.redirect('/portfolio/airpeggio/reservations/');
+}
+
+const pilots = reservationPilots(reservation);
+const passengers = reservationPassengers(reservation);
+const pilotAccount = (id: string) => ACCOUNTS.find((a) => a.id === id);
+
+const dobFmt = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<ReservationDetailLayout reservation={reservation} active="people">
+  <section class="reservation-panel">
+    <div class="reservation-panel__head">
+      <h2>Pilots</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <table class="datatable people-table">
+        <colgroup>
+          <col style="width: 16%" />
+          <col style="width: 8%" />
+          <col style="width: 18%" />
+          <col style="width: 22%" />
+          {reservation.legs.map(() => <col />)}
+          <col style="width: 6%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Pilot</th>
+            <th>Position</th>
+            <th>Info</th>
+            <th>Contact</th>
+            {
+              reservation.legs.map((leg) => (
+                <th class="people-leg-th">
+                  <span class="people-leg-th__date">
+                    {new Intl.DateTimeFormat('en-US', {
+                      month: 'short',
+                      day: '2-digit',
+                    })
+                      .format(leg.departure)
+                      .toUpperCase()}
+                  </span>
+                  <span class="people-leg-th__route">
+                    {leg.origin} <Icon name="arrow-right" /> {leg.destination}
+                  </span>
+                </th>
+              ))
+            }
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            pilots.map((pilot) => {
+              const account = pilotAccount(pilot.accountId);
+              if (!account) return null;
+              return (
+                <tr>
+                  <td>
+                    <strong>{accountFullName(account)}</strong>
+                  </td>
+                  <td>
+                    <span class="position-pill">{pilot.position}</span>
+                  </td>
+                  <td>
+                    <div class="people-info">
+                      <span>
+                        <strong>DOB:</strong>{' '}
+                        {account.birthDate
+                          ? dobFmt.format(account.birthDate)
+                          : '-'}
+                      </span>
+                      <span>
+                        <strong>Gender:</strong> {account.gender ?? ''}
+                      </span>
+                      <span>
+                        <strong>Weight:</strong> {account.weight ?? ''}
+                      </span>
+                    </div>
+                  </td>
+                  <td>{account.email}</td>
+                  {reservation.legs.map((leg) => (
+                    <td class="people-leg-cell">
+                      <span
+                        class:list={[
+                          'checklist-leg-check',
+                          pilot.legIds.includes(leg.id) && 'is-on',
+                        ]}
+                      >
+                        {pilot.legIds.includes(leg.id) && <Icon name="check" />}
+                      </span>
+                    </td>
+                  ))}
+                  <td>
+                    <button
+                      type="button"
+                      class="reservation-row-action"
+                      aria-label={`Remove ${accountFullName(account)}`}
+                    >
+                      <Icon name="trash" />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="reservation-panel__head reservation-panel__head--gap">
+      <h2>Passengers</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <div class="people-actions">
+        <Button icon="plus">Add Passenger</Button>
+      </div>
+      <table class="datatable people-table">
+        <colgroup>
+          <col style="width: 18%" />
+          <col style="width: 24%" />
+          <col style="width: 22%" />
+          {reservation.legs.map(() => <col />)}
+          <col style="width: 6%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Passenger</th>
+            <th>Info</th>
+            <th>Contact</th>
+            {
+              reservation.legs.map((leg) => (
+                <th class="people-leg-th">
+                  <span class="people-leg-th__date">
+                    {new Intl.DateTimeFormat('en-US', {
+                      month: 'short',
+                      day: '2-digit',
+                    })
+                      .format(leg.departure)
+                      .toUpperCase()}
+                  </span>
+                  <span class="people-leg-th__route">
+                    {leg.origin} <Icon name="arrow-right" /> {leg.destination}
+                  </span>
+                </th>
+              ))
+            }
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            passengers.length === 0 ? (
+              <tr>
+                <td colspan={4 + reservation.legs.length} class="empty-row">
+                  No passengers added
+                </td>
+              </tr>
+            ) : (
+              passengers.map((pax) => {
+                const c = getCustomer(pax.customerId);
+                if (!c) return null;
+                return (
+                  <tr>
+                    <td>
+                      <strong>{c.fullName}</strong>
+                    </td>
+                    <td>
+                      <div class="people-info">
+                        <span>
+                          <strong>DOB:</strong>{' '}
+                          {c.dateOfBirth ? dobFmt.format(c.dateOfBirth) : '-'}
+                        </span>
+                        <span>
+                          <strong>Gender:</strong> {c.gender ?? ''}
+                        </span>
+                        <span>
+                          <strong>Weight:</strong> {c.weight ?? ''}
+                        </span>
+                      </div>
+                    </td>
+                    <td>{c.email || c.phone || ''}</td>
+                    {reservation.legs.map((leg) => (
+                      <td class="people-leg-cell">
+                        <span
+                          class:list={[
+                            'checklist-leg-check',
+                            pax.legIds.includes(leg.id) && 'is-on',
+                          ]}
+                        >
+                          {pax.legIds.includes(leg.id) && <Icon name="check" />}
+                        </span>
+                      </td>
+                    ))}
+                    <td>
+                      <button
+                        type="button"
+                        class="reservation-row-action"
+                        aria-label={`Remove ${c.fullName}`}
+                      >
+                        <Icon name="trash" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</ReservationDetailLayout>
+
+<style>
+  .people-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 14px;
+  }
+
+  .people-table {
+    th,
+    td {
+      vertical-align: middle;
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+  }
+
+  .people-leg-th {
+    text-align: center;
+    font-weight: 800;
+
+    > span {
+      display: block;
+    }
+  }
+
+  .people-leg-th__date {
+    font-size: 11px;
+    color: var(--air-muted);
+    letter-spacing: 0.08em;
+  }
+
+  .people-leg-th__route {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 2px;
+    color: var(--air-ink);
+    font-size: 12px;
+    text-transform: none;
+    letter-spacing: 0;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  .people-leg-cell {
+    text-align: center;
+  }
+
+  .position-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 46px;
+    padding: 4px 10px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    font-weight: 800;
+  }
+
+  .people-info {
+    display: grid;
+    gap: 2px;
+    font-size: 13px;
+
+    strong {
+      font-weight: 800;
+    }
+  }
+</style>

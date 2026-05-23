@@ -1,0 +1,230 @@
+---
+import AirpeggioLayout from '../../_layout.astro';
+import Button from '../../_components/Button.astro';
+import Icon from '../../_components/Icon.astro';
+import ReservationHero from './ReservationHero.astro';
+import ReservationTabNav from './ReservationTabNav.astro';
+import type { Reservation } from '../../_data';
+
+interface Props {
+  reservation: Reservation;
+  active: string;
+}
+
+const { reservation, active } = Astro.props;
+---
+
+<AirpeggioLayout
+  title={`Airpeggio Reservation #${reservation.tripNumber} | Samuel Dillow`}
+  active="reservations"
+>
+  <header class="reservation-detail-head">
+    <a
+      class="reservation-back"
+      href="/portfolio/airpeggio/reservations/"
+      aria-label="Back to reservations"
+    >
+      <Icon name="arrow-left" />
+    </a>
+    <div>
+      <h1>Reservation Details</h1>
+      <nav aria-label="Breadcrumb">
+        <a href="/portfolio/airpeggio/reservations/">Reservation</a>
+        <span>›</span>
+        <strong>#{reservation.tripNumber}</strong>
+      </nav>
+    </div>
+    <div class="reservation-detail-head__actions">
+      <Button>Send Trip Sheet</Button>
+      <Button icon="edit">Edit Details</Button>
+      <Button icon="receipt">Notes</Button>
+    </div>
+  </header>
+
+  <ReservationHero reservation={reservation} />
+
+  <div class="reservation-tab-nav-wrap">
+    <ReservationTabNav reservationId={reservation.id} active={active} />
+  </div>
+
+  <slot />
+</AirpeggioLayout>
+
+<style>
+  .reservation-detail-head {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 12px;
+
+    h1 {
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+      font-size: 15px;
+
+      a {
+        color: var(--air-muted);
+        text-decoration: none;
+      }
+
+      strong {
+        color: var(--air-ink);
+      }
+    }
+
+    @media (max-width: 880px) {
+      grid-template-columns: 28px 1fr;
+
+      .reservation-detail-head__actions {
+        grid-column: 1 / -1;
+        flex-wrap: wrap;
+      }
+    }
+  }
+
+  .reservation-back {
+    display: inline-grid;
+    place-items: center;
+    color: var(--air-ink);
+    text-decoration: none;
+  }
+
+  .reservation-detail-head__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .reservation-tab-nav-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0 22px;
+  }
+</style>
+
+<style is:global>
+  /* Shared chrome + utility classes for reservation detail pages. */
+  .reservation-panel {
+    overflow: hidden;
+    margin-bottom: 22px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+  }
+
+  .reservation-panel__head {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--air-line);
+    color: var(--air-ink);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .reservation-panel__head h2 {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+  }
+
+  .reservation-panel__head--gap {
+    margin-top: 22px;
+    border-top: 1px solid var(--air-line);
+  }
+
+  .reservation-panel__body {
+    padding: 18px 22px 22px;
+  }
+
+  .checklist-leg-check {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--air-line);
+    border-radius: 4px;
+    background: #fff;
+    color: transparent;
+  }
+
+  .checklist-leg-check .air-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .checklist-leg-check.is-on {
+    background: var(--air-purple);
+    border-color: var(--air-purple);
+    color: #fff;
+  }
+
+  .quote-status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .quote-status-pill--unpaid {
+    background: #2550ad;
+    color: #fff;
+  }
+
+  .quote-status-pill--paid {
+    background: var(--air-green);
+    color: #fff;
+  }
+
+  .empty-row {
+    padding: 36px 18px;
+    text-align: center;
+    color: var(--air-muted);
+    font-weight: 600;
+  }
+
+  .reservation-row-action {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--air-ink);
+    cursor: pointer;
+  }
+
+  .reservation-row-action:hover {
+    background: var(--air-panel-soft);
+  }
+
+  .reservation-row-action .air-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .itinerary-cell-sub {
+    display: block;
+    color: var(--air-muted);
+    font-weight: 500;
+    font-size: 13px;
+    margin-top: 2px;
+  }
+</style>

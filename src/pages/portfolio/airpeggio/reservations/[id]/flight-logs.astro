@@ -1,0 +1,136 @@
+---
+import Icon from '../../_components/Icon.astro';
+import ReservationDetailLayout from '../_components/ReservationDetailLayout.astro';
+import {
+  RESERVATIONS,
+  formatLegItineraryDate,
+  getReservation,
+} from '../../_data';
+
+export function getStaticPaths() {
+  return RESERVATIONS.map((reservation) => ({
+    params: { id: reservation.id },
+    props: { reservation },
+  }));
+}
+
+const reservation =
+  Astro.props.reservation ?? getReservation(Astro.params.id ?? '');
+
+if (!reservation) {
+  return Astro.redirect('/portfolio/airpeggio/reservations/');
+}
+---
+
+<ReservationDetailLayout reservation={reservation} active="flight-logs">
+  <section class="reservation-panel">
+    <div class="reservation-panel__head">
+      <h2>Flight Logs</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <table class="datatable flight-log-table">
+        <colgroup>
+          <col style="width: 16%" />
+          <col style="width: 14%" />
+          <col style="width: 14%" />
+          <col style="width: 20%" />
+          <col style="width: 22%" />
+          <col style="width: 8%" />
+          <col style="width: 6%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Flight</th>
+            <th>Out/In</th>
+            <th>Off/On</th>
+            <th>Hobbs</th>
+            <th>Fuel</th>
+            <th>Pax</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            reservation.legs.map((leg) => {
+              const log = reservation.flightLogs?.find(
+                (l) => l.legId === leg.id,
+              );
+              const hobbsOut = log?.hobbsOut ?? 0;
+              const hobbsIn = log?.hobbsIn ?? 0;
+              const total = log?.totalHours ?? 0;
+              const fuelAdd = log?.fuelAdd ?? 0;
+              const fuelOut = log?.fuelOut ?? 0;
+              const fuelIn = log?.fuelIn ?? 0;
+              const fuelBurn = log?.fuelBurn ?? 0;
+              const pax = log?.pax ?? 0;
+              const dateLabel = `${formatLegItineraryDate(leg.departure).slice(2, 4)}/${formatLegItineraryDate(leg.departure).slice(4, 6)}/${formatLegItineraryDate(leg.departure).slice(6, 8)}`;
+              return (
+                <tr>
+                  <td>
+                    <strong>
+                      {leg.origin} - {leg.destination}
+                    </strong>
+                    <span class="itinerary-cell-sub">{dateLabel}</span>
+                  </td>
+                  <td>
+                    <div class="flight-log-pair">
+                      <strong>OUT:</strong>
+                      <strong>IN:</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flight-log-pair">
+                      <strong>OFF:</strong>
+                      <strong>ON:</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flight-log-pair">
+                      <strong>OUT: {hobbsOut}</strong>
+                      <strong>IN: {hobbsIn}</strong>
+                      <strong>TOTAL: {total.toFixed(1)} hrs</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flight-log-pair">
+                      <strong>ADD: {fuelAdd}</strong>
+                      <strong>OUT: {fuelOut}</strong>
+                      <strong>IN: {fuelIn}</strong>
+                      <strong>BURN: {fuelBurn} lbs</strong>
+                    </div>
+                  </td>
+                  <td>{pax}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="reservation-row-action"
+                      aria-label="Edit flight log"
+                    >
+                      <Icon name="edit" />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</ReservationDetailLayout>
+
+<style>
+  .flight-log-table td {
+    vertical-align: middle;
+  }
+
+  .flight-log-pair {
+    display: grid;
+    gap: 2px;
+    font-size: 13px;
+
+    strong {
+      font-weight: 800;
+    }
+  }
+</style>

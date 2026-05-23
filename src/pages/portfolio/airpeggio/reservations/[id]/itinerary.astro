@@ -1,0 +1,226 @@
+---
+import Button from '../../_components/Button.astro';
+import Icon from '../../_components/Icon.astro';
+import EditTripLegModal from '../_components/EditTripLegModal.astro';
+import ReservationDetailLayout from '../_components/ReservationDetailLayout.astro';
+import {
+  RESERVATIONS,
+  formatBlockDuration,
+  formatLegItineraryDate,
+  formatLegTimezone,
+  getReservation,
+  legArrival,
+  legBlockMinutes,
+  legDutyMinutes,
+  legRegulation,
+} from '../../_data';
+
+export function getStaticPaths() {
+  return RESERVATIONS.map((reservation) => ({
+    params: { id: reservation.id },
+    props: { reservation },
+  }));
+}
+
+const reservation =
+  Astro.props.reservation ?? getReservation(Astro.params.id ?? '');
+
+if (!reservation) {
+  return Astro.redirect('/portfolio/airpeggio/reservations/');
+}
+---
+
+<ReservationDetailLayout reservation={reservation} active="itinerary">
+  <section class="reservation-panel">
+    <div class="reservation-panel__head">
+      <h2>Itinerary</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <div class="itinerary-actions">
+        <Button icon="edit">Edit Itinerary</Button>
+        <Button icon="plus">Add Trip Leg</Button>
+      </div>
+      <table class="datatable itinerary-table">
+        <colgroup>
+          <col style="width: 16%" />
+          <col style="width: 24%" />
+          <col style="width: 24%" />
+          <col style="width: 28%" />
+          <col style="width: 8%" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Depart</th>
+            <th>Arrive</th>
+            <th>Info</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            reservation.legs.map((leg) => {
+              const tz = formatLegTimezone(leg.origin);
+              const arrival = legArrival(leg);
+              const block = legBlockMinutes(leg);
+              const duty = legDutyMinutes(leg);
+              const reg = legRegulation(leg);
+              const departLabel = `${formatLegItineraryDate(leg.departure).slice(2, 4)}/${formatLegItineraryDate(leg.departure).slice(4, 6)}/${formatLegItineraryDate(leg.departure).slice(6, 8)}`;
+              const arriveLabel = `${formatLegItineraryDate(arrival).slice(2, 4)}/${formatLegItineraryDate(arrival).slice(4, 6)}/${formatLegItineraryDate(arrival).slice(6, 8)}`;
+              const hm = (d: Date) =>
+                new Intl.DateTimeFormat('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false,
+                }).format(d);
+              return (
+                <tr>
+                  <td>
+                    <div class="itinerary-cell-trip">
+                      <strong>
+                        #{leg.flightNumber ?? leg.id.slice(0, 4).toUpperCase()}
+                      </strong>
+                      <span class="itinerary-flag" title="Flight bundle">
+                        <Icon name="copy" />
+                        <span>FB</span>
+                      </span>
+                    </div>
+                    <span class="itinerary-cell-sub">Part {reg}</span>
+                  </td>
+                  <td>
+                    <strong>{leg.origin}</strong>
+                    <span class="itinerary-cell-sub">
+                      {departLabel} {hm(leg.departure)} {tz}
+                    </span>
+                  </td>
+                  <td>
+                    <strong>{leg.destination}</strong>
+                    <span class="itinerary-cell-sub">
+                      {arriveLabel} {hm(arrival)} {tz}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="itinerary-info">
+                      <span>
+                        <strong>Block:</strong> {formatBlockDuration(block)}
+                      </span>
+                      <span>
+                        <strong>Duty:</strong> {formatBlockDuration(duty)}
+                      </span>
+                      <span>
+                        <strong>PAX:</strong> {leg.passengers}
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="datatable-actions">
+                      <button
+                        type="button"
+                        class="reservation-row-action"
+                        data-open-modal={`edit-leg-${leg.id}`}
+                        aria-label="Edit trip leg"
+                      >
+                        <Icon name="edit" />
+                      </button>
+                      <button
+                        type="button"
+                        class="reservation-row-action"
+                        aria-label="Delete trip leg"
+                      >
+                        <Icon name="trash" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+      <div class="itinerary-totals">
+        <p>
+          <strong>Total Block:</strong>{' '}
+          {
+            formatBlockDuration(
+              reservation.legs.reduce((sum, l) => sum + legBlockMinutes(l), 0),
+            )
+          }
+        </p>
+        <p>
+          <strong>Total Duty:</strong>{' '}
+          {
+            formatBlockDuration(
+              reservation.legs.reduce((sum, l) => sum + legDutyMinutes(l), 0),
+            )
+          }
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {
+    reservation.legs.map((leg) => (
+      <EditTripLegModal id={`edit-leg-${leg.id}`} leg={leg} />
+    ))
+  }
+</ReservationDetailLayout>
+
+<style>
+  .itinerary-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .itinerary-table td {
+    vertical-align: middle;
+  }
+
+  .itinerary-cell-trip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+
+    strong {
+      font-weight: 800;
+    }
+  }
+
+  .itinerary-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 14px;
+    background: #e3f6ea;
+    color: #138645;
+    font-size: 11px;
+    font-weight: 800;
+
+    :global(.air-icon) {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  .itinerary-info {
+    display: grid;
+    gap: 2px;
+    font-size: 13.5px;
+  }
+
+  .itinerary-totals {
+    display: flex;
+    gap: 26px;
+    margin-top: 18px;
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--air-ink);
+    }
+  }
+</style>

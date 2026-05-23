@@ -1,0 +1,36 @@
+---
+import ReservationDetailLayout from '../_components/ReservationDetailLayout.astro';
+import { RESERVATIONS, getReservation } from '../../_data';
+
+export function getStaticPaths() {
+  return RESERVATIONS.map((reservation) => ({
+    params: { id: reservation.id },
+    props: { reservation },
+  }));
+}
+
+const reservation =
+  Astro.props.reservation ?? getReservation(Astro.params.id ?? '');
+
+if (!reservation) {
+  return Astro.redirect('/portfolio/airpeggio/reservations/');
+}
+---
+
+<ReservationDetailLayout reservation={reservation} active="documents">
+  <section class="reservation-panel">
+    <div class="reservation-panel__head">
+      <h2>Documents</h2>
+    </div>
+    <div class="reservation-panel__body">
+      <table class="datatable">
+        <thead>
+          <tr><th>File Name</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="empty-row">No results</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</ReservationDetailLayout>

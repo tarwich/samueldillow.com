@@ -1,102 +1,70 @@
 ---
-import Button from "../../_components/Button.astro";
-import Icon from "../../_components/Icon.astro";
-import Modal from "../../_components/Modal.astro";
-import { AIRCRAFT, COMPANIES, SALESPEOPLE } from "../../_data";
+import Button from '../../_components/Button.astro';
+import Icon from '../../_components/Icon.astro';
+import Input from '../../_components/Input.astro';
+import Modal from '../../_components/Modal.astro';
+import Select from '../../_components/Select.astro';
+import Textarea from '../../_components/Textarea.astro';
+import { AIRCRAFT, COMPANIES, CUSTOMERS, PILOTS } from '../../_data';
 
 interface Props {
   id?: string;
 }
 
-const { id = "add-reservation" } = Astro.props;
+const { id = 'add-reservation' } = Astro.props;
 
 const ACTIVITY_OPTIONS = [
-  "Charter Flight",
-  "Aircraft Owner Flight",
-  "Training Flight",
-  "Leaseback/Rental Flight",
-  "Maintenance Reservation",
+  'Charter Flight',
+  'Aircraft Owner Flight',
+  'Training Flight',
+  'Leaseback/Rental Flight',
+  'Maintenance Reservation',
 ] as const;
 
-const REG_OPTIONS = ["91", "135", "121"] as const;
+const REG_OPTIONS = ['91', '135', '121'] as const;
 ---
 
 <Modal id={id} title="Reserve Aircraft">
   <form class="reserve-form" method="dialog">
     <div class="reserve-form__grid reserve-form__grid--top">
-      <div class="reserve-field">
-        <label class="reserve-field__label" for={`${id}-aircraft`}>
-          Aircraft <em>*</em>
-        </label>
-        <span class="reserve-select">
-          <span class="is-placeholder">Select...</span>
-          <Icon name="chevron-down" />
-        </span>
-        <select hidden>
-          {AIRCRAFT.map((a) => <option value={a.id}>{a.tail}</option>)}
-        </select>
-      </div>
-      <div class="reserve-field">
-        <label class="reserve-field__label" for={`${id}-activity`}>
-          Activity Type <em>*</em>
-        </label>
-        <span class="reserve-select">
-          <span>Charter Flight</span>
-          <Icon name="chevron-down" />
-        </span>
-        <select hidden>
-          {ACTIVITY_OPTIONS.map((opt) => <option value={opt}>{opt}</option>)}
-        </select>
-      </div>
-      <div class="reserve-field">
-        <label class="reserve-field__label" for={`${id}-company`}>Company</label>
-        <div class="reserve-field__row">
-          <span class="reserve-select reserve-select--flex">
-            <span class="is-placeholder">Select...</span>
-            <Icon name="chevron-down" />
-          </span>
-          <button
-            type="button"
-            class="reserve-circle-button"
-            aria-label="Add company"
-          >
-            <Icon name="plus" />
-          </button>
+      <Select
+        label="Aircraft"
+        placeholder="Select..."
+        options={AIRCRAFT.map((a) => ({ label: a.tail, value: a.id }))}
+      />
+      <Select
+        label="Activity Type"
+        placeholder="Select..."
+        value="Charter Flight"
+        options={ACTIVITY_OPTIONS.map((opt) => ({ label: opt, value: opt }))}
+      />
+      <div class="reserve-form__picker">
+        <span class="reserve-form__picker-label">Company</span>
+        <div class="reserve-form__picker-row">
+          <Select
+            placeholder="Select..."
+            options={COMPANIES.map((c) => ({ label: c.name, value: c.id }))}
+          />
+          <Button variant="ghost" icon="plus" aria-label="Add company" />
         </div>
-        <select hidden>
-          {COMPANIES.map((c) => <option value={c.id}>{c.name}</option>)}
-        </select>
       </div>
-      <div class="reserve-field">
-        <label class="reserve-field__label" for={`${id}-customer`}>
-          Customer
-        </label>
-        <div class="reserve-field__row">
-          <span class="reserve-select reserve-select--flex">
-            <span class="is-placeholder">Select...</span>
-            <Icon name="chevron-down" />
-          </span>
-          <button
-            type="button"
-            class="reserve-circle-button"
-            aria-label="Add customer"
-          >
-            <Icon name="plus" />
-          </button>
+      <div class="reserve-form__picker">
+        <span class="reserve-form__picker-label">Customer</span>
+        <div class="reserve-form__picker-row">
+          <Select
+            placeholder="Select..."
+            options={CUSTOMERS.map((c) => ({
+              label: c.fullName,
+              value: c.id,
+            }))}
+          />
+          <Button variant="ghost" icon="plus" aria-label="Add customer" />
         </div>
       </div>
     </div>
 
     <div class="reserve-form__order">
-      <div class="reserve-field">
-        <label class="reserve-field__label" for={`${id}-order`}>Order #</label>
-        <input
-          id={`${id}-order`}
-          class="reserve-input"
-          type="text"
-          placeholder="Order #"
-        />
-      </div>
+      <Input label="Order #" placeholder="Order #" />
     </div>
 
     <section class="reserve-section">
@@ -112,6 +80,13 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
         </label>
       </header>
 
+      {
+        /*
+        Flight plan keeps its own compact 38px inputs because the shared
+        Input/Select components are sized for stand-alone form fields and
+        would be too tall for this tabular row.
+      */
+      }
       <div class="reserve-flight-plan" role="grid">
         <div class="reserve-flight-plan__header" role="row">
           <span role="columnheader">From <em>*</em></span>
@@ -128,45 +103,45 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
         </div>
         <div class="reserve-flight-plan__row" role="row">
           <input
-            class="reserve-input reserve-flight-plan__input"
+            class="reserve-flight-plan__input"
             type="text"
             placeholder="From"
             aria-label="From"
           />
           <input
-            class="reserve-input reserve-flight-plan__input"
+            class="reserve-flight-plan__input"
             type="text"
             placeholder="To"
             aria-label="To"
           />
-          <span class="reserve-select reserve-flight-plan__select">
+          <span class="reserve-flight-plan__select">
             <span>135</span>
             <Icon name="chevron-down" />
           </span>
           <input
-            class="reserve-input reserve-flight-plan__input"
+            class="reserve-flight-plan__input"
             type="number"
             value="0"
             aria-label="Passengers"
           />
           <input
-            class="reserve-input reserve-flight-plan__input"
+            class="reserve-flight-plan__input"
             type="date"
             aria-label="Depart date"
           />
           <input
-            class="reserve-input reserve-flight-plan__input"
+            class="reserve-flight-plan__input"
             type="text"
             placeholder="hhmm UTC"
             aria-label="Depart UTC"
           />
           <input
-            class="reserve-input reserve-flight-plan__input"
+            class="reserve-flight-plan__input"
             type="date"
             aria-label="Arrive date"
           />
           <input
-            class="reserve-input reserve-flight-plan__input"
+            class="reserve-flight-plan__input"
             type="text"
             placeholder="hhmm UTC"
             aria-label="Arrive UTC"
@@ -183,7 +158,6 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
         </div>
       </div>
 
-      {/* Reg picker values referenced even though the visual is a fake select. */}
       <select hidden>
         {REG_OPTIONS.map((reg) => <option value={reg}>{reg}</option>)}
       </select>
@@ -197,24 +171,16 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
         </div>
       </header>
       <div class="reserve-form__grid">
-        <div class="reserve-field">
-          <label class="reserve-field__label" for={`${id}-pic`}>
-            Pilot in Command
-          </label>
-          <span class="reserve-select">
-            <span class="is-placeholder">Select...</span>
-            <Icon name="chevron-down" />
-          </span>
-        </div>
-        <div class="reserve-field">
-          <label class="reserve-field__label" for={`${id}-sic`}>
-            Second in Command
-          </label>
-          <span class="reserve-select">
-            <span class="is-placeholder">Select...</span>
-            <Icon name="chevron-down" />
-          </span>
-        </div>
+        <Select
+          label="Pilot in Command"
+          placeholder="Select..."
+          options={PILOTS.map((p) => ({ label: p.fullName, value: p.id }))}
+        />
+        <Select
+          label="Second in Command"
+          placeholder="Select..."
+          options={PILOTS.map((p) => ({ label: p.fullName, value: p.id }))}
+        />
       </div>
     </section>
 
@@ -225,22 +191,19 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
           <p>Select passengers to assign to the trip</p>
         </div>
       </header>
-      <div class="reserve-field">
-        <label class="reserve-field__label" for={`${id}-pax`}>
+      <div class="reserve-form__picker">
+        <span class="reserve-form__picker-label">
           Select Passengers <em>*</em>
-        </label>
-        <div class="reserve-field__row">
-          <span class="reserve-select reserve-select--flex">
-            <span class="is-placeholder">Select...</span>
-            <Icon name="chevron-down" />
-          </span>
-          <button
-            type="button"
-            class="reserve-circle-button"
-            aria-label="Add passenger"
-          >
-            <Icon name="plus" />
-          </button>
+        </span>
+        <div class="reserve-form__picker-row">
+          <Select
+            placeholder="Select..."
+            options={CUSTOMERS.map((c) => ({
+              label: c.fullName,
+              value: c.id,
+            }))}
+          />
+          <Button variant="ghost" icon="plus" aria-label="Add passenger" />
         </div>
       </div>
     </section>
@@ -251,13 +214,10 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
         <Icon name="chevron-up" />
       </summary>
       <div class="reserve-section__body">
-        <div class="reserve-field">
-          <label class="reserve-field__label">Tags</label>
-          <span class="reserve-select">
-            <span class="is-placeholder">Select...</span>
-            <Icon name="chevron-down" />
-          </span>
-        </div>
+        <span class="reserve-tags-display">
+          <span class="is-placeholder">Select...</span>
+          <Icon name="chevron-down" />
+        </span>
       </div>
     </details>
 
@@ -267,33 +227,15 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
         <Icon name="chevron-up" />
       </summary>
       <div class="reserve-section__body">
-        <div class="reserve-field">
-          <label class="reserve-field__label" for={`${id}-internal-notes`}>
-            Internal Notes
-          </label>
-          <textarea
-            id={`${id}-internal-notes`}
-            class="reserve-input reserve-input--textarea"
-            placeholder="Add internal notes here"></textarea>
-        </div>
-        <div class="reserve-field">
-          <label class="reserve-field__label" for={`${id}-crew-notes`}>
-            Crew Notes
-          </label>
-          <textarea
-            id={`${id}-crew-notes`}
-            class="reserve-input reserve-input--textarea"
-            placeholder="Add crew notes here"></textarea>
-        </div>
-        <div class="reserve-field">
-          <label class="reserve-field__label" for={`${id}-pax-notes`}>
-            Passenger Notes
-          </label>
-          <textarea
-            id={`${id}-pax-notes`}
-            class="reserve-input reserve-input--textarea"
-            placeholder="Add passenger notes here"></textarea>
-        </div>
+        <Textarea
+          label="Internal Notes"
+          placeholder="Add internal notes here"
+        />
+        <Textarea label="Crew Notes" placeholder="Add crew notes here" />
+        <Textarea
+          label="Passenger Notes"
+          placeholder="Add passenger notes here"
+        />
       </div>
     </details>
 
@@ -318,10 +260,6 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
         </table>
       </div>
     </details>
-
-    {/* Salesperson picklist referenced for completeness even though this
-        modal doesn't surface the field — it inherits from the current user. */}
-    <span hidden>{SALESPEOPLE.map((s) => s.name).join(", ")}</span>
   </form>
 
   <Fragment slot="footer">
@@ -381,114 +319,29 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
     }
   }
 
-  .reserve-field {
+  .reserve-form__picker {
     display: grid;
     gap: 8px;
     min-width: 0;
-  }
 
-  .reserve-field__label {
-    color: var(--air-ink);
-    font-size: 15px;
-    font-weight: 800;
-    line-height: 1;
+    .reserve-form__picker-label {
+      color: var(--air-ink);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
 
-    em {
-      color: #c83b00;
-      font-style: normal;
-      margin-left: 2px;
-    }
-  }
-
-  .reserve-field__row {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .reserve-input {
-    width: 100%;
-    height: 42px;
-    padding: 0 14px;
-    border: 1px solid var(--air-line);
-    border-radius: 6px;
-    background: #fff;
-    color: var(--air-ink);
-    font: inherit;
-    font-size: 14px;
-    font-weight: 600;
-
-    &::placeholder {
-      color: #98a3b3;
-      font-weight: 500;
+      em {
+        color: #c83b00;
+        font-style: normal;
+        margin-left: 2px;
+      }
     }
 
-    &:focus {
-      outline: 0;
-      border-color: var(--air-ink);
-      box-shadow: 0 0 0 2px rgba(11, 18, 34, 0.08);
-    }
-  }
-
-  .reserve-input--textarea {
-    height: auto;
-    min-height: 110px;
-    padding: 12px 14px;
-    resize: vertical;
-  }
-
-  .reserve-select {
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 0 14px;
-    border: 1px solid var(--air-line);
-    border-radius: 6px;
-    background: #fff;
-    color: var(--air-ink);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-
-    .is-placeholder {
-      color: #98a3b3;
-      font-weight: 500;
-    }
-
-    :global(.air-icon) {
-      width: 14px;
-      height: 14px;
-      color: var(--air-muted);
-    }
-  }
-
-  .reserve-select--flex {
-    flex: 1 1 auto;
-  }
-
-  .reserve-circle-button {
-    display: inline-grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
-    padding: 0;
-    border: 1px solid var(--air-line);
-    border-radius: 50%;
-    background: #fff;
-    color: var(--air-ink);
-    cursor: pointer;
-
-    :global(.air-icon) {
-      width: 18px;
-      height: 18px;
-    }
-
-    &:hover {
-      background: var(--air-panel-soft);
+    .reserve-form__picker-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: stretch;
     }
   }
 
@@ -549,7 +402,7 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
       background: #fff;
 
       &::after {
-        content: "";
+        content: '';
         width: 12px;
         height: 12px;
         background: #fff;
@@ -611,15 +464,49 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
     }
 
     .reserve-flight-plan__input {
+      width: 100%;
       height: 38px;
       padding: 0 10px;
+      border: 1px solid var(--air-line);
+      border-radius: 6px;
       background: #fff;
+      color: var(--air-ink);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+
+      &::placeholder {
+        color: #98a3b3;
+        font-weight: 500;
+      }
+
+      &:focus {
+        outline: 0;
+        border-color: var(--air-ink);
+        box-shadow: 0 0 0 2px rgba(11, 18, 34, 0.08);
+      }
     }
 
     .reserve-flight-plan__select {
       height: 38px;
       padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border: 1px solid var(--air-line);
+      border-radius: 6px;
       background: #fff;
+      color: var(--air-ink);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+
+      :global(.air-icon) {
+        width: 14px;
+        height: 14px;
+        color: var(--air-muted);
+      }
     }
 
     .reserve-flight-plan__readout {
@@ -683,7 +570,9 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
     }
   }
 
-  .reserve-section--collapsible:not([open]) .reserve-section__summary :global(.air-icon) {
+  .reserve-section--collapsible:not([open])
+    .reserve-section__summary
+    :global(.air-icon) {
     transform: rotate(180deg);
   }
 
@@ -691,6 +580,33 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
     display: grid;
     gap: 18px;
     padding: 22px 20px 24px;
+  }
+
+  .reserve-tags-display {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 14px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--air-ink);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    .is-placeholder {
+      color: #98a3b3;
+      font-weight: 500;
+    }
+
+    :global(.air-icon) {
+      width: 14px;
+      height: 14px;
+      color: var(--air-muted);
+    }
   }
 
   .reserve-documents__actions {

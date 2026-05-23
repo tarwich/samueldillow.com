@@ -1,6 +1,5 @@
 ---
 import AirpeggioLayout from "../_layout.astro";
-import AircraftModal from "./_components/AircraftModal.astro";
 import Button from "../_components/Button.astro";
 import Icon from "../_components/Icon.astro";
 import IconButton from "../_components/IconButton.astro";
@@ -8,7 +7,7 @@ import PageHeader from "../_components/PageHeader.astro";
 import Popover from "../_components/Popover.astro";
 import Select from "../_components/Select.astro";
 import ViewToggle from "../_components/ViewToggle.astro";
-import { AIRCRAFT } from "../_data";
+import { AIRCRAFT, formatAircraftForModal } from "../_data";
 import ColumnsPopover from "../_components/ColumnsPopover.astro";
 
 const tailColors: Record<string, string> = {
@@ -46,9 +45,13 @@ const tailColors: Record<string, string> = {
       <h1 slot="title">Aircraft</h1>
       <Fragment slot="actions">
         <Button href="#">Manage Pricing Profiles</Button>
-        <Button variant="primary" icon="plus" data-open-modal="add-aircraft"
-          >Add Aircraft</Button
+        <Button
+          variant="primary"
+          icon="plus"
+          @click="$store.aircraftModal.open()"
         >
+          Add Aircraft
+        </Button>
       </Fragment>
       <Fragment slot="filters">
         <Popover icon="filter" label="Filter" orientation="bottom">
@@ -232,7 +235,7 @@ const tailColors: Record<string, string> = {
                       type="button"
                       class="aircraft-row-action"
                       aria-label={`Edit ${aircraft.tail}`}
-                      data-open-modal="add-aircraft"
+                      @click={`$store.aircraftModal.open(${formatAircraftForModal(aircraft)})`}
                     >
                       <Icon name="edit" />
                     </button>
@@ -244,8 +247,6 @@ const tailColors: Record<string, string> = {
         </tbody>
       </table>
     </section>
-
-    <AircraftModal id="add-aircraft" mode="add" />
 
     <footer class="aircraft-pagination" aria-label="Pagination">
       <div class="aircraft-page-size">

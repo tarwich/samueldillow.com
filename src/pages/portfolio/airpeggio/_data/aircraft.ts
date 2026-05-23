@@ -271,3 +271,24 @@ export const AIRCRAFT: Aircraft[] = AIRCRAFT_TEMPLATES.map(generateAircraft);
 
 export const getAircraft = (id: string): Aircraft | undefined =>
   AIRCRAFT.find((a) => a.id === id);
+
+export const formatAircraftForModal = (aircraft: Aircraft): string => {
+  const payload = {
+    id: aircraft.id,
+    tail: aircraft.tail,
+    serialNumber: aircraft.serialNumber,
+    model: aircraft.model,
+    class: aircraft.class,
+    seats: aircraft.seats,
+    engineCount: aircraft.engineCount,
+    airframeHours: aircraft.airframeHours,
+    airframeCycles: aircraft.airframeCycles,
+    baseAirport: aircraft.baseAirport,
+    privacy: aircraft.privacy,
+    owner: aircraft.owner,
+    color: aircraft.color,
+    image: aircraft.image,
+    requireOwnerApproval: aircraft.requireOwnerApproval,
+  };
+  return JSON.stringify(payload);
+};

@@ -4,6 +4,7 @@ import TopNav from './_components/TopNav.astro';
 import CustomerModal from './customers/_components/CustomerModal.astro';
 import CompanyModal from './companies/_components/CompanyModal.astro';
 import ReservationModal from './reservations/_components/ReservationModal.astro';
+import AircraftModal from './aircraft/_components/AircraftModal.astro';
 
 interface Props {
   title?: string;
@@ -30,7 +31,7 @@ const {
     <title>{title}</title>
     <script>
       import Alpine from 'alpinejs';
-      import type { Customer, Company, Reservation } from './_data';
+      import type { Aircraft, Customer, Company, Reservation } from './_data';
       // @ts-ignore
       window.Alpine = Alpine;
 
@@ -67,6 +68,17 @@ const {
       };
       Alpine.store('reservationModal', reservationModal);
 
+      const aircraftModal = {
+        aircraft: null as Partial<Aircraft> | null,
+        open(aircraft: Partial<Aircraft> = {}) {
+          this.aircraft = aircraft;
+        },
+        close() {
+          this.aircraft = null;
+        },
+      };
+      Alpine.store('aircraftModal', aircraftModal);
+
       Alpine.start();
     </script>
   </head>
@@ -77,6 +89,7 @@ const {
       <CustomerModal />
       <CompanyModal />
       <ReservationModal />
+      <AircraftModal />
     </main>
   </body>
 </html>

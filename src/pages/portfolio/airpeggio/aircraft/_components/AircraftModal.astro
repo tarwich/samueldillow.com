@@ -1,43 +1,19 @@
 ---
 import Button from "../../_components/Button.astro";
 import Icon from "../../_components/Icon.astro";
+import Input from "../../_components/Input.astro";
 import Modal from "../../_components/Modal.astro";
-import { type Aircraft } from "../../_data";
+import Select from "../../_components/Select.astro";
+import { AIRPORTS, COMPANIES } from "../../_data";
 
 interface Props {
   id?: string;
-  mode?: "add" | "edit";
-  aircraft?: Aircraft;
 }
 
-const {
-  id = "aircraft-modal",
-  mode = "edit",
-  aircraft,
-} = Astro.props;
+const { id = "aircraft-modal" } = Astro.props;
 
-const isEdit = mode === "edit" && aircraft;
-const title = isEdit ? "Edit Aircraft" : "Add Aircraft";
-
-const colorSwatches: Record<string, string> = {
-  red: "#b24b4a",
-  lime: "#c7d533",
-  blue: "#565bc4",
-};
-
-const tail = aircraft?.tail ?? "";
-const serial = aircraft?.serialNumber ?? "";
-const seats = aircraft?.seats ?? "";
-const engines = aircraft?.engineCount ?? "";
-const airframeHours = aircraft?.airframeHours ?? "";
-const airframeCycles = aircraft?.airframeCycles ?? "";
-const homebase = aircraft?.baseAirport ?? "";
-const ownerName = aircraft?.owner ?? "";
-const swatch = colorSwatches[aircraft?.color ?? "red"];
-const requireApproval = aircraft?.requireOwnerApproval ?? false;
-const privacy = aircraft?.privacy ?? "private";
-const image = aircraft?.image;
-const modelLabel = aircraft?.model ? `${aircraft.model} - ${aircraft.class}` : "";
+const deleteConfirmId = `${id}-confirm-delete`;
+const deleteTriggerId = `${id}-delete-trigger`;
 
 const equipment = [
   ["MEL", "Life limit list", "Over water equipment"],
@@ -74,163 +50,162 @@ const amenities = [
   ["Toaster oven", "Warming oven"],
 ];
 
-const deleteConfirmId = `${id}-confirm-delete`;
-const deleteTriggerId = `${id}-delete-trigger`;
-
-// In edit mode the first section starts open and the rest are collapsed so
-// users can scan quickly. In add mode everything is open since users are
-// expected to fill in each section.
-const sectionOpen = (index: number) => !isEdit || index === 0;
 ---
 
-<Modal id={id} title={title}>
-  <form class="aircraft-form" method="dialog">
-    <details class="aircraft-section" open={sectionOpen(0)}>
+<Modal
+  id={id}
+  title="Aircraft"
+  x-effect="$store.aircraftModal.aircraft ? $el.showModal() : $el.close()"
+  @close="$store.aircraftModal.close()"
+>
+  <span
+    slot="title"
+    x-text="$store.aircraftModal.aircraft?.id ? 'Edit Aircraft' : 'Add Aircraft'"
+  ></span>
+
+  <form
+    class="aircraft-form"
+    method="dialog"
+    x-data="{aircraft: {}}"
+    x-effect="aircraft = $store.aircraftModal.aircraft ?? {}"
+  >
+    <details class="aircraft-section" open>
       <summary class="aircraft-section__head">
         <span>Aircraft Basic Information</span>
         <Icon name="chevron-up" />
       </summary>
       <div class="aircraft-section__body">
         <div class="aircraft-form__field aircraft-form__field--full">
-          <label class="aircraft-form__label">Aircraft Image</label>
+          <span class="aircraft-form__label">Aircraft Image</span>
           <div class="aircraft-image-uploader">
-            {image ? (
-              <>
-                <img src={image} alt="Aircraft" />
-                <button type="button" class="aircraft-image-uploader__delete" aria-label="Remove image">
-                  <Icon name="trash" />
-                </button>
-              </>
-            ) : (
+            <template x-if="aircraft.image">
+              <img :src="aircraft.image" alt="Aircraft" />
+            </template>
+            <template x-if="aircraft.image">
+              <button
+                type="button"
+                class="aircraft-image-uploader__delete"
+                aria-label="Remove image"
+                @click="aircraft.image = ''"
+              >
+                <Icon name="trash" />
+              </button>
+            </template>
+            <template x-if="!aircraft.image">
               <div class="aircraft-image-uploader__placeholder">
                 <Icon name="upload" />
                 <span>Click or drag to upload</span>
               </div>
-            )}
+            </template>
           </div>
         </div>
 
         <div class="aircraft-form__grid">
+          <Input
+            label="Tail Number"
+            required
+            placeholder="N12345"
+            x-model="aircraft.tail"
+          />
+          <Input
+            label="Serial Number"
+            required
+            x-model="aircraft.serialNumber"
+          />
           <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-tail`}>
-              Tail Number <em>*</em>
-            </label>
-            <div class="aircraft-input-row">
-              <input id={`${id}-tail`} class="aircraft-input" type="text" value={tail} placeholder="N12345" />
-              <button type="button" class="aircraft-input-affix" aria-label="Edit tail number">
-                <Icon name="edit" />
-              </button>
+            <span class="aircraft-form__label">Type <em>*</em></span>
+            <div class="aircraft-form__picker-row">
+              <Select
+                placeholder="Select type..."
+                options={[
+                  "Cessna 172 - Single Engine",
+                  "Cessna Citation X - Light Jet",
+                  "Embraer Phenom 300 - Light Jet",
+                  "Gulfstream G550 - Heavy Jet",
+                ].map((label) => ({ label, value: label }))}
+                x-model="aircraft.model"
+              />
+              <Button variant="ghost" icon="plus">Create</Button>
             </div>
           </div>
-
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-serial`}>
-              Serial Number <em>*</em>
-            </label>
-            <input id={`${id}-serial`} class="aircraft-input" type="text" value={serial} />
-          </div>
-
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-type`}>
-              Type <em>*</em>
-            </label>
-            <div class="aircraft-input-row">
-              <span class="aircraft-select">
-                <span>{modelLabel || "Select type..."}</span>
-                <Icon name="chevron-down" />
-              </span>
-              <Button variant="ghost" icon="plus" class="aircraft-form__create">Create</Button>
-            </div>
-          </div>
-
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-seats`}>
-              Seats <em>*</em>
-            </label>
-            <input id={`${id}-seats`} class="aircraft-input" type="number" value={seats} />
-          </div>
-
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-engines`}>
-              Engines <em>*</em>
-            </label>
-            <input id={`${id}-engines`} class="aircraft-input" type="number" value={engines} />
-          </div>
-
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-cycles`}>Airframe Cycles</label>
-            <input id={`${id}-cycles`} class="aircraft-input" type="number" value={airframeCycles} />
-          </div>
-
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-hours`}>Airframe Hours</label>
-            <input id={`${id}-hours`} class="aircraft-input" type="text" value={airframeHours} />
-          </div>
-
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-homebase`}>Homebase Airport</label>
-            <span class="aircraft-select">
-              <span>{homebase || "Select airport..."}</span>
-              <Icon name="chevron-down" />
-            </span>
-          </div>
-
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-privacy`}>
-              Privacy Type <em>*</em>
-            </label>
-            <span class="aircraft-select">
-              <span>{privacy === "charter" ? "Charter" : "Private"}</span>
-              <Icon name="chevron-down" />
-            </span>
-          </div>
-
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-pricing`}>Default Pricing Profile</label>
-            <span class="aircraft-select aircraft-select--placeholder">
-              <span>Select pricing profile...</span>
-              <Icon name="chevron-down" />
-            </span>
-          </div>
-
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-company`}>Company</label>
-            <span class="aircraft-select aircraft-select--placeholder">
-              <span>Select...</span>
-              <Icon name="chevron-down" />
-            </span>
-          </div>
-
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label" for={`${id}-owner`}>Owner</label>
-            <span class="aircraft-select">
-              <span>{ownerName || "Select owner..."}</span>
-              <Icon name="chevron-down" />
-            </span>
-          </div>
+          <Input label="Seats" required type="number" x-model="aircraft.seats" />
+          <Input
+            label="Engines"
+            required
+            type="number"
+            x-model="aircraft.engineCount"
+          />
+          <Input
+            label="Airframe Cycles"
+            type="number"
+            x-model="aircraft.airframeCycles"
+          />
+          <Input label="Airframe Hours" x-model="aircraft.airframeHours" />
+          <Select
+            label="Homebase Airport"
+            placeholder="Select airport..."
+            options={AIRPORTS.map((a) => ({
+              label: `${a.icao} — ${a.name}`,
+              value: a.icao,
+            }))}
+            x-model="aircraft.baseAirport"
+          />
+          <Select
+            label="Privacy Type"
+            placeholder="Select..."
+            options={[
+              { label: "Private", value: "private" },
+              { label: "Charter", value: "charter" },
+            ]}
+            x-model="aircraft.privacy"
+          />
+          <Select
+            label="Default Pricing Profile"
+            placeholder="Select pricing profile..."
+            options={[]}
+            x-model="aircraft.pricingProfileId"
+          />
+          <Select
+            label="Company"
+            placeholder="Select..."
+            options={COMPANIES.map((c) => ({ label: c.name, value: c.id }))}
+            x-model="aircraft.companyId"
+          />
+          <Input
+            label="Owner"
+            placeholder="Select owner..."
+            x-model="aircraft.owner"
+          />
         </div>
 
         <label class="aircraft-checkbox">
-          <input type="checkbox" checked={requireApproval} />
+          <input
+            type="checkbox"
+            x-model="aircraft.requireOwnerApproval"
+          />
           <span class="aircraft-checkbox__box" aria-hidden="true"></span>
-          <span class="aircraft-checkbox__label">Reservations require owner approval</span>
+          <span class="aircraft-checkbox__label">
+            Reservations require owner approval
+          </span>
         </label>
 
         <div class="aircraft-form__field aircraft-form__field--full">
-          <label class="aircraft-form__label">
-            Color <em>*</em>
-          </label>
+          <span class="aircraft-form__label">Color <em>*</em></span>
           <p class="aircraft-form__help">
-            This is the color identifier for the aircraft. It will be used to identify the aircraft in the Airpeggio UI.
+            This is the color identifier for the aircraft. It will be used to
+            identify the aircraft in the Airpeggio UI.
           </p>
           <div class="aircraft-color-picker">
-            <span class="aircraft-color-picker__swatch" style={`background: ${swatch};`}></span>
+            <span
+              class="aircraft-color-picker__swatch"
+              :style="`background: ${({red:'#b24b4a',lime:'#c7d533',blue:'#565bc4'})[aircraft.color] ?? '#b24b4a'};`"
+            ></span>
           </div>
         </div>
       </div>
     </details>
 
-    <details class="aircraft-section" open={sectionOpen(1)}>
+    <details class="aircraft-section">
       <summary class="aircraft-section__head">
         <span>Engine Information</span>
         <Icon name="chevron-up" />
@@ -240,110 +215,137 @@ const sectionOpen = (index: number) => !isEdit || index === 0;
       </div>
     </details>
 
-    <details class="aircraft-section" open={sectionOpen(2)}>
+    <details class="aircraft-section">
       <summary class="aircraft-section__head">
         <span>Aircraft Performance Profile</span>
         <Icon name="chevron-up" />
       </summary>
       <div class="aircraft-section__body">
         <div class="aircraft-form__grid">
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Max Range (NM) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="1000" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Minimum Runway (Ft) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="2500" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Fuel Capacity (Lbs) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="486" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Fuel Burn (Lbs/hr) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="100" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Climb Speed (Knots) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="120" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Climb Rate (Ft/min) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="1400" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Cruise Speed (Knots) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="180" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Cruise Altitude (Ft) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="10000" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Descend Speed (Knots) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="180" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Descend Rate (Ft/min) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="1400" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Pre Trip Block (Minutes) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="60" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Turnaround Block (Minutes) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="30" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Post Trip Block (Minutes) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="30" />
-          </div>
-          <div class="aircraft-form__field">
-            <label class="aircraft-form__label">Taxi/Ground Block (Minutes) <em>*</em></label>
-            <input class="aircraft-input" type="number" value="12" />
-          </div>
+          <Input label="Max Range (NM)" required type="number" value="1000" />
+          <Input
+            label="Minimum Runway (Ft)"
+            required
+            type="number"
+            value="2500"
+          />
+          <Input
+            label="Fuel Capacity (Lbs)"
+            required
+            type="number"
+            value="486"
+          />
+          <Input
+            label="Fuel Burn (Lbs/hr)"
+            required
+            type="number"
+            value="100"
+          />
+          <Input
+            label="Climb Speed (Knots)"
+            required
+            type="number"
+            value="120"
+          />
+          <Input
+            label="Climb Rate (Ft/min)"
+            required
+            type="number"
+            value="1400"
+          />
+          <Input
+            label="Cruise Speed (Knots)"
+            required
+            type="number"
+            value="180"
+          />
+          <Input
+            label="Cruise Altitude (Ft)"
+            required
+            type="number"
+            value="10000"
+          />
+          <Input
+            label="Descend Speed (Knots)"
+            required
+            type="number"
+            value="180"
+          />
+          <Input
+            label="Descend Rate (Ft/min)"
+            required
+            type="number"
+            value="1400"
+          />
+          <Input
+            label="Pre Trip Block (Minutes)"
+            required
+            type="number"
+            value="60"
+          />
+          <Input
+            label="Turnaround Block (Minutes)"
+            required
+            type="number"
+            value="30"
+          />
+          <Input
+            label="Post Trip Block (Minutes)"
+            required
+            type="number"
+            value="30"
+          />
+          <Input
+            label="Taxi/Ground Block (Minutes)"
+            required
+            type="number"
+            value="12"
+          />
         </div>
       </div>
     </details>
 
-    <details class="aircraft-section" open={sectionOpen(3)}>
+    <details class="aircraft-section">
       <summary class="aircraft-section__head">
         <span>Aircraft Equipment</span>
         <Icon name="chevron-up" />
       </summary>
       <div class="aircraft-section__body">
         <div class="aircraft-checks aircraft-checks--three">
-          {equipment.flat().map((label) => (
-            <label class="aircraft-checkbox aircraft-checkbox--inline">
-              <input type="checkbox" />
-              <span class="aircraft-checkbox__box" aria-hidden="true"></span>
-              <span class="aircraft-checkbox__label">{label}</span>
-            </label>
-          ))}
+          {
+            equipment.flat().map((label) => (
+              <label class="aircraft-checkbox aircraft-checkbox--inline">
+                <input type="checkbox" />
+                <span class="aircraft-checkbox__box" aria-hidden="true" />
+                <span class="aircraft-checkbox__label">{label}</span>
+              </label>
+            ))
+          }
         </div>
       </div>
     </details>
 
-    <details class="aircraft-section" open={sectionOpen(4)}>
+    <details class="aircraft-section">
       <summary class="aircraft-section__head">
         <span>Aircraft Amenities</span>
         <Icon name="chevron-up" />
       </summary>
       <div class="aircraft-section__body">
         <div class="aircraft-checks aircraft-checks--three">
-          {amenities.flat().map((label) => (
-            <label class="aircraft-checkbox aircraft-checkbox--inline">
-              <input type="checkbox" />
-              <span class="aircraft-checkbox__box" aria-hidden="true"></span>
-              <span class="aircraft-checkbox__label">{label}</span>
-            </label>
-          ))}
+          {
+            amenities.flat().map((label) => (
+              <label class="aircraft-checkbox aircraft-checkbox--inline">
+                <input type="checkbox" />
+                <span class="aircraft-checkbox__box" aria-hidden="true" />
+                <span class="aircraft-checkbox__label">{label}</span>
+              </label>
+            ))
+          }
         </div>
       </div>
     </details>
 
-    <details class="aircraft-section" open={sectionOpen(5)}>
+    <details class="aircraft-section">
       <summary class="aircraft-section__head">
         <span>Documents</span>
         <Icon name="chevron-up" />
@@ -357,11 +359,16 @@ const sectionOpen = (index: number) => !isEdit || index === 0;
             <tr><th>File Name</th></tr>
           </thead>
           <tbody>
-            {isEdit && (
+            <template x-if="aircraft.id">
               <tr>
                 <td>airpeggiologodark_1742871564315.png</td>
               </tr>
-            )}
+            </template>
+            <template x-if="!aircraft.id">
+              <tr>
+                <td class="aircraft-documents__empty">No results</td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
@@ -370,30 +377,33 @@ const sectionOpen = (index: number) => !isEdit || index === 0;
 
   <Fragment slot="footer">
     <Button variant="primary">
-      {isEdit ? "Update Aircraft" : "Add Aircraft"}
+      <span
+        x-text="$store.aircraftModal.aircraft?.id ? 'Update Aircraft' : 'Add Aircraft'"
+      ></span>
     </Button>
-    <Button variant="ghost" onclick={`document.getElementById('${id}')?.close()`}>
+    <Button variant="ghost" @click="$store.aircraftModal.close()">
       Cancel
     </Button>
-    {isEdit && (
-      <span class="aircraft-form__delete">
-        <Button
-          variant="danger"
-          popovertarget={deleteConfirmId}
-          id={deleteTriggerId}
-          class="aircraft-delete-trigger"
-        >
-          Delete Aircraft
-        </Button>
-        <div id={deleteConfirmId} popover class="aircraft-delete-confirm">
-          <p>Are you sure you want to delete this aircraft?</p>
-          <div class="aircraft-delete-confirm__actions">
-            <Button variant="ghost" popovertarget={deleteConfirmId}>Cancel</Button>
-            <Button variant="danger">Delete Aircraft</Button>
-          </div>
+    <span
+      class="aircraft-form__delete"
+      x-show="$store.aircraftModal.aircraft?.id"
+    >
+      <Button
+        variant="danger"
+        popovertarget={deleteConfirmId}
+        id={deleteTriggerId}
+        class="aircraft-delete-trigger"
+      >
+        Delete Aircraft
+      </Button>
+      <div id={deleteConfirmId} popover class="aircraft-delete-confirm">
+        <p>Are you sure you want to delete this aircraft?</p>
+        <div class="aircraft-delete-confirm__actions">
+          <Button variant="ghost" popovertarget={deleteConfirmId}>Cancel</Button>
+          <Button variant="danger">Delete Aircraft</Button>
         </div>
-      </span>
-    )}
+      </div>
+    </span>
   </Fragment>
 </Modal>
 
@@ -402,9 +412,6 @@ const sectionOpen = (index: number) => !isEdit || index === 0;
     max-width: min(1100px, calc(100vw - 32px));
     max-height: min(90vh, 880px);
     width: 100%;
-    /* Without this the grid 1fr middle row reports min-content height from
-       the long form, growing the dialog past max-height and producing a
-       second outer scrollbar alongside the inner modal__body scrollbar. */
     overflow: hidden;
   }
 
@@ -475,6 +482,7 @@ const sectionOpen = (index: number) => !isEdit || index === 0;
     display: grid;
     gap: 8px;
     min-width: 0;
+    align-content: start;
   }
 
   .aircraft-form__field--full {
@@ -483,8 +491,8 @@ const sectionOpen = (index: number) => !isEdit || index === 0;
 
   .aircraft-form__label {
     color: var(--air-ink);
-    font-size: 15px;
-    font-weight: 800;
+    font-size: 14px;
+    font-weight: 700;
     line-height: 1;
 
     em {
@@ -502,79 +510,11 @@ const sectionOpen = (index: number) => !isEdit || index === 0;
     line-height: 1.4;
   }
 
-  .aircraft-input {
-    width: 100%;
-    height: 42px;
-    padding: 0 14px;
-    border: 1px solid var(--air-line);
-    border-radius: 6px;
-    background: #fff;
-    color: var(--air-ink);
-    font: inherit;
-    font-size: 14px;
-    font-weight: 600;
-
-    &:focus {
-      outline: 0;
-      border-color: var(--air-ink);
-      box-shadow: 0 0 0 2px rgba(11, 18, 34, 0.08);
-    }
-  }
-
-  .aircraft-input-row {
+  .aircraft-form__picker-row {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 10px;
     align-items: stretch;
-  }
-
-  .aircraft-input-affix {
-    display: inline-grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    border: 1px solid var(--air-line);
-    border-radius: 6px;
-    background: #fff;
-    color: var(--air-ink);
-    cursor: pointer;
-
-    :global(.air-icon) {
-      width: 16px;
-      height: 16px;
-    }
-  }
-
-  .aircraft-form__create {
-    min-height: 42px;
-    border-radius: 6px;
-  }
-
-  .aircraft-select {
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 0 14px;
-    border: 1px solid var(--air-line);
-    border-radius: 6px;
-    background: #fff;
-    color: var(--air-ink);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-
-    :global(.air-icon) {
-      width: 14px;
-      height: 14px;
-      color: var(--air-muted);
-    }
-  }
-
-  .aircraft-select--placeholder {
-    color: var(--air-muted);
-    font-weight: 500;
   }
 
   .aircraft-image-uploader {
@@ -687,10 +627,6 @@ const sectionOpen = (index: number) => !isEdit || index === 0;
     }
   }
 
-  .aircraft-checkbox--inline .aircraft-checkbox__label {
-    font-weight: 600;
-  }
-
   .aircraft-checks {
     display: grid;
     gap: 16px 28px;
@@ -750,6 +686,12 @@ const sectionOpen = (index: number) => !isEdit || index === 0;
       font-size: 14px;
       font-weight: 600;
     }
+
+    .aircraft-documents__empty {
+      padding: 32px 16px;
+      color: var(--air-muted);
+      text-align: center;
+    }
   }
 
   .aircraft-form__delete {
@@ -757,8 +699,6 @@ const sectionOpen = (index: number) => !isEdit || index === 0;
     position: relative;
   }
 
-  /* Only one Aircraft modal renders per page, so a single shared anchor name
-     works for both the add and edit instances. */
   :global(.aircraft-delete-trigger) {
     anchor-name: --aircraft-delete-anchor;
   }

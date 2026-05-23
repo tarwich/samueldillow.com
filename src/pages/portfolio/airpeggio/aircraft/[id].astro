@@ -1,9 +1,8 @@
 ---
 import AirpeggioLayout from "../_layout.astro";
-import AircraftModal from "./_components/AircraftModal.astro";
 import Button from "../_components/Button.astro";
 import Icon from "../_components/Icon.astro";
-import { AIRCRAFT, getAircraft } from "../_data";
+import { AIRCRAFT, formatAircraftForModal, getAircraft } from "../_data";
 
 export function getStaticPaths() {
   return AIRCRAFT.map((aircraft) => ({
@@ -50,7 +49,13 @@ const fields = [
         <strong>{aircraft.tail}</strong>
       </nav>
     </div>
-    <Button icon="edit" class="aircraft-edit" data-open-modal="edit-aircraft">Edit Details</Button>
+    <Button
+      icon="edit"
+      class="aircraft-edit"
+      @click={`$store.aircraftModal.open(${formatAircraftForModal(aircraft)})`}
+    >
+      Edit Details
+    </Button>
   </header>
 
   <section class="detail-panel">
@@ -98,8 +103,6 @@ const fields = [
         icon="eye">View Profile</Button>
     </div>
   </section>
-
-  <AircraftModal id="edit-aircraft" mode="edit" aircraft={aircraft} />
 
   <section class="aircraft-tabs" aria-label="Aircraft records">
     <div class="tab-list">

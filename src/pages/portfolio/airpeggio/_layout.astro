@@ -1,6 +1,7 @@
 ---
 import "./_styles.css";
 import TopNav from "./_components/TopNav.astro";
+import CustomerModal from "./customers/_components/CustomerModal.astro";
 
 interface Props {
   title?: string;
@@ -12,6 +13,7 @@ const {
   title = "Airpeggio Inbox | Samuel Dillow",
   description = "Airpeggio fleet-management software reconstruction.",
   active = "inbox",
+  ...rest
 } = Astro.props;
 ---
 
@@ -28,13 +30,27 @@ const {
       import Alpine from "alpinejs";
       // @ts-ignore
       window.Alpine = Alpine;
+
+      Alpine.store("customerModal", {
+        customer: null,
+        modal: null,
+        open(customer) {
+          console.log("Opening modal for customer:", customer);
+          this.customer = customer;
+        },
+        close() {
+          this.customer = null;
+        },
+      });
+
       Alpine.start();
     </script>
   </head>
   <body class="air-app">
     <TopNav active={active} />
-    <main class="air-main">
+    <main class="air-main" {...rest}>
       <slot />
+      <CustomerModal />
     </main>
   </body>
 </html>

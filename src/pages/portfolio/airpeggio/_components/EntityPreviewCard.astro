@@ -8,6 +8,7 @@ interface Props {
   viewHref?: string;
   editModalId?: string;
   editEvent?: string;
+  editButton?: boolean;
   editLabel?: string;
   viewLabel?: string;
   width?: string;
@@ -22,6 +23,7 @@ const {
   viewHref,
   editModalId,
   editEvent,
+  editButton,
   editLabel = `Edit ${title}`,
   viewLabel = `View ${title}`,
   width = "260px",
@@ -49,12 +51,12 @@ const {
 
     <footer class="entity-preview-card__actions" aria-label={`${title} actions`}>
       {
-        (editModalId || editEvent) && (
+        (editModalId || editEvent || editButton) && (
           <button
             type="button"
             class="entity-preview-card__action"
             aria-label={editLabel}
-            data-open-modal={editEvent ? undefined : editModalId}
+            data-open-modal={editEvent || editButton ? undefined : editModalId}
             data-entity-preview-edit-event={editEvent}
             {...editAttrs}
           >

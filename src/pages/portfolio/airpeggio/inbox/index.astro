@@ -49,8 +49,6 @@ const requests = [...INBOX_REQUESTS]
     return { req, customer, company };
   });
 
-const editCustomer = requests.find(({ customer }) => customer)?.customer;
-
 const airportPositions: Record<string, { x: number; y: number }> = {
   KVNY: { x: 276, y: 184 },
   KSDL: { x: 310, y: 205 },
@@ -380,11 +378,7 @@ const routePath = (
     </section>
 
     <QuickQuoteModal />
-    {
-      editCustomer && (
-        <CustomerModal id="edit-customer" mode="edit" customer={editCustomer} />
-      )
-    }
+    <CustomerModal id="customer-modal" />
   </div>
 </AirpeggioLayout>
 

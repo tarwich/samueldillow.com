@@ -57,7 +57,13 @@ const maybe = <T,>(value: T, weight = 0.7): T | undefined =>
 const NOW = new Date("2026-05-13T12:00:00Z");
 
 function makeCustomer(company: Company): Customer {
-  const firstName = faker.person.firstName();
+  const gender = faker.helpers.arrayElement<Gender>(["M", "F"]);
+  const firstName =
+    gender === "M"
+      ? faker.person.firstName("male")
+      : gender === "F"
+        ? faker.person.firstName("female")
+        : faker.person.firstName();
   const lastName = faker.person.lastName();
   const email =
     faker.helpers.maybe(() => buildEmail(firstName, lastName, company), {
@@ -75,7 +81,7 @@ function makeCustomer(company: Company): Customer {
     email,
     phone: faker.phone.number({ style: "national" }),
     companyTitle: maybe(faker.helpers.arrayElement(COMPANY_TITLES), 0.55),
-    gender: maybe(faker.helpers.arrayElement<Gender>(["M", "F", "X"]), 0.7),
+    gender,
     dateOfBirth: maybe(
       faker.date.birthdate({ min: 28, max: 72, mode: "age" }),
       0.55,
@@ -133,4 +139,63 @@ export const getCustomer = (id: string): Customer | undefined =>
 
 export const customersForCompany = (companyId: string): Customer[] =>
   CUSTOMERS.filter((c) => c.companyId === companyId);
+
+const formatDateForInput = (date?: Date) =>
+  date
+    ? `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`
+    : "";
+
+export interface CustomerEditPayload {
+  id: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender: Gender;
+  weight: number | "";
+  companyName: string;
+  companyTitle: string;
+  passportNumber: string;
+  passportCountry: string;
+  passportExpiry: string;
+  phone: string;
+  email: string;
+  city: string;
+  state: string;
+  driversLicense: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  salespersonName: string;
+  notes: string;
+}
+
+export function customerEditPayload(
+  customer: Customer,
+  company?: Company,
+): CustomerEditPayload {
+  const salesperson = customer.salespersonId
+    ? SALESPEOPLE.find((s) => s.id === customer.salespersonId)
+    : undefined;
+  return {
+    id: customer.id,
+    firstName: customer.firstName,
+    lastName: customer.lastName,
+    dateOfBirth: formatDateForInput(customer.dateOfBirth),
+    gender: customer.gender ?? "M",
+    weight: customer.weight ?? "",
+    companyName: company?.name ?? "",
+    companyTitle: customer.companyTitle ?? "",
+    passportNumber: customer.passportNumber ?? "",
+    passportCountry: customer.passportCountry ?? "",
+    passportExpiry: formatDateForInput(customer.passportExpiry),
+    phone: customer.phone,
+    email: customer.email,
+    city: customer.city ?? "",
+    state: customer.state ?? "",
+    driversLicense: customer.driversLicense ?? "",
+    emergencyContactName: customer.emergencyContactName ?? "",
+    emergencyContactPhone: customer.emergencyContactPhone ?? "",
+    salespersonName: salesperson?.name ?? "",
+    notes: customer.notes ?? "",
+  };
+}
 

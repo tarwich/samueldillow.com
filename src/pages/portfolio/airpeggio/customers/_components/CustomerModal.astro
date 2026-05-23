@@ -2,36 +2,19 @@
 import Button from "../../_components/Button.astro";
 import Icon from "../../_components/Icon.astro";
 import Modal from "../../_components/Modal.astro";
-import { COMPANIES, SALESPEOPLE, type Customer } from "../../_data";
 
 interface Props {
   id?: string;
-  mode?: "add" | "edit";
-  customer?: Customer;
 }
 
-const { id = "customer-modal", mode = "edit", customer } = Astro.props;
-const isEdit = mode === "edit" && customer;
-const title = isEdit ? "Edit Customer" : "Create Customer";
-
-const sectionOpen = (index: number) => !isEdit || index === 0;
-
-const formatDate = (date?: Date) =>
-  date
-    ? `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`
-    : "";
-
-const company = customer
-  ? COMPANIES.find((c) => c.id === customer.companyId)
-  : undefined;
-
+const { id = "customer-modal" } = Astro.props;
 const deleteConfirmId = `${id}-confirm-delete`;
 const deleteTriggerId = `${id}-delete-trigger`;
 ---
 
-<Modal id={id} title={title}>
-  <form class="customer-form" method="dialog">
-    <details class="customer-section" open={sectionOpen(0)}>
+<Modal id={id} title="Edit Customer" x-effect="$store.customerModal.customer?.id ? $el.showModal() : $el.close()">
+  <form class="customer-form" method="dialog" x-data="{customer: {}}" x-effect="customer = $store.customerModal.customer ?? {}">
+    <details class="customer-section" open>
       <summary class="customer-section__head">
         <span>Customer Details</span>
         <Icon name="chevron-up" />
@@ -46,8 +29,8 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-first`}
               class="customer-input"
               type="text"
-              value={customer?.firstName ?? ""}
               placeholder="Enter the first name"
+              x-model="customer.firstName"
             />
           </div>
           <div class="customer-form__field">
@@ -58,54 +41,46 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-last`}
               class="customer-input"
               type="text"
-              value={customer?.lastName ?? ""}
               placeholder="Enter the last name"
+              x-model="customer.lastName"
             />
           </div>
           <div class="customer-form__field">
             <label class="customer-form__label" for={`${id}-dob`}
               >Date of Birth</label
             >
-            <input
-              id={`${id}-dob`}
-              class="customer-input"
-              type="date"
-              value={formatDate(customer?.dateOfBirth)}
-            />
+            <input id={`${id}-dob`} class="customer-input" type="date" x-model="customer.dateOfBirth" />
           </div>
           <div class="customer-form__field">
             <span class="customer-form__label">Gender</span>
             <div class="customer-radio-group" role="radiogroup">
-              {(["M", "F", "X"] as const).map((value) => (
-                <label class="customer-radio">
-                  <input
-                    type="radio"
-                    name={`${id}-gender`}
-                    value={value}
-                    checked={(customer?.gender ?? "M") === value}
-                  />
-                  <span class="customer-radio__dot" aria-hidden="true" />
-                  <span class="customer-radio__label">{value}</span>
-                </label>
-              ))}
+              {
+                (["M", "F", "X"] as const).map((value) => (
+                  <label class="customer-radio">
+                    <input
+                      type="radio"
+                      name={`${id}-gender`}
+                      value={value}
+                      x-model="customer.gender"
+                    />
+                    <span class="customer-radio__dot" aria-hidden="true" />
+                    <span class="customer-radio__label">{value}</span>
+                  </label>
+                ))
+              }
             </div>
           </div>
           <div class="customer-form__field">
             <label class="customer-form__label" for={`${id}-weight`}
               >Weight</label
             >
-            <input
-              id={`${id}-weight`}
-              class="customer-input"
-              type="number"
-              value={customer?.weight ?? 0}
-            />
+            <input id={`${id}-weight`} class="customer-input" type="number" x-model="customer.weight" />
           </div>
         </div>
       </div>
     </details>
 
-    <details class="customer-section" open={sectionOpen(1)}>
+    <details class="customer-section" open>
       <summary class="customer-section__head">
         <span>Company Details</span>
         <Icon name="chevron-up" />
@@ -118,8 +93,8 @@ const deleteTriggerId = `${id}-delete-trigger`;
             >
             <div class="customer-input-row">
               <span class="customer-select">
-                <span class={company ? "" : "is-placeholder"}>
-                  {company?.name ?? "Select..."}
+                <span id={`${id}-company-wrap`} class="is-placeholder">
+                  <span id={`${id}-company-text`}>Select...</span>
                 </span>
                 <Icon name="chevron-down" />
               </span>
@@ -136,7 +111,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-title`}
               class="customer-input"
               type="text"
-              value={customer?.companyTitle ?? ""}
               placeholder="Enter company title here"
             />
           </div>
@@ -144,7 +118,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </div>
     </details>
 
-    <details class="customer-section" open={sectionOpen(2)}>
+    <details class="customer-section" open>
       <summary class="customer-section__head">
         <span>Passport Details</span>
         <Icon name="chevron-up" />
@@ -159,7 +133,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-passport-number`}
               class="customer-input"
               type="text"
-              value={customer?.passportNumber ?? ""}
               placeholder="Enter passport number here"
             />
           </div>
@@ -171,7 +144,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-passport-country`}
               class="customer-input"
               type="text"
-              value={customer?.passportCountry ?? ""}
               placeholder="Enter passport country here"
             />
           </div>
@@ -183,14 +155,13 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-passport-expiry`}
               class="customer-input"
               type="date"
-              value={formatDate(customer?.passportExpiry)}
             />
           </div>
         </div>
       </div>
     </details>
 
-    <details class="customer-section" open={sectionOpen(3)}>
+    <details class="customer-section" open>
       <summary class="customer-section__head">
         <span>Contact Details</span>
         <Icon name="chevron-up" />
@@ -205,7 +176,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-mobile`}
               class="customer-input"
               type="tel"
-              value={customer?.phone ?? ""}
               placeholder="Enter mobile number here"
             />
           </div>
@@ -217,7 +187,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-email`}
               class="customer-input"
               type="email"
-              value={customer?.email ?? ""}
               placeholder="Enter email address here"
             />
           </div>
@@ -227,7 +196,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-city`}
               class="customer-input"
               type="text"
-              value={customer?.city ?? ""}
               placeholder="Enter city name"
             />
           </div>
@@ -238,7 +206,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-state`}
               class="customer-input"
               type="text"
-              value={customer?.state ?? ""}
               placeholder="Enter state here"
             />
           </div>
@@ -246,7 +213,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </div>
     </details>
 
-    <details class="customer-section" open={sectionOpen(4)}>
+    <details class="customer-section" open>
       <summary class="customer-section__head">
         <span>Drivers License Details</span>
         <Icon name="chevron-up" />
@@ -261,7 +228,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-dl`}
               class="customer-input"
               type="text"
-              value={customer?.driversLicense ?? ""}
               placeholder="Enter DL here"
             />
           </div>
@@ -269,7 +235,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </div>
     </details>
 
-    <details class="customer-section" open={sectionOpen(5)}>
+    <details class="customer-section" open>
       <summary class="customer-section__head">
         <span>Emergency Contact</span>
         <Icon name="chevron-up" />
@@ -284,7 +250,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-ec-name`}
               class="customer-input"
               type="text"
-              value={customer?.emergencyContactName ?? ""}
               placeholder="Enter emergency contact name here"
             />
           </div>
@@ -296,7 +261,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-ec-phone`}
               class="customer-input"
               type="tel"
-              value={customer?.emergencyContactPhone ?? ""}
               placeholder="Enter emergency contact here"
             />
           </div>
@@ -304,7 +268,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </div>
     </details>
 
-    <details class="customer-section" open={sectionOpen(6)}>
+    <details class="customer-section" open>
       <summary class="customer-section__head">
         <span>Additional Details</span>
         <Icon name="chevron-up" />
@@ -316,31 +280,25 @@ const deleteTriggerId = `${id}-delete-trigger`;
               >Salesperson</label
             >
             <span class="customer-select">
-              <span
-                class={customer?.salespersonId ? "" : "is-placeholder"}
-              >
-                {SALESPEOPLE.find((s) => s.id === customer?.salespersonId)
-                  ?.name ?? "Select..."}
+              <span id={`${id}-salesperson-wrap`} class="is-placeholder">
+                <span id={`${id}-salesperson-text`}>Select...</span>
               </span>
               <Icon name="chevron-down" />
             </span>
           </div>
           <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-notes`}
-              >Notes</label
+            <label class="customer-form__label" for={`${id}-notes`}>Notes</label
             >
             <textarea
               id={`${id}-notes`}
               class="customer-input customer-input--textarea"
-              placeholder="Add notes here"
-              >{customer?.notes ?? ""}</textarea
-            >
+              placeholder="Add notes here"></textarea>
           </div>
         </div>
       </div>
     </details>
 
-    <details class="customer-section" open={sectionOpen(7)}>
+    <details class="customer-section" open>
       <summary class="customer-section__head">
         <span>Documents</span>
         <Icon name="chevron-up" />
@@ -364,37 +322,175 @@ const deleteTriggerId = `${id}-delete-trigger`;
   </form>
 
   <Fragment slot="footer">
-    <Button variant="primary">
-      {isEdit ? "Update Customer" : "Create Customer"}
+    <Button variant="primary" data-customer-submit>
+      <span data-customer-submit-label>Update Customer</span>
     </Button>
-    <Button variant="ghost" onclick={`document.getElementById('${id}')?.close()`}>
+    <Button
+      variant="ghost"
+      onclick={`document.getElementById('${id}')?.close()`}
+    >
       Cancel
     </Button>
-    {
-      isEdit && (
-        <span class="customer-form__delete">
-          <Button
-            variant="danger"
-            popovertarget={deleteConfirmId}
-            id={deleteTriggerId}
-            class="customer-delete-trigger"
-          >
-            Delete Customer
+    <span class="customer-form__delete" data-customer-delete-wrap>
+      <Button
+        variant="danger"
+        popovertarget={deleteConfirmId}
+        id={deleteTriggerId}
+        class="customer-delete-trigger"
+      >
+        Delete Customer
+      </Button>
+      <div id={deleteConfirmId} popover class="customer-delete-confirm">
+        <p>Are you sure you want to delete this customer?</p>
+        <div class="customer-delete-confirm__actions">
+          <Button variant="ghost" popovertarget={deleteConfirmId}>
+            Cancel
           </Button>
-          <div id={deleteConfirmId} popover class="customer-delete-confirm">
-            <p>Are you sure you want to delete this customer?</p>
-            <div class="customer-delete-confirm__actions">
-              <Button variant="ghost" popovertarget={deleteConfirmId}>
-                Cancel
-              </Button>
-              <Button variant="danger">Delete Customer</Button>
-            </div>
-          </div>
-        </span>
-      )
-    }
+          <Button variant="danger">Delete Customer</Button>
+        </div>
+      </div>
+    </span>
   </Fragment>
 </Modal>
+
+<script>
+  type CustomerPayload = {
+    firstName?: string;
+    lastName?: string;
+    dateOfBirth?: string;
+    gender?: "M" | "F" | "X";
+    weight?: number | "";
+    companyName?: string;
+    companyTitle?: string;
+    passportNumber?: string;
+    passportCountry?: string;
+    passportExpiry?: string;
+    phone?: string;
+    email?: string;
+    city?: string;
+    state?: string;
+    driversLicense?: string;
+    emergencyContactName?: string;
+    emergencyContactPhone?: string;
+    salespersonName?: string;
+    notes?: string;
+  };
+
+  const MODAL_ID = "customer-modal";
+
+  const FIELD_MAP: Record<keyof CustomerPayload, string | null> = {
+    firstName: `${MODAL_ID}-first`,
+    lastName: `${MODAL_ID}-last`,
+    dateOfBirth: `${MODAL_ID}-dob`,
+    weight: `${MODAL_ID}-weight`,
+    companyTitle: `${MODAL_ID}-title`,
+    passportNumber: `${MODAL_ID}-passport-number`,
+    passportCountry: `${MODAL_ID}-passport-country`,
+    passportExpiry: `${MODAL_ID}-passport-expiry`,
+    phone: `${MODAL_ID}-mobile`,
+    email: `${MODAL_ID}-email`,
+    city: `${MODAL_ID}-city`,
+    state: `${MODAL_ID}-state`,
+    driversLicense: `${MODAL_ID}-dl`,
+    emergencyContactName: `${MODAL_ID}-ec-name`,
+    emergencyContactPhone: `${MODAL_ID}-ec-phone`,
+    notes: `${MODAL_ID}-notes`,
+    gender: null,
+    companyName: null,
+    salespersonName: null,
+  };
+
+  // function setField(elementId: string, value: unknown) {
+  //   const el = document.getElementById(elementId);
+  //   if (el && "value" in el) {
+  //     (el as HTMLInputElement | HTMLTextAreaElement).value =
+  //       value === undefined || value === null ? "" : String(value);
+  //   }
+  // }
+
+  // function setGender(value: string) {
+  //   const radio = document.querySelector<HTMLInputElement>(
+  //     `input[name="${MODAL_ID}-gender"][value="${value}"]`,
+  //   );
+  //   if (radio) radio.checked = true;
+  // }
+
+  // function setDisplay(wrapId: string, textId: string, value: string) {
+  //   const wrap = document.getElementById(wrapId);
+  //   const text = document.getElementById(textId);
+  //   if (text) text.textContent = value || "Select...";
+  //   if (wrap) wrap.classList.toggle("is-placeholder", !value);
+  // }
+
+  // function populate(payload: CustomerPayload) {
+  //   for (const [key, elementId] of Object.entries(FIELD_MAP)) {
+  //     if (!elementId) continue;
+  //     setField(elementId, payload[key as keyof CustomerPayload]);
+  //   }
+  //   setGender(payload.gender ?? "M");
+  //   setDisplay(
+  //     `${MODAL_ID}-company-wrap`,
+  //     `${MODAL_ID}-company-text`,
+  //     payload.companyName ?? "",
+  //   );
+  //   setDisplay(
+  //     `${MODAL_ID}-salesperson-wrap`,
+  //     `${MODAL_ID}-salesperson-text`,
+  //     payload.salespersonName ?? "",
+  //   );
+  // }
+
+  // function clearFields() {
+  //   populate({});
+  // }
+
+  // function setMode(mode: "edit" | "add") {
+  //   const title = document.getElementById(`${MODAL_ID}-title`);
+  //   if (title) {
+  //     title.textContent = mode === "edit" ? "Edit Customer" : "Create Customer";
+  //   }
+  //   const submitLabel = document.querySelector("[data-customer-submit-label]");
+  //   if (submitLabel) {
+  //     submitLabel.textContent =
+  //       mode === "edit" ? "Update Customer" : "Create Customer";
+  //   }
+  //   const deleteWrap = document.querySelector<HTMLElement>(
+  //     "[data-customer-delete-wrap]",
+  //   );
+  //   if (deleteWrap) deleteWrap.hidden = mode !== "edit";
+  // }
+
+  // function openModal() {
+  //   const modal = document.getElementById(MODAL_ID);
+  //   if (modal instanceof HTMLDialogElement) modal.showModal();
+  // }
+
+  // document.addEventListener("click", (event) => {
+  //   const target = event.target as Element | null;
+  //   if (!target) return;
+
+  //   const editBtn = target.closest<HTMLElement>("[data-edit-customer]");
+  //   if (editBtn) {
+  //     try {
+  //       const payload = JSON.parse(
+  //         editBtn.dataset.editCustomer ?? "{}",
+  //       ) as CustomerPayload;
+  //       populate(payload);
+  //       setMode("edit");
+  //       openModal();
+  //     } catch {
+  //       // bad payload; do nothing
+  //     }
+  //     return;
+  //   }
+
+  //   if (target.closest("[data-add-customer]")) {
+  //     clearFields();
+  //     setMode("add");
+  //     openModal();
+  //   }
+  // });
+</script>
 
 <style>
   :global(.modal:has(.customer-form)) {
@@ -681,4 +777,3 @@ const deleteTriggerId = `${id}-delete-trigger`;
     }
   }
 </style>
-

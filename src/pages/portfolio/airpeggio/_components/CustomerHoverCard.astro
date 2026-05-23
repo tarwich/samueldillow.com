@@ -1,13 +1,12 @@
 ---
 import EntityPreviewCard from "./EntityPreviewCard.astro";
 import PreviewField from "./PreviewField.astro";
-import type { Customer, Company } from "../_data";
+import { customerEditPayload, type Customer, type Company } from "../_data";
 
 interface Props {
   customer: Customer;
   company?: Company;
   triggerClass?: string;
-  editModalId?: string;
   placement?: "top" | "bottom";
 }
 
@@ -15,34 +14,23 @@ const {
   customer,
   company,
   triggerClass,
-  editModalId = "edit-customer",
   placement = "bottom",
 } = Astro.props;
 const name = customer.fullName;
 const viewHref = `/portfolio/airpeggio/customers/${customer.id}/`;
 const phone = customer.phone;
+
+const editPayload = customerEditPayload(customer, company);
 ---
 
 <EntityPreviewCard
   title={name}
   icon="customer"
   viewHref={viewHref}
-  editEvent="airpeggio:edit-customer"
+  editButton
+  data-edit-customer={JSON.stringify(editPayload)}
   placement={placement}
   width="260px"
-  data-edit-modal-id={editModalId}
-  data-customer-hover-edit
-  data-customer-first={customer.firstName}
-  data-customer-last={customer.lastName}
-  data-customer-dob={customer.dateOfBirth?.toISOString() ?? ""}
-  data-customer-gender={customer.gender ?? ""}
-  data-customer-weight={customer.weight ?? ""}
-  data-customer-company={company?.name ?? ""}
-  data-customer-title={customer.companyTitle ?? ""}
-  data-customer-mobile={phone}
-  data-customer-email={customer.email}
-  data-customer-city={customer.city ?? ""}
-  data-customer-state={customer.state ?? ""}
 >
   <Fragment slot="trigger">
     <a class:list={["customer-hover-card__trigger", triggerClass]} href={viewHref}>
@@ -71,56 +59,6 @@ const phone = customer.phone;
     icon="briefcase"
   />
 </EntityPreviewCard>
-
-<script>
-  const formatDate = (isoDate: string | undefined) => {
-    if (!isoDate) return "";
-    const date = new Date(isoDate);
-    if (Number.isNaN(date.getTime())) return "";
-    return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
-  };
-
-  function setField(
-    modal: HTMLDialogElement,
-    fieldId: string,
-    value: string | undefined,
-  ) {
-    const field = modal.querySelector<HTMLInputElement>(`#${fieldId}`);
-    if (field) field.value = value ?? "";
-  }
-
-  document.addEventListener("airpeggio:edit-customer", (event) => {
-    const customEvent = event as CustomEvent<{ trigger?: EventTarget }>;
-    const button = customEvent.detail.trigger;
-    if (!(button instanceof HTMLButtonElement)) return;
-
-    const modalId = button.dataset.editModalId;
-    if (!modalId) return;
-
-    const modal = document.getElementById(modalId);
-    if (!(modal instanceof HTMLDialogElement)) return;
-
-    setField(modal, `${modalId}-first`, button.dataset.customerFirst);
-    setField(modal, `${modalId}-last`, button.dataset.customerLast);
-    setField(modal, `${modalId}-dob`, formatDate(button.dataset.customerDob));
-    setField(modal, `${modalId}-weight`, button.dataset.customerWeight);
-    setField(modal, `${modalId}-title`, button.dataset.customerTitle);
-    setField(modal, `${modalId}-mobile`, button.dataset.customerMobile);
-    setField(modal, `${modalId}-email`, button.dataset.customerEmail);
-    setField(modal, `${modalId}-city`, button.dataset.customerCity);
-    setField(modal, `${modalId}-state`, button.dataset.customerState);
-
-    const gender = button.dataset.customerGender;
-    if (gender) {
-      const radio = modal.querySelector<HTMLInputElement>(
-        `input[name="${modalId}-gender"][value="${gender}"]`,
-      );
-      if (radio) radio.checked = true;
-    }
-
-    modal.showModal();
-  });
-</script>
 
 <style>
   .customer-hover-card__trigger {

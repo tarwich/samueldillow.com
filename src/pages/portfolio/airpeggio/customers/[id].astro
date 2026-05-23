@@ -1,9 +1,13 @@
 ---
 import AirpeggioLayout from "../_layout.astro";
 import Button from "../_components/Button.astro";
-import CustomerModal from "./_components/CustomerModal.astro";
 import Icon from "../_components/Icon.astro";
-import { CUSTOMERS, COMPANIES, getCustomer } from "../_data";
+import {
+  CUSTOMERS,
+  COMPANIES,
+  getCustomer,
+  customerEditPayload,
+} from "../_data";
 
 export function getStaticPaths() {
   return CUSTOMERS.map((customer) => ({
@@ -52,6 +56,7 @@ const personalFields = [
 <AirpeggioLayout
   title={`Airpeggio Customer ${displayName} | Samuel Dillow`}
   active="customers"
+  x-data="{}"
 >
   <header class="customer-detail-head">
     <a
@@ -69,9 +74,17 @@ const personalFields = [
         <strong>{displayName}</strong>
       </nav>
     </div>
-    <Button icon="edit" class="customer-edit" data-open-modal="edit-customer"
-      >Edit Details</Button
+    <Button
+      icon="edit"
+      class="customer-edit"
+      data-edit-customer={JSON.stringify(
+        customerEditPayload(customer, company),
+      )}
+      @click={`$store.customerModal.open(${JSON.stringify(customer)})`}
     >
+      Edit Details
+      <span x-text="$store.customerModal.customer?.id"></span>
+    </Button>
   </header>
 
   <section class="customer-name-card">
@@ -159,8 +172,6 @@ const personalFields = [
       </footer>
     </div>
   </section>
-
-  <CustomerModal id="edit-customer" mode="edit" customer={customer} />
 </AirpeggioLayout>
 
 <style>

@@ -7,7 +7,7 @@ import CompanyModal from "../companies/_components/CompanyModal.astro";
 import CustomerModal from "./_components/CustomerModal.astro";
 import Icon from "../_components/Icon.astro";
 import PageHeader from "../_components/PageHeader.astro";
-import { CUSTOMERS, COMPANIES, SALESPEOPLE } from "../_data";
+import { CUSTOMERS, COMPANIES, SALESPEOPLE, customerEditPayload } from "../_data";
 
 const companyById = new Map(COMPANIES.map((c) => [c.id, c]));
 const salespersonById = new Map(SALESPEOPLE.map((s) => [s.id, s]));
@@ -29,10 +29,6 @@ const rows = CUSTOMERS.slice(0, 10).map((customer) => {
   return { customer, company, salesperson };
 });
 
-// Edit drawer reuses one CustomerModal instance. Server-render with the first
-// customer so the form has realistic content; the page script swaps fields on
-// open per row.
-const editCustomer = CUSTOMERS[0];
 const editCompany = rows.find(({ company }) => company)?.company;
 ---
 
@@ -46,9 +42,9 @@ const editCompany = rows.find(({ company }) => company)?.company;
       <h1 slot="title">Customers</h1>
       <Fragment slot="actions">
         <Button href="/portfolio/airpeggio/companies/">Manage Companies</Button>
-        <Button variant="primary" icon="plus" data-open-modal="add-customer"
-          >Add Customer</Button
-        >
+        <Button variant="primary" icon="plus" data-add-customer>
+          Add Customer
+        </Button>
       </Fragment>
       <Fragment slot="tools">
         <ColumnsPopover
@@ -135,7 +131,9 @@ const editCompany = rows.find(({ company }) => company)?.company;
                       type="button"
                       class="customers-row-action"
                       aria-label={`Edit ${customer.fullName}`}
-                      data-open-modal="edit-customer"
+                      data-edit-customer={JSON.stringify(
+                        customerEditPayload(customer, company),
+                      )}
                     >
                       <Icon name="edit" />
                     </button>
@@ -164,8 +162,7 @@ const editCompany = rows.find(({ company }) => company)?.company;
       </nav>
     </footer>
 
-    <CustomerModal id="add-customer" mode="add" />
-    <CustomerModal id="edit-customer" mode="edit" customer={editCustomer} />
+    <CustomerModal id="customer-modal" />
     {
       editCompany && (
         <CompanyModal id="edit-company" mode="edit" company={editCompany} />

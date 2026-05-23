@@ -55,12 +55,23 @@ const titleId = `${id}-title`;
     });
   });
 
-  // Backdrop click closes the dialog
+  // Backdrop click closes the dialog. Track mousedown so a drag that starts
+  // inside the modal (e.g. selecting text) and ends on the backdrop doesn't
+  // count — only a press that both starts and ends on the backdrop closes.
   document.querySelectorAll("dialog.modal").forEach((dialog) => {
+    let pressedOnBackdrop = false;
+    dialog.addEventListener("mousedown", (event) => {
+      pressedOnBackdrop = event.target === dialog;
+    });
     dialog.addEventListener("click", (event) => {
-      if (event.target === dialog && dialog instanceof HTMLDialogElement) {
+      if (
+        pressedOnBackdrop &&
+        event.target === dialog &&
+        dialog instanceof HTMLDialogElement
+      ) {
         dialog.close();
       }
+      pressedOnBackdrop = false;
     });
   });
 </script>

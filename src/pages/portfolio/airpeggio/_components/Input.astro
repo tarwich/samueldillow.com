@@ -1,0 +1,94 @@
+---
+type InputType = "text" | "email" | "tel" | "url" | "search" | "number" | "date" | "time" | "password";
+
+interface Props {
+  label?: string;
+  required?: boolean;
+  type?: InputType;
+  placeholder?: string;
+  value?: string | number;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  label,
+  required = false,
+  type = "text",
+  placeholder,
+  value,
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+{label ? (
+  <label class:list={["air-field", className]}>
+    <span class="air-field__label">
+      {label}
+      {required && <em aria-hidden="true">*</em>}
+    </span>
+    <input
+      class="air-input"
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      required={required}
+      {...rest}
+    />
+  </label>
+) : (
+  <input
+    class:list={["air-input", className]}
+    type={type}
+    placeholder={placeholder}
+    value={value}
+    required={required}
+    {...rest}
+  />
+)}
+
+<style>
+  .air-field {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .air-field__label {
+    color: var(--air-ink);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+
+    em {
+      color: #c83b00;
+      font-style: normal;
+      margin-left: 2px;
+    }
+  }
+
+  .air-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    &::placeholder {
+      color: #98a3b3;
+      font-weight: 500;
+    }
+
+    &:focus {
+      outline: 0;
+      border-color: var(--air-ink);
+      box-shadow: 0 0 0 2px var(--air-ink);
+    }
+  }
+</style>

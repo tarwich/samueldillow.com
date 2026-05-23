@@ -1,0 +1,91 @@
+---
+interface Props {
+  label?: string;
+  required?: boolean;
+  placeholder?: string;
+  value?: string;
+  rows?: number;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  label,
+  required = false,
+  placeholder,
+  value,
+  rows,
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+{label ? (
+  <label class:list={["air-field", className]}>
+    <span class="air-field__label">
+      {label}
+      {required && <em aria-hidden="true">*</em>}
+    </span>
+    <textarea
+      class="air-textarea"
+      placeholder={placeholder}
+      rows={rows}
+      required={required}
+      {...rest}
+    >{value}</textarea>
+  </label>
+) : (
+  <textarea
+    class:list={["air-textarea", className]}
+    placeholder={placeholder}
+    rows={rows}
+    required={required}
+    {...rest}
+  >{value}</textarea>
+)}
+
+<style>
+  .air-field {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .air-field__label {
+    color: var(--air-ink);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+
+    em {
+      color: #c83b00;
+      font-style: normal;
+      margin-left: 2px;
+    }
+  }
+
+  .air-textarea {
+    width: 100%;
+    min-height: 96px;
+    padding: 12px 14px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    resize: vertical;
+
+    &::placeholder {
+      color: #98a3b3;
+      font-weight: 500;
+    }
+
+    &:focus {
+      outline: 0;
+      border-color: var(--air-ink);
+      box-shadow: 0 0 0 2px var(--air-ink);
+    }
+  }
+</style>

@@ -1,9 +1,12 @@
 ---
 import Button from "../../_components/Button.astro";
 import Icon from "../../_components/Icon.astro";
+import Input from "../../_components/Input.astro";
 import Modal from "../../_components/Modal.astro";
+import RadioGroup from "../../_components/RadioGroup.astro";
 import Select from "../../_components/Select.astro";
-import { SALESPEOPLE } from "../../_data";
+import Textarea from "../../_components/Textarea.astro";
+import { COMPANIES, SALESPEOPLE } from "../../_data";
 
 interface Props {
   id?: string;
@@ -33,71 +36,30 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </summary>
       <div class="customer-section__body">
         <div class="customer-form__grid">
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-first`}
-              >First name <em>*</em></label
-            >
-            <input
-              id={`${id}-first`}
-              class="customer-input"
-              type="text"
-              placeholder="Enter the first name"
-              x-model="customer.firstName"
-            />
-          </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-last`}
-              >Last name <em>*</em></label
-            >
-            <input
-              id={`${id}-last`}
-              class="customer-input"
-              type="text"
-              placeholder="Enter the last name"
-              x-model="customer.lastName"
-            />
-          </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-dob`}
-              >Date of Birth</label
-            >
-            <input
-              id={`${id}-dob`}
-              class="customer-input"
-              type="date"
-              x-model="customer.dateOfBirth"
-            />
-          </div>
-          <div class="customer-form__field">
-            <span class="customer-form__label">Gender</span>
-            <div class="customer-radio-group" role="radiogroup">
-              {
-                (["M", "F", "X"] as const).map((value) => (
-                  <label class="customer-radio">
-                    <input
-                      type="radio"
-                      name={`${id}-gender`}
-                      value={value}
-                      x-model="customer.gender"
-                    />
-                    <span class="customer-radio__dot" aria-hidden="true" />
-                    <span class="customer-radio__label">{value}</span>
-                  </label>
-                ))
-              }
-            </div>
-          </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-weight`}
-              >Weight</label
-            >
-            <input
-              id={`${id}-weight`}
-              class="customer-input"
-              type="number"
-              x-model="customer.weight"
-            />
-          </div>
+          <Input
+            label="First name"
+            required
+            placeholder="Enter the first name"
+            x-model="customer.firstName"
+          />
+          <Input
+            label="Last name"
+            required
+            placeholder="Enter the last name"
+            x-model="customer.lastName"
+          />
+          <Input
+            label="Date of Birth"
+            type="date"
+            x-model="customer.dateOfBirth"
+          />
+          <RadioGroup
+            label="Gender"
+            name={`${id}-gender`}
+            options={["M", "F", "X"]}
+            x-model="customer.gender"
+          />
+          <Input label="Weight" type="number" x-model="customer.weight" />
         </div>
       </div>
     </details>
@@ -109,40 +71,25 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </summary>
       <div class="customer-section__body">
         <div class="customer-form__grid">
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-company`}
-              >Company</label
-            >
-            <div class="customer-input-row">
-              <span class="customer-select">
-                <span
-                  id={`${id}-company-wrap`}
-                  :class="{ 'is-placeholder': !customer.companyName }"
-                >
-                  <span
-                    id={`${id}-company-text`}
-                    x-text="customer.companyName || 'Select...'">Select...</span
-                  >
-                </span>
-                <Icon name="chevron-down" />
-              </span>
-              <Button variant="ghost" icon="plus" class="customer-form__create"
-                >Create</Button
-              >
+          <div class="customer-form__company">
+            <span class="customer-form__company-label">Company</span>
+            <div class="customer-form__company-row">
+              <Select
+                placeholder="Select..."
+                options={COMPANIES.map((company) => ({
+                  label: company.name,
+                  value: company.id,
+                }))}
+                x-model="customer.companyId"
+              />
+              <Button variant="ghost" icon="plus">Create</Button>
             </div>
           </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-title`}
-              >Company Title</label
-            >
-            <input
-              id={`${id}-title`}
-              class="customer-input"
-              type="text"
-              placeholder="Enter company title here"
-              x-model="customer.companyTitle"
-            />
-          </div>
+          <Input
+            label="Company Title"
+            placeholder="Enter company title here"
+            x-model="customer.companyTitle"
+          />
         </div>
       </div>
     </details>
@@ -154,41 +101,21 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </summary>
       <div class="customer-section__body">
         <div class="customer-form__grid">
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-passport-number`}
-              >Passport Number</label
-            >
-            <input
-              id={`${id}-passport-number`}
-              class="customer-input"
-              type="text"
-              placeholder="Enter passport number here"
-              x-model="customer.passportNumber"
-            />
-          </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-passport-country`}
-              >Passport Country</label
-            >
-            <input
-              id={`${id}-passport-country`}
-              class="customer-input"
-              type="text"
-              placeholder="Enter passport country here"
-              x-model="customer.passportCountry"
-            />
-          </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-passport-expiry`}
-              >Passport Expiry</label
-            >
-            <input
-              id={`${id}-passport-expiry`}
-              class="customer-input"
-              type="date"
-              x-model="customer.passportExpiry"
-            />
-          </div>
+          <Input
+            label="Passport Number"
+            placeholder="Enter passport number here"
+            x-model="customer.passportNumber"
+          />
+          <Input
+            label="Passport Country"
+            placeholder="Enter passport country here"
+            x-model="customer.passportCountry"
+          />
+          <Input
+            label="Passport Expiry"
+            type="date"
+            x-model="customer.passportExpiry"
+          />
         </div>
       </div>
     </details>
@@ -200,51 +127,28 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </summary>
       <div class="customer-section__body">
         <div class="customer-form__grid">
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-mobile`}
-              >Mobile Number</label
-            >
-            <input
-              id={`${id}-mobile`}
-              class="customer-input"
-              type="tel"
-              placeholder="Enter mobile number here"
-              x-model="customer.phone"
-            />
-          </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-email`}
-              >Email Address</label
-            >
-            <input
-              id={`${id}-email`}
-              class="customer-input"
-              type="email"
-              placeholder="Enter email address here"
-              x-model="customer.email"
-            />
-          </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-city`}>City</label>
-            <input
-              id={`${id}-city`}
-              class="customer-input"
-              type="text"
-              placeholder="Enter city name"
-              x-model="customer.city"
-            />
-          </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-state`}>State</label
-            >
-            <input
-              id={`${id}-state`}
-              class="customer-input"
-              type="text"
-              placeholder="Enter state here"
-              x-model="customer.state"
-            />
-          </div>
+          <Input
+            label="Mobile Number"
+            type="tel"
+            placeholder="Enter mobile number here"
+            x-model="customer.phone"
+          />
+          <Input
+            label="Email Address"
+            type="email"
+            placeholder="Enter email address here"
+            x-model="customer.email"
+          />
+          <Input
+            label="City"
+            placeholder="Enter city name"
+            x-model="customer.city"
+          />
+          <Input
+            label="State"
+            placeholder="Enter state here"
+            x-model="customer.state"
+          />
         </div>
       </div>
     </details>
@@ -256,18 +160,11 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </summary>
       <div class="customer-section__body">
         <div class="customer-form__grid">
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-dl`}
-              >Drivers License Number</label
-            >
-            <input
-              id={`${id}-dl`}
-              class="customer-input"
-              type="text"
-              placeholder="Enter DL here"
-              x-model="customer.driversLicense"
-            />
-          </div>
+          <Input
+            label="Drivers License Number"
+            placeholder="Enter DL here"
+            x-model="customer.driversLicense"
+          />
         </div>
       </div>
     </details>
@@ -279,30 +176,17 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </summary>
       <div class="customer-section__body">
         <div class="customer-form__grid">
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-ec-name`}
-              >Emergency Contact Name</label
-            >
-            <input
-              id={`${id}-ec-name`}
-              class="customer-input"
-              type="text"
-              placeholder="Enter emergency contact name here"
-              x-model="customer.emergencyContactName"
-            />
-          </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-ec-phone`}
-              >Emergency Contact</label
-            >
-            <input
-              id={`${id}-ec-phone`}
-              class="customer-input"
-              type="tel"
-              placeholder="Enter emergency contact here"
-              x-model="customer.emergencyContactPhone"
-            />
-          </div>
+          <Input
+            label="Emergency Contact Name"
+            placeholder="Enter emergency contact name here"
+            x-model="customer.emergencyContactName"
+          />
+          <Input
+            label="Emergency Contact"
+            type="tel"
+            placeholder="Enter emergency contact here"
+            x-model="customer.emergencyContactPhone"
+          />
         </div>
       </div>
     </details>
@@ -314,88 +198,75 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </summary>
       <div class="customer-section__body">
         <div class="customer-form__grid">
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-salesperson`}
-              >Salesperson</label
-            >
-            <span class="customer-select">
-              <span
-                id={`${id}-salesperson-wrap`}
-                :class="{ 'is-placeholder': !customer.salesperson }"
-              >
-                <span
-                  id={`${id}-salesperson-text`}
-                  x-text="customer.salesperson?.fullName || 'Select...'"
-                  >Select...</span
-                >
-              </span>
-              <Icon name="chevron-down" />
-            </span>
-          </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-notes`}>Notes</label
-            >
-            <textarea
-              id={`${id}-notes`}
-              class="customer-input customer-input--textarea"
-              placeholder="Add notes here"
-              x-model="customer.notes"></textarea>
-          </div>
+          <Select
+            label="Salesperson"
+            placeholder="Select..."
+            options={SALESPEOPLE.map((account) => ({
+              label: account.fullName,
+              value: account.id,
+            }))}
+            x-model="customer.salespersonId"
+          />
         </div>
-      </div>
-    </details>
-
-    <details class="customer-section" open>
-      <summary class="customer-section__head">
-        <span>Documents</span>
-        <Icon name="chevron-up" />
-      </summary>
-      <div class="customer-section__body">
-        <div class="customer-documents__actions">
-          <Button variant="ghost" icon="plus">Add Files</Button>
-        </div>
-        <table class="customer-documents">
-          <thead>
-            <tr><th>File Name</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="customer-documents__empty">No results</td>
-            </tr>
-          </tbody>
-        </table>
+        <Textarea
+          label="Notes"
+          placeholder="Add notes here"
+          x-model="customer.notes"
+        />
       </div>
     </details>
   </form>
 
-  <Fragment slot="footer">
-    <Button variant="primary" data-customer-submit>
-      <span data-customer-submit-label>Update Customer</span>
-    </Button>
-    <Button variant="ghost" @click="$store.customerModal.close()">
-      Cancel
-    </Button>
-    <span class="customer-form__delete" data-customer-delete-wrap>
-      <Button
-        variant="danger"
-        popovertarget={deleteConfirmId}
-        id={deleteTriggerId}
-        class="customer-delete-trigger"
-      >
-        Delete Customer
-      </Button>
-      <div id={deleteConfirmId} popover class="customer-delete-confirm">
-        <p>Are you sure you want to delete this customer?</p>
-        <div class="customer-delete-confirm__actions">
-          <Button variant="ghost" popovertarget={deleteConfirmId}>
-            Cancel
-          </Button>
-          <Button variant="danger">Delete Customer</Button>
-        </div>
+  <details class="customer-section" open>
+    <summary class="customer-section__head">
+      <span>Documents</span>
+      <Icon name="chevron-up" />
+    </summary>
+    <div class="customer-section__body">
+      <div class="customer-documents__actions">
+        <Button variant="ghost" icon="plus">Add Files</Button>
       </div>
-    </span>
-  </Fragment>
+      <table class="customer-documents">
+        <thead>
+          <tr><th>File Name</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="customer-documents__empty">No results</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 </Modal>
+
+<Fragment slot="footer">
+  <Button variant="primary" data-customer-submit>
+    <span data-customer-submit-label>Update Customer</span>
+  </Button>
+  <Button variant="ghost" @click="$store.customerModal.close()">
+    Cancel
+  </Button>
+  <span class="customer-form__delete" data-customer-delete-wrap>
+    <Button
+      variant="danger"
+      popovertarget={deleteConfirmId}
+      id={deleteTriggerId}
+      class="customer-delete-trigger"
+    >
+      Delete Customer
+    </Button>
+    <div id={deleteConfirmId} popover class="customer-delete-confirm">
+      <p>Are you sure you want to delete this customer?</p>
+      <div class="customer-delete-confirm__actions">
+        <Button variant="ghost" popovertarget={deleteConfirmId}>
+          Cancel
+        </Button>
+        <Button variant="danger">Delete Customer</Button>
+      </div>
+    </div>
+  </span>
+</Fragment>
 
 <style>
   :global(.modal:has(.customer-form)) {
@@ -461,152 +332,23 @@ const deleteTriggerId = `${id}-delete-trigger`;
     }
   }
 
-  .customer-form__field {
+  .customer-form__company {
     display: grid;
     gap: 8px;
     min-width: 0;
-  }
 
-  .customer-form__label {
-    color: var(--air-ink);
-    font-size: 15px;
-    font-weight: 800;
-    line-height: 1;
-
-    em {
-      color: #c83b00;
-      font-style: normal;
-      margin-left: 2px;
-    }
-  }
-
-  .customer-input {
-    width: 100%;
-    height: 42px;
-    padding: 0 14px;
-    border: 1px solid var(--air-line);
-    border-radius: 6px;
-    background: #fff;
-    color: var(--air-ink);
-    font: inherit;
-    font-size: 14px;
-    font-weight: 600;
-
-    &::placeholder {
-      color: #98a3b3;
-      font-weight: 500;
-    }
-
-    &:focus {
-      outline: 0;
-      border-color: var(--air-ink);
-      box-shadow: 0 0 0 2px rgba(11, 18, 34, 0.08);
-    }
-  }
-
-  .customer-input--textarea {
-    height: auto;
-    min-height: 96px;
-    padding: 12px 14px;
-    resize: vertical;
-  }
-
-  .customer-input-row {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 10px;
-    align-items: stretch;
-  }
-
-  .customer-form__create {
-    min-height: 42px;
-    border-radius: 6px;
-  }
-
-  .customer-select {
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 0 14px;
-    border: 1px solid var(--air-line);
-    border-radius: 6px;
-    background: #fff;
-    color: var(--air-ink);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-
-    .is-placeholder {
-      color: #98a3b3;
-      font-weight: 500;
-    }
-
-    :global(.air-icon) {
-      width: 14px;
-      height: 14px;
-      color: var(--air-muted);
-    }
-  }
-
-  .customer-radio-group {
-    display: flex;
-    align-items: center;
-    gap: 28px;
-    min-height: 42px;
-  }
-
-  .customer-radio {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    user-select: none;
-
-    input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .customer-radio__dot {
-      position: relative;
-      display: inline-grid;
-      place-items: center;
-      width: 22px;
-      height: 22px;
-      flex: 0 0 22px;
-      border: 1px solid #c8cfdb;
-      border-radius: 50%;
-      background: #fff;
-
-      &::after {
-        content: "";
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: var(--air-purple);
-        opacity: 0;
-      }
-    }
-
-    input:checked + .customer-radio__dot {
-      border-color: var(--air-purple);
-    }
-
-    input:checked + .customer-radio__dot::after {
-      opacity: 1;
-    }
-
-    input:focus-visible + .customer-radio__dot {
-      outline: 2px solid var(--air-purple);
-      outline-offset: 2px;
-    }
-
-    .customer-radio__label {
-      font-size: 15px;
+    .customer-form__company-label {
+      color: var(--air-ink);
+      font-size: 14px;
       font-weight: 700;
+      line-height: 1;
+    }
+
+    .customer-form__company-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: stretch;
     }
   }
 

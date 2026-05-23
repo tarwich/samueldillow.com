@@ -1,0 +1,133 @@
+---
+type Option = string | { value: string; label: string };
+
+interface Props {
+  label?: string;
+  name: string;
+  options: Option[];
+  required?: boolean;
+  value?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  label,
+  name,
+  options,
+  required = false,
+  value,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const normalized = options.map((opt) =>
+  typeof opt === "string" ? { value: opt, label: opt } : opt,
+);
+---
+
+<div class:list={["air-field", className]} role="radiogroup" aria-label={label}>
+  {label && (
+    <span class="air-field__label">
+      {label}
+      {required && <em aria-hidden="true">*</em>}
+    </span>
+  )}
+  <div class="air-radio-group">
+    {normalized.map((opt) => (
+      <label class="air-radio">
+        <input
+          type="radio"
+          name={name}
+          value={opt.value}
+          checked={value === opt.value}
+          required={required}
+          {...rest}
+        />
+        <span class="air-radio__dot" aria-hidden="true" />
+        <span class="air-radio__label">{opt.label}</span>
+      </label>
+    ))}
+  </div>
+</div>
+
+<style>
+  .air-field {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .air-field__label {
+    color: var(--air-ink);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+
+    em {
+      color: #c83b00;
+      font-style: normal;
+      margin-left: 2px;
+    }
+  }
+
+  .air-radio-group {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    min-height: 44px;
+  }
+
+  .air-radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+
+    input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .air-radio__dot {
+      position: relative;
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      flex: 0 0 22px;
+      border: 1px solid #c8cfdb;
+      border-radius: 50%;
+      background: #fff;
+
+      &::after {
+        content: "";
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--air-purple);
+        opacity: 0;
+      }
+    }
+
+    input:checked + .air-radio__dot {
+      border-color: var(--air-purple);
+    }
+
+    input:checked + .air-radio__dot::after {
+      opacity: 1;
+    }
+
+    input:focus-visible + .air-radio__dot {
+      outline: 2px solid var(--air-purple);
+      outline-offset: 2px;
+    }
+
+    .air-radio__label {
+      font-size: 15px;
+      font-weight: 700;
+    }
+  }
+</style>

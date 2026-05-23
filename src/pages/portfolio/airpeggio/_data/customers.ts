@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
-import { COMPANIES, type Company } from "./companies";
+import { COMPANIES, getCompany, type Company } from "./companies";
 import { getAccount, SALESPEOPLE, type Account } from "./accounts";
 
 faker.seed(202);
@@ -188,7 +188,8 @@ export interface CustomerEditPayload {
   dateOfBirth: string;
   gender: Gender;
   weight: number | "";
-  companyName: string;
+  companyId: string;
+  company: Company | null;
   companyTitle: string;
   passportNumber: string;
   passportCountry: string;
@@ -215,7 +216,8 @@ export function customerEditPayload(
     dateOfBirth: formatDateForInput(customer.dateOfBirth),
     gender: customer.gender ?? "M",
     weight: customer.weight ?? "",
-    companyName: company?.name ?? "",
+    companyId: company?.id ?? customer.companyId ?? "",
+    get company() { return this.companyId ? getCompany(this.companyId) ?? null : null },
     companyTitle: customer.companyTitle ?? "",
     passportNumber: customer.passportNumber ?? "",
     passportCountry: customer.passportCountry ?? "",

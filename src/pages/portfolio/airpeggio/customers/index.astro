@@ -7,7 +7,12 @@ import CompanyModal from "../companies/_components/CompanyModal.astro";
 import CustomerModal from "./_components/CustomerModal.astro";
 import Icon from "../_components/Icon.astro";
 import PageHeader from "../_components/PageHeader.astro";
-import { CUSTOMERS, COMPANIES, SALESPEOPLE, customerEditPayload } from "../_data";
+import {
+  CUSTOMERS,
+  COMPANIES,
+  SALESPEOPLE,
+  customerEditPayload,
+} from "../_data";
 
 const companyById = new Map(COMPANIES.map((c) => [c.id, c]));
 const salespersonById = new Map(SALESPEOPLE.map((s) => [s.id, s]));
@@ -42,7 +47,7 @@ const editCompany = rows.find(({ company }) => company)?.company;
       <h1 slot="title">Customers</h1>
       <Fragment slot="actions">
         <Button href="/portfolio/airpeggio/companies/">Manage Companies</Button>
-        <Button variant="primary" icon="plus" data-add-customer>
+        <Button variant="primary" icon="plus" @click={`$store.customerModal.open({})`}>
           Add Customer
         </Button>
       </Fragment>
@@ -131,9 +136,7 @@ const editCompany = rows.find(({ company }) => company)?.company;
                       type="button"
                       class="customers-row-action"
                       aria-label={`Edit ${customer.fullName}`}
-                      data-edit-customer={JSON.stringify(
-                        customerEditPayload(customer, company),
-                      )}
+                      @click={`$store.customerModal.open(${customerEditPayload(customer, company)})`}
                     >
                       <Icon name="edit" />
                     </button>

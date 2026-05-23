@@ -28,25 +28,26 @@ const {
     <title>{title}</title>
     <script>
       import Alpine from "alpinejs";
+      import type { Customer } from "./_data/customers";
       // @ts-ignore
       window.Alpine = Alpine;
 
-      Alpine.store("customerModal", {
-        customer: null,
-        modal: null,
-        open(customer) {
-          console.log("Opening modal for customer:", customer);
+      const customerModal = {
+        customer: null as Customer | null,
+        open(customer: Customer) {
           this.customer = customer;
         },
         close() {
           this.customer = null;
         },
-      });
+      };
+
+      Alpine.store("customerModal", customerModal);
 
       Alpine.start();
     </script>
   </head>
-  <body class="air-app">
+  <body class="air-app" x-data="{}">
     <TopNav active={active} />
     <main class="air-main" {...rest}>
       <slot />

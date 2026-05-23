@@ -12,7 +12,12 @@ const deleteConfirmId = `${id}-confirm-delete`;
 const deleteTriggerId = `${id}-delete-trigger`;
 ---
 
-<Modal id={id} title="Edit Customer" x-effect="$store.customerModal.customer?.id ? $el.showModal() : $el.close()">
+<Modal
+  id={id}
+  title="Edit Customer"
+  x-effect="$store.customerModal.customer ? $el.showModal() : $el.close()"
+  @close="$store.customerModal.close()"
+>
   <form class="customer-form" method="dialog" x-data="{customer: {}}" x-effect="customer = $store.customerModal.customer ?? {}">
     <details class="customer-section" open>
       <summary class="customer-section__head">
@@ -93,8 +98,15 @@ const deleteTriggerId = `${id}-delete-trigger`;
             >
             <div class="customer-input-row">
               <span class="customer-select">
-                <span id={`${id}-company-wrap`} class="is-placeholder">
-                  <span id={`${id}-company-text`}>Select...</span>
+                <span
+                  id={`${id}-company-wrap`}
+                  :class="{ 'is-placeholder': !customer.companyName }"
+                >
+                  <span
+                    id={`${id}-company-text`}
+                    x-text="customer.companyName || 'Select...'"
+                    >Select...</span
+                  >
                 </span>
                 <Icon name="chevron-down" />
               </span>
@@ -112,6 +124,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               class="customer-input"
               type="text"
               placeholder="Enter company title here"
+              x-model="customer.companyTitle"
             />
           </div>
         </div>
@@ -134,6 +147,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               class="customer-input"
               type="text"
               placeholder="Enter passport number here"
+              x-model="customer.passportNumber"
             />
           </div>
           <div class="customer-form__field">
@@ -145,6 +159,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               class="customer-input"
               type="text"
               placeholder="Enter passport country here"
+              x-model="customer.passportCountry"
             />
           </div>
           <div class="customer-form__field">
@@ -155,6 +170,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-passport-expiry`}
               class="customer-input"
               type="date"
+              x-model="customer.passportExpiry"
             />
           </div>
         </div>
@@ -177,6 +193,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               class="customer-input"
               type="tel"
               placeholder="Enter mobile number here"
+              x-model="customer.phone"
             />
           </div>
           <div class="customer-form__field">
@@ -188,6 +205,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               class="customer-input"
               type="email"
               placeholder="Enter email address here"
+              x-model="customer.email"
             />
           </div>
           <div class="customer-form__field">
@@ -197,6 +215,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               class="customer-input"
               type="text"
               placeholder="Enter city name"
+              x-model="customer.city"
             />
           </div>
           <div class="customer-form__field">
@@ -207,6 +226,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               class="customer-input"
               type="text"
               placeholder="Enter state here"
+              x-model="customer.state"
             />
           </div>
         </div>
@@ -229,6 +249,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               class="customer-input"
               type="text"
               placeholder="Enter DL here"
+              x-model="customer.driversLicense"
             />
           </div>
         </div>
@@ -251,6 +272,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               class="customer-input"
               type="text"
               placeholder="Enter emergency contact name here"
+              x-model="customer.emergencyContactName"
             />
           </div>
           <div class="customer-form__field">
@@ -262,6 +284,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               class="customer-input"
               type="tel"
               placeholder="Enter emergency contact here"
+              x-model="customer.emergencyContactPhone"
             />
           </div>
         </div>
@@ -280,8 +303,15 @@ const deleteTriggerId = `${id}-delete-trigger`;
               >Salesperson</label
             >
             <span class="customer-select">
-              <span id={`${id}-salesperson-wrap`} class="is-placeholder">
-                <span id={`${id}-salesperson-text`}>Select...</span>
+              <span
+                id={`${id}-salesperson-wrap`}
+                :class="{ 'is-placeholder': !customer.salespersonName }"
+              >
+                <span
+                  id={`${id}-salesperson-text`}
+                  x-text="customer.salespersonName || 'Select...'"
+                  >Select...</span
+                >
               </span>
               <Icon name="chevron-down" />
             </span>
@@ -292,7 +322,8 @@ const deleteTriggerId = `${id}-delete-trigger`;
             <textarea
               id={`${id}-notes`}
               class="customer-input customer-input--textarea"
-              placeholder="Add notes here"></textarea>
+              placeholder="Add notes here"
+              x-model="customer.notes"></textarea>
           </div>
         </div>
       </div>
@@ -325,10 +356,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
     <Button variant="primary" data-customer-submit>
       <span data-customer-submit-label>Update Customer</span>
     </Button>
-    <Button
-      variant="ghost"
-      onclick={`document.getElementById('${id}')?.close()`}
-    >
+    <Button variant="ghost" @click="$store.customerModal.close()">
       Cancel
     </Button>
     <span class="customer-form__delete" data-customer-delete-wrap>
@@ -352,145 +380,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
     </span>
   </Fragment>
 </Modal>
-
-<script>
-  type CustomerPayload = {
-    firstName?: string;
-    lastName?: string;
-    dateOfBirth?: string;
-    gender?: "M" | "F" | "X";
-    weight?: number | "";
-    companyName?: string;
-    companyTitle?: string;
-    passportNumber?: string;
-    passportCountry?: string;
-    passportExpiry?: string;
-    phone?: string;
-    email?: string;
-    city?: string;
-    state?: string;
-    driversLicense?: string;
-    emergencyContactName?: string;
-    emergencyContactPhone?: string;
-    salespersonName?: string;
-    notes?: string;
-  };
-
-  const MODAL_ID = "customer-modal";
-
-  const FIELD_MAP: Record<keyof CustomerPayload, string | null> = {
-    firstName: `${MODAL_ID}-first`,
-    lastName: `${MODAL_ID}-last`,
-    dateOfBirth: `${MODAL_ID}-dob`,
-    weight: `${MODAL_ID}-weight`,
-    companyTitle: `${MODAL_ID}-title`,
-    passportNumber: `${MODAL_ID}-passport-number`,
-    passportCountry: `${MODAL_ID}-passport-country`,
-    passportExpiry: `${MODAL_ID}-passport-expiry`,
-    phone: `${MODAL_ID}-mobile`,
-    email: `${MODAL_ID}-email`,
-    city: `${MODAL_ID}-city`,
-    state: `${MODAL_ID}-state`,
-    driversLicense: `${MODAL_ID}-dl`,
-    emergencyContactName: `${MODAL_ID}-ec-name`,
-    emergencyContactPhone: `${MODAL_ID}-ec-phone`,
-    notes: `${MODAL_ID}-notes`,
-    gender: null,
-    companyName: null,
-    salespersonName: null,
-  };
-
-  // function setField(elementId: string, value: unknown) {
-  //   const el = document.getElementById(elementId);
-  //   if (el && "value" in el) {
-  //     (el as HTMLInputElement | HTMLTextAreaElement).value =
-  //       value === undefined || value === null ? "" : String(value);
-  //   }
-  // }
-
-  // function setGender(value: string) {
-  //   const radio = document.querySelector<HTMLInputElement>(
-  //     `input[name="${MODAL_ID}-gender"][value="${value}"]`,
-  //   );
-  //   if (radio) radio.checked = true;
-  // }
-
-  // function setDisplay(wrapId: string, textId: string, value: string) {
-  //   const wrap = document.getElementById(wrapId);
-  //   const text = document.getElementById(textId);
-  //   if (text) text.textContent = value || "Select...";
-  //   if (wrap) wrap.classList.toggle("is-placeholder", !value);
-  // }
-
-  // function populate(payload: CustomerPayload) {
-  //   for (const [key, elementId] of Object.entries(FIELD_MAP)) {
-  //     if (!elementId) continue;
-  //     setField(elementId, payload[key as keyof CustomerPayload]);
-  //   }
-  //   setGender(payload.gender ?? "M");
-  //   setDisplay(
-  //     `${MODAL_ID}-company-wrap`,
-  //     `${MODAL_ID}-company-text`,
-  //     payload.companyName ?? "",
-  //   );
-  //   setDisplay(
-  //     `${MODAL_ID}-salesperson-wrap`,
-  //     `${MODAL_ID}-salesperson-text`,
-  //     payload.salespersonName ?? "",
-  //   );
-  // }
-
-  // function clearFields() {
-  //   populate({});
-  // }
-
-  // function setMode(mode: "edit" | "add") {
-  //   const title = document.getElementById(`${MODAL_ID}-title`);
-  //   if (title) {
-  //     title.textContent = mode === "edit" ? "Edit Customer" : "Create Customer";
-  //   }
-  //   const submitLabel = document.querySelector("[data-customer-submit-label]");
-  //   if (submitLabel) {
-  //     submitLabel.textContent =
-  //       mode === "edit" ? "Update Customer" : "Create Customer";
-  //   }
-  //   const deleteWrap = document.querySelector<HTMLElement>(
-  //     "[data-customer-delete-wrap]",
-  //   );
-  //   if (deleteWrap) deleteWrap.hidden = mode !== "edit";
-  // }
-
-  // function openModal() {
-  //   const modal = document.getElementById(MODAL_ID);
-  //   if (modal instanceof HTMLDialogElement) modal.showModal();
-  // }
-
-  // document.addEventListener("click", (event) => {
-  //   const target = event.target as Element | null;
-  //   if (!target) return;
-
-  //   const editBtn = target.closest<HTMLElement>("[data-edit-customer]");
-  //   if (editBtn) {
-  //     try {
-  //       const payload = JSON.parse(
-  //         editBtn.dataset.editCustomer ?? "{}",
-  //       ) as CustomerPayload;
-  //       populate(payload);
-  //       setMode("edit");
-  //       openModal();
-  //     } catch {
-  //       // bad payload; do nothing
-  //     }
-  //     return;
-  //   }
-
-  //   if (target.closest("[data-add-customer]")) {
-  //     clearFields();
-  //     setMode("add");
-  //     openModal();
-  //   }
-  // });
-</script>
 
 <style>
   :global(.modal:has(.customer-form)) {

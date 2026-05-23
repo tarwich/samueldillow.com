@@ -54,6 +54,47 @@ const buildEmail = (first: string, last: string, company: Company) =>
 const maybe = <T,>(value: T, weight = 0.7): T | undefined =>
   faker.number.float({ min: 0, max: 1 }) < weight ? value : undefined;
 
+// US passports come in two formats: legacy 9-digit numeric (still valid until
+// they expire) and the post-2021 books with one letter followed by 8 digits.
+const usPassportNumber = (): string =>
+  faker.number.float({ min: 0, max: 1 }) < 0.7
+    ? `${faker.string.alpha({ length: 1, casing: "upper" })}${faker.string.numeric({ length: 8 })}`
+    : faker.string.numeric({ length: 9 });
+
+const upperLetter = () =>
+  faker.string.alpha({ length: 1, casing: "upper" });
+
+// Per-state US driver's license formats. FL/NJ derive the leading letter from
+// the holder's last name; everything else is shape-only.
+const driversLicenseFor = (
+  state: string | undefined,
+  lastName: string,
+): string => {
+  const nameLetter = (lastName[0] ?? "A").toUpperCase();
+  switch (state) {
+    case "TX":
+    case "GA":
+      return faker.string.numeric({ length: 8 });
+    case "NY":
+    case "CO":
+      return faker.string.numeric({ length: 9 });
+    case "CA":
+      return `${upperLetter()}${faker.string.numeric({ length: 7 })}`;
+    case "AZ":
+      return `${upperLetter()}${faker.string.numeric({ length: 8 })}`;
+    case "IL":
+      return `${upperLetter()}${faker.string.numeric({ length: 11 })}`;
+    case "FL":
+      return `${nameLetter}${faker.string.numeric({ length: 12 })}`;
+    case "NJ":
+      return `${nameLetter}${faker.string.numeric({ length: 14 })}`;
+    case "WA":
+      return faker.string.alphanumeric({ length: 12, casing: "upper" });
+    default:
+      return faker.string.numeric({ length: 9 });
+  }
+};
+
 const NOW = new Date("2026-05-13T12:00:00Z");
 
 function makeCustomer(company: Company): Customer {
@@ -69,6 +110,7 @@ function makeCustomer(company: Company): Customer {
     faker.helpers.maybe(() => buildEmail(firstName, lastName, company), {
       probability: 0.6,
     }) ?? faker.internet.email({ firstName, lastName }).toLowerCase();
+  const state = maybe(faker.helpers.arrayElement(STATES), 0.6);
 
   return {
     id: nanoid(),
@@ -87,18 +129,12 @@ function makeCustomer(company: Company): Customer {
       0.55,
     ),
     weight: maybe(faker.number.int({ min: 120, max: 240 }), 0.4),
-    passportNumber: maybe(
-      faker.string.alphanumeric({ length: 9, casing: "upper" }),
-      0.25,
-    ),
+    passportNumber: maybe(usPassportNumber(), 0.25),
     passportCountry: maybe(faker.location.countryCode("alpha-3"), 0.25),
     passportExpiry: maybe(faker.date.future({ years: 8 }), 0.2),
     city: maybe(faker.location.city(), 0.6),
-    state: maybe(faker.helpers.arrayElement(STATES), 0.6),
-    driversLicense: maybe(
-      faker.string.alphanumeric({ length: 8, casing: "upper" }),
-      0.35,
-    ),
+    state,
+    driversLicense: maybe(driversLicenseFor(state, lastName), 0.35),
     emergencyContactName: maybe(faker.person.fullName(), 0.35),
     emergencyContactPhone: maybe(
       faker.phone.number({ style: "national" }),
@@ -171,11 +207,11 @@ export interface CustomerEditPayload {
 export function customerEditPayload(
   customer: Customer,
   company?: Company,
-): CustomerEditPayload {
+): string {
   const salesperson = customer.salespersonId
     ? SALESPEOPLE.find((s) => s.id === customer.salespersonId)
     : undefined;
-  return {
+  const payload = {
     id: customer.id,
     firstName: customer.firstName,
     lastName: customer.lastName,
@@ -197,5 +233,7 @@ export function customerEditPayload(
     salespersonName: salesperson?.name ?? "",
     notes: customer.notes ?? "",
   };
+
+  return JSON.stringify(payload);
 }
 

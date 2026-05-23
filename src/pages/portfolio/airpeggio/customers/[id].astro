@@ -77,13 +77,9 @@ const personalFields = [
     <Button
       icon="edit"
       class="customer-edit"
-      data-edit-customer={JSON.stringify(
-        customerEditPayload(customer, company),
-      )}
-      @click={`$store.customerModal.open(${JSON.stringify(customer)})`}
+      @click={`$store.customerModal.open(${customerEditPayload(customer, company)})`}
     >
       Edit Details
-      <span x-text="$store.customerModal.customer?.id"></span>
     </Button>
   </header>
 

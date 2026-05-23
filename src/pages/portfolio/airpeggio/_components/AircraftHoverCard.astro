@@ -1,0 +1,59 @@
+---
+import EntityPreviewCard from "./EntityPreviewCard.astro";
+import PreviewField from "./PreviewField.astro";
+import { formatAircraftForModal, type Aircraft } from "../_data";
+
+interface Props {
+  aircraft: Aircraft;
+  triggerClass?: string;
+  placement?: "top" | "bottom";
+}
+
+const { aircraft, triggerClass, placement = "bottom" } = Astro.props;
+const viewHref = `/portfolio/airpeggio/aircraft/${aircraft.id}/`;
+const privacyLabel =
+  aircraft.privacy === "charter" ? "Charter (Part 135)" : "Private (Part 91)";
+const seatsLabel = `${aircraft.seats} ${aircraft.seats === 1 ? "seat" : "seats"}`;
+const tailColors: Record<Aircraft["color"], string> = {
+  red: "#b24b4a",
+  lime: "#7ba84a",
+  blue: "#3f6f96",
+};
+const tailColor = tailColors[aircraft.color] ?? "var(--air-ink)";
+---
+
+<EntityPreviewCard
+  title={aircraft.tail}
+  icon="aircraft"
+  viewHref={viewHref}
+  onEdit={`$store.aircraftModal.open(${formatAircraftForModal(aircraft)})`}
+  placement={placement}
+  width="280px"
+>
+  <Fragment slot="trigger">
+    <a
+      class:list={["aircraft-hover-card__trigger", triggerClass]}
+      href={viewHref}
+      style={`--tail-color: ${tailColor}`}
+    >
+      <slot name="trigger">{aircraft.tail}</slot>
+    </a>
+  </Fragment>
+
+  <PreviewField value={aircraft.model} fallback="No model" icon="aircraft" />
+  <PreviewField value={seatsLabel} icon="users" />
+  <PreviewField value={aircraft.location} fallback="No homebase" icon="pin" />
+  <PreviewField value={privacyLabel} icon="shield" />
+  <PreviewField value={aircraft.owner} fallback="No owner" icon="account" />
+</EntityPreviewCard>
+
+<style>
+  .aircraft-hover-card__trigger {
+    color: var(--air-ink);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+</style>

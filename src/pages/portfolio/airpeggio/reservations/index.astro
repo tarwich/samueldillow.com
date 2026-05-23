@@ -23,6 +23,7 @@ import {
 } from "../_data";
 import CustomerHoverCard from "../_components/CustomerHoverCard.astro";
 import CompanyHoverCard from "../_components/CompanyHoverCard.astro";
+import AircraftHoverCard from "../_components/AircraftHoverCard.astro";
 
 const tailColors: Record<string, string> = {
   red: "#b24b4a",
@@ -114,13 +115,19 @@ const tailColors: Record<string, string> = {
                         Trip #{reservation.tripNumber}
                       </span>
                       {aircraft && (
-                        <span
-                          class="reservation-trip__tail"
-                          style={`--tail-color: ${tailColors[aircraft.color] ?? "var(--air-ink)"}`}
+                        <AircraftHoverCard
+                          aircraft={aircraft}
+                          triggerClass="reservation-trip__tail"
                         >
-                          <Icon name="aircraft" />
-                          <strong>{aircraft.tail}</strong>
-                        </span>
+                          <span
+                            slot="trigger"
+                            class="reservation-trip__tail-inner"
+                            style={`--tail-color: ${tailColors[aircraft.color] ?? "var(--air-ink)"}`}
+                          >
+                            <Icon name="aircraft" />
+                            <strong>{aircraft.tail}</strong>
+                          </span>
+                        </AircraftHoverCard>
                       )}
                     </div>
                   </td>
@@ -357,7 +364,7 @@ const tailColors: Record<string, string> = {
     white-space: nowrap;
   }
 
-  .reservation-trip__tail {
+  .reservation-trip__tail-inner {
     display: inline-flex;
     align-items: center;
     gap: 6px;

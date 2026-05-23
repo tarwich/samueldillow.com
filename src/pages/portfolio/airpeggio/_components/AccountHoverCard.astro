@@ -1,0 +1,48 @@
+---
+import EntityPreviewCard from "./EntityPreviewCard.astro";
+import PreviewField from "./PreviewField.astro";
+import { accessLabel, type Account } from "../_data";
+
+interface Props {
+  account: Account;
+  triggerClass?: string;
+  placement?: "top" | "bottom";
+}
+
+const { account, triggerClass, placement = "bottom" } = Astro.props;
+const viewHref = `/portfolio/airpeggio/accounts/${account.id}/`;
+const access = accessLabel(account.roles);
+---
+
+<EntityPreviewCard
+  title={account.fullName}
+  icon="customer"
+  viewHref={viewHref}
+  placement={placement}
+  width="260px"
+>
+  <Fragment slot="trigger">
+    <a
+      class:list={["account-hover-card__trigger", triggerClass]}
+      href={viewHref}
+    >
+      <slot name="trigger">{account.fullName}</slot>
+    </a>
+  </Fragment>
+
+  <PreviewField value={account.email} fallback="No email provided" icon="mail" />
+  <PreviewField value={account.phone} fallback="No phone provided" icon="phone" />
+  <PreviewField value={access} fallback="No role assigned" icon="shield" />
+  <PreviewField value={account.status} icon="check" />
+</EntityPreviewCard>
+
+<style>
+  .account-hover-card__trigger {
+    color: var(--air-ink);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+</style>

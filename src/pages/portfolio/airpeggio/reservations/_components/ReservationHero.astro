@@ -1,5 +1,8 @@
 ---
 import Icon from "../../_components/Icon.astro";
+import AircraftHoverCard from "../../_components/AircraftHoverCard.astro";
+import CustomerHoverCard from "../../_components/CustomerHoverCard.astro";
+import CompanyHoverCard from "../../_components/CompanyHoverCard.astro";
 import {
   formatLegDayLabel,
   formatLegHourLabel,
@@ -34,30 +37,43 @@ const tailColors: Record<string, string> = {
   <div class="reservation-hero__left">
     {
       aircraft && (
-        <p class="reservation-hero__line reservation-hero__line--tail">
+        <div class="reservation-hero__line reservation-hero__line--tail">
           <Icon name="aircraft" />
-          <strong
-            style={`color: ${tailColors[aircraft.color] ?? "var(--air-ink)"}`}
-          >
-            {aircraft.tail}
-          </strong>
-        </p>
+          <AircraftHoverCard aircraft={aircraft}>
+            <strong
+              slot="trigger"
+              style={`color: ${tailColors[aircraft.color] ?? "var(--air-ink)"}`}
+            >
+              {aircraft.tail}
+            </strong>
+          </AircraftHoverCard>
+        </div>
       )
     }
-    <p class="reservation-hero__line">
+    <div class="reservation-hero__line">
       <Icon name="customer" />
       {
         customer ? (
-          <span>{customer.fullName}</span>
+          <CustomerHoverCard customer={customer} company={company}>
+            <span slot="trigger">{customer.fullName}</span>
+          </CustomerHoverCard>
         ) : (
           <span class="text-muted">No customer assigned</span>
         )
       }
-    </p>
-    <p class="reservation-hero__line reservation-hero__line--muted">
+    </div>
+    <div class="reservation-hero__line reservation-hero__line--muted">
       <Icon name="account" />
-      <span>{company?.name ?? "(No company assigned)"}</span>
-    </p>
+      {
+        company ? (
+          <CompanyHoverCard company={company}>
+            <span slot="trigger">{company.name}</span>
+          </CompanyHoverCard>
+        ) : (
+          <span>(No company assigned)</span>
+        )
+      }
+    </div>
   </div>
 
   <ul class="reservation-hero__legs">

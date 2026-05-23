@@ -1,0 +1,75 @@
+---
+import EntityPreviewCard from "./EntityPreviewCard.astro";
+import PreviewField from "./PreviewField.astro";
+import {
+  formatLegDate,
+  formatReservationForModal,
+  reservationAircraft,
+  reservationCompany,
+  reservationCustomer,
+  type Reservation,
+} from "../_data";
+
+interface Props {
+  reservation: Reservation;
+  triggerClass?: string;
+  placement?: "top" | "bottom";
+}
+
+const { reservation, triggerClass, placement = "bottom" } = Astro.props;
+const viewHref = `/portfolio/airpeggio/reservations/${reservation.id}/`;
+const aircraft = reservationAircraft(reservation);
+const customer = reservationCustomer(reservation);
+const company = reservationCompany(reservation);
+const firstLeg = reservation.legs[0];
+const route = firstLeg
+  ? `${firstLeg.origin} → ${firstLeg.destination} · ${formatLegDate(firstLeg.departure)}`
+  : undefined;
+
+const LIFECYCLE_LABELS: Record<Reservation["lifecycle"], string> = {
+  planned: "Planned",
+  scheduled: "Scheduled",
+  flown: "Flown",
+  cancelled: "Cancelled",
+};
+const statusLabel = LIFECYCLE_LABELS[reservation.lifecycle];
+---
+
+<EntityPreviewCard
+  title={`Trip #${reservation.tripNumber}`}
+  icon="calendar"
+  viewHref={viewHref}
+  onEdit={`$store.reservationModal.open(${formatReservationForModal(reservation)})`}
+  placement={placement}
+  width="280px"
+>
+  <Fragment slot="trigger">
+    <a
+      class:list={["reservation-hover-card__trigger", triggerClass]}
+      href={viewHref}
+    >
+      <slot name="trigger">Trip #{reservation.tripNumber}</slot>
+    </a>
+  </Fragment>
+
+  <PreviewField value={aircraft?.tail} fallback="No aircraft" icon="aircraft" />
+  <PreviewField value={route} fallback="No legs scheduled" icon="pin" />
+  <PreviewField
+    value={customer?.fullName}
+    fallback="No customer"
+    icon="customer"
+  />
+  <PreviewField value={company?.name} fallback="No company" icon="account" />
+  <PreviewField value={statusLabel} icon="check" />
+</EntityPreviewCard>
+
+<style>
+  .reservation-hover-card__trigger {
+    color: var(--air-ink);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+</style>

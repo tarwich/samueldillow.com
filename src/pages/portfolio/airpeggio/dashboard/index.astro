@@ -3,6 +3,10 @@ import AirpeggioLayout from "../_layout.astro";
 import Badge from "../_components/Badge.astro";
 import Button from "../_components/Button.astro";
 import Icon from "../_components/Icon.astro";
+import ReservationHoverCard from "../_components/ReservationHoverCard.astro";
+import AircraftHoverCard from "../_components/AircraftHoverCard.astro";
+import CustomerHoverCard from "../_components/CustomerHoverCard.astro";
+import CompanyHoverCard from "../_components/CompanyHoverCard.astro";
 import {
   ACCOUNTS,
   AIRCRAFT,
@@ -281,7 +285,9 @@ const truncateEmail = (email: string, max = 28) =>
             <ul class="kpi__list">
               {tripsInProgress.slice(0, 4).map((trip) => (
                 <li>
-                  <b># {trip.tripNumber}</b>
+                  <ReservationHoverCard reservation={trip}>
+                    <b slot="trigger"># {trip.tripNumber}</b>
+                  </ReservationHoverCard>
                   <span>
                     {trip.legs.map((leg) => leg.origin).join(" → ")} →{" "}
                     {trip.legs[trip.legs.length - 1].destination}
@@ -309,7 +315,13 @@ const truncateEmail = (email: string, max = 28) =>
                 return (
                   <li>
                     <Icon name="aircraft" />
-                    <b>{aircraft?.tail ?? "—"}</b>
+                    {aircraft ? (
+                      <AircraftHoverCard aircraft={aircraft}>
+                        <b slot="trigger">{aircraft.tail}</b>
+                      </AircraftHoverCard>
+                    ) : (
+                      <b>—</b>
+                    )}
                     <span>
                       {leg.origin} → {leg.destination}
                     </span>
@@ -510,28 +522,38 @@ const truncateEmail = (email: string, max = 28) =>
                 return (
                   <tr>
                     <td>
-                      <a
-                        class="trip-pill"
-                        href={`/portfolio/airpeggio/reservations/${r.id}/`}
+                      <ReservationHoverCard
+                        reservation={r}
+                        triggerClass="trip-pill"
                       >
-                        Trip #{r.tripNumber}
-                      </a>
+                        <span slot="trigger">Trip #{r.tripNumber}</span>
+                      </ReservationHoverCard>
                       {aircraft && (
                         <div class="trip-tail">
-                          <Icon name="aircraft" />
-                          {aircraft.tail}
+                          <AircraftHoverCard aircraft={aircraft}>
+                            <span slot="trigger" class="trip-tail__inner">
+                              <Icon name="aircraft" />
+                              {aircraft.tail}
+                            </span>
+                          </AircraftHoverCard>
                         </div>
                       )}
                     </td>
                     <td>
                       {c ? (
                         <>
-                          <strong>{c.firstName} {c.lastName}</strong>
+                          <CustomerHoverCard customer={c} company={cust}>
+                            <strong slot="trigger">{c.firstName} {c.lastName}</strong>
+                          </CustomerHoverCard>
                           {c.email && (
                             <div class="text-muted">{truncateEmail(c.email)}</div>
                           )}
                           {cust && (
-                            <div class="text-muted">{cust.name}</div>
+                            <div class="text-muted">
+                              <CompanyHoverCard company={cust}>
+                                <span slot="trigger">{cust.name}</span>
+                              </CompanyHoverCard>
+                            </div>
                           )}
                         </>
                       ) : (

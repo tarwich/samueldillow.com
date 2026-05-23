@@ -1,12 +1,13 @@
 ---
 import Icon from '../../_components/Icon.astro';
+import AircraftHoverCard from '../../_components/AircraftHoverCard.astro';
+import AccountHoverCard from '../../_components/AccountHoverCard.astro';
+import CustomerHoverCard from '../../_components/CustomerHoverCard.astro';
 import ChecklistItem from '../_components/ChecklistItem.astro';
 import ReservationDetailLayout from '../_components/ReservationDetailLayout.astro';
 import {
   ACCOUNTS,
   RESERVATIONS,
-  accountFullName,
-  formatAircraftForModal,
   formatLegItineraryDate,
   formatQuoteAmount,
   getReservation,
@@ -85,18 +86,17 @@ const checklistPassengerStatus = passengers.length > 0 ? 'complete' : 'pending';
     </div>
     <div class="reservation-panel__body reservation-checklist">
       <ChecklistItem status={checklistAircraftStatus} label="Aircraft">
-        <strong>{aircraft?.tail ?? '—'}</strong>
+        {
+          aircraft ? (
+            <AircraftHoverCard aircraft={aircraft}>
+              <strong slot="trigger">{aircraft.tail}</strong>
+            </AircraftHoverCard>
+          ) : (
+            <strong>—</strong>
+          )
+        }
         <Fragment slot="actions">
           <a href="#">Change Plane</a>
-          {
-            aircraft && (
-              <a
-                @click={`$store.aircraftModal.open(${formatAircraftForModal(aircraft)})`}
-              >
-                Edit Aircraft
-              </a>
-            )
-          }
         </Fragment>
       </ChecklistItem>
 
@@ -181,7 +181,7 @@ const checklistPassengerStatus = passengers.length > 0 ? 'complete' : 'pending';
                   <div class="checklist-pilot">
                     <span class="checklist-pilot__pos">{pilot.position}</span>
                     <span class="checklist-pilot__name">
-                      {accountFullName(account)}
+                      <AccountHoverCard account={account} />
                     </span>
                     <span class="checklist-pilot__legs">Legs</span>
                     {reservation.legs.map((leg) => (
@@ -207,7 +207,9 @@ const checklistPassengerStatus = passengers.length > 0 ? 'complete' : 'pending';
                   .filter((p) => p.groups.length > 0 && p.account)
                   .map(({ account, groups }) => (
                     <div class="pilot-conflicts__person">
-                      <strong>{accountFullName(account!)}</strong>
+                      <strong>
+                        <AccountHoverCard account={account!} />
+                      </strong>
                       <ul>
                         {groups.map((g) => (
                           <li>
@@ -235,7 +237,10 @@ const checklistPassengerStatus = passengers.length > 0 ? 'complete' : 'pending';
             <span>
               {passengers.length} passenger{passengers.length === 1 ? '' : 's'}
               {customer && (
-                <span class="text-muted"> · primary: {customer.fullName}</span>
+                <span class="text-muted">
+                  {' '}· primary:{' '}
+                  <CustomerHoverCard customer={customer} />
+                </span>
               )}
             </span>
           )

@@ -3,6 +3,8 @@ import AirpeggioLayout from "../_layout.astro";
 import Button from "../_components/Button.astro";
 import ColumnsPopover from "../_components/ColumnsPopover.astro";
 import CompanyHoverCard from "../_components/CompanyHoverCard.astro";
+import AccountHoverCard from "../_components/AccountHoverCard.astro";
+import CustomerHoverCard from "../_components/CustomerHoverCard.astro";
 import CompanyModal from "../companies/_components/CompanyModal.astro";
 import CustomerModal from "./_components/CustomerModal.astro";
 import Icon from "../_components/Icon.astro";
@@ -92,12 +94,13 @@ const editCompany = rows.find(({ company }) => company)?.company;
             rows.map(({ customer, company, salesperson }) => (
               <tr data-customer-id={customer.id}>
                 <td>
-                  <a
-                    class="customers-name-link"
-                    href={`/portfolio/airpeggio/customers/${customer.id}/`}
+                  <CustomerHoverCard
+                    customer={customer}
+                    company={company}
+                    triggerClass="customers-name-link"
                   >
-                    <strong>{customer.fullName}</strong>
-                  </a>
+                    <strong slot="trigger">{customer.fullName}</strong>
+                  </CustomerHoverCard>
                   <br />
                   <span class="text-muted">{emailFmt(customer.email)}</span>
                 </td>
@@ -116,7 +119,11 @@ const editCompany = rows.find(({ company }) => company)?.company;
                 <td class="customers-cell-center">{customer.phone}</td>
                 <td class="customers-cell-center">{customer.tripsCount}</td>
                 <td class="customers-cell-center">
-                  {salesperson?.fullName ?? "-"}
+                  {salesperson ? (
+                    <AccountHoverCard account={salesperson} />
+                  ) : (
+                    "-"
+                  )}
                 </td>
                 <td class="customers-cell-center">
                   {customer.lastActive

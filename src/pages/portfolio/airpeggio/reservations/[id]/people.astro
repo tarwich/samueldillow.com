@@ -1,9 +1,12 @@
 ---
 import Button from '../../_components/Button.astro';
 import Icon from '../../_components/Icon.astro';
+import AccountHoverCard from '../../_components/AccountHoverCard.astro';
+import CustomerHoverCard from '../../_components/CustomerHoverCard.astro';
 import ReservationDetailLayout from '../_components/ReservationDetailLayout.astro';
 import {
   ACCOUNTS,
+  COMPANIES,
   RESERVATIONS,
   accountFullName,
   getCustomer,
@@ -87,7 +90,9 @@ const dobFmt = new Intl.DateTimeFormat('en-US', {
               return (
                 <tr>
                   <td>
-                    <strong>{accountFullName(account)}</strong>
+                    <strong>
+                      <AccountHoverCard account={account} />
+                    </strong>
                   </td>
                   <td>
                     <span class="position-pill">{pilot.position}</span>
@@ -190,10 +195,15 @@ const dobFmt = new Intl.DateTimeFormat('en-US', {
               passengers.map((pax) => {
                 const c = getCustomer(pax.customerId);
                 if (!c) return null;
+                const paxCompany = c.companyId
+                  ? COMPANIES.find((co) => co.id === c.companyId)
+                  : undefined;
                 return (
                   <tr>
                     <td>
-                      <strong>{c.fullName}</strong>
+                      <strong>
+                        <CustomerHoverCard customer={c} company={paxCompany} />
+                      </strong>
                     </td>
                     <td>
                       <div class="people-info">

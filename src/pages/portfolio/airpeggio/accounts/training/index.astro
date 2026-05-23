@@ -16,6 +16,7 @@ import {
   type TrainingStatus,
 } from "../../_data";
 import Kpi from "../_components/Kpi.astro";
+import AccountHoverCard from "../../_components/AccountHoverCard.astro";
 
 const NOW = new Date("2026-05-14T12:00:00Z");
 
@@ -204,12 +205,10 @@ const formatExpires = (date: Date): string =>
                 x-show={`filter === 'total' || $el.dataset.statuses.split(',').includes(filter)`}
               >
                 <th scope="row" class="training-matrix__crew">
-                  <a
-                    href={`/portfolio/airpeggio/accounts/${account.id}/`}
-                    class="training-matrix__crew-link"
-                  >
-                    {accountFullName(account)}
-                  </a>
+                  <AccountHoverCard
+                    account={account}
+                    triggerClass="training-matrix__crew-link"
+                  />
                 </th>
                 {cells.map((cell) => (
                   <td class="training-matrix__cell" data-status={cell.status}>

@@ -1,5 +1,8 @@
 ---
-import Icon from '../../_components/Icon.astro';
+import AircraftHoverCard from '../../_components/AircraftHoverCard.astro';
+import CompanyHoverCard from '../../_components/CompanyHoverCard.astro';
+import CustomerHoverCard from '../../_components/CustomerHoverCard.astro';
+import AccountHoverCard from '../../_components/AccountHoverCard.astro';
 import ReservationDetailLayout from '../_components/ReservationDetailLayout.astro';
 import {
   RESERVATIONS,
@@ -39,14 +42,7 @@ const salesperson = reservationSalesperson(reservation);
       <div>
         <dt>Aircraft</dt>
         <dd>
-          {
-            aircraft && (
-              <>
-                <Icon name="aircraft" />
-                <span>{aircraft.tail}</span>
-              </>
-            )
-          }
+          {aircraft ? <AircraftHoverCard aircraft={aircraft} /> : '-'}
         </dd>
       </div>
       <div>
@@ -55,15 +51,23 @@ const salesperson = reservationSalesperson(reservation);
       </div>
       <div>
         <dt>Company</dt>
-        <dd>{company?.name ?? '-'}</dd>
+        <dd>{company ? <CompanyHoverCard company={company} /> : '-'}</dd>
       </div>
       <div>
         <dt>Customer</dt>
-        <dd>{customer ? customer.fullName : '-'}</dd>
+        <dd>
+          {customer ? (
+            <CustomerHoverCard customer={customer} company={company} />
+          ) : (
+            '-'
+          )}
+        </dd>
       </div>
       <div>
         <dt>Salesperson</dt>
-        <dd>{salesperson?.fullName ?? '-'}</dd>
+        <dd>
+          {salesperson ? <AccountHoverCard account={salesperson} /> : '-'}
+        </dd>
       </div>
       <div></div>
       <div>

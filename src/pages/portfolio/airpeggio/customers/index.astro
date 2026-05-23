@@ -10,8 +10,8 @@ import PageHeader from "../_components/PageHeader.astro";
 import {
   CUSTOMERS,
   COMPANIES,
-  SALESPEOPLE,
   customerEditPayload,
+  SALESPEOPLE,
 } from "../_data";
 
 const companyById = new Map(COMPANIES.map((c) => [c.id, c]));
@@ -116,7 +116,7 @@ const editCompany = rows.find(({ company }) => company)?.company;
                 <td class="customers-cell-center">{customer.phone}</td>
                 <td class="customers-cell-center">{customer.tripsCount}</td>
                 <td class="customers-cell-center">
-                  {salesperson?.name ?? "-"}
+                  {salesperson?.fullName ?? "-"}
                 </td>
                 <td class="customers-cell-center">
                   {customer.lastActive

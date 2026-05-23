@@ -2,6 +2,8 @@
 import Button from "../../_components/Button.astro";
 import Icon from "../../_components/Icon.astro";
 import Modal from "../../_components/Modal.astro";
+import Select from "../../_components/Select.astro";
+import { SALESPEOPLE } from "../../_data";
 
 interface Props {
   id?: string;
@@ -18,7 +20,12 @@ const deleteTriggerId = `${id}-delete-trigger`;
   x-effect="$store.customerModal.customer ? $el.showModal() : $el.close()"
   @close="$store.customerModal.close()"
 >
-  <form class="customer-form" method="dialog" x-data="{customer: {}}" x-effect="customer = $store.customerModal.customer ?? {}">
+  <form
+    class="customer-form"
+    method="dialog"
+    x-data="{customer: {}}"
+    x-effect="customer = $store.customerModal.customer ?? {}"
+  >
     <details class="customer-section" open>
       <summary class="customer-section__head">
         <span>Customer Details</span>
@@ -54,7 +61,12 @@ const deleteTriggerId = `${id}-delete-trigger`;
             <label class="customer-form__label" for={`${id}-dob`}
               >Date of Birth</label
             >
-            <input id={`${id}-dob`} class="customer-input" type="date" x-model="customer.dateOfBirth" />
+            <input
+              id={`${id}-dob`}
+              class="customer-input"
+              type="date"
+              x-model="customer.dateOfBirth"
+            />
           </div>
           <div class="customer-form__field">
             <span class="customer-form__label">Gender</span>
@@ -79,7 +91,12 @@ const deleteTriggerId = `${id}-delete-trigger`;
             <label class="customer-form__label" for={`${id}-weight`}
               >Weight</label
             >
-            <input id={`${id}-weight`} class="customer-input" type="number" x-model="customer.weight" />
+            <input
+              id={`${id}-weight`}
+              class="customer-input"
+              type="number"
+              x-model="customer.weight"
+            />
           </div>
         </div>
       </div>
@@ -104,8 +121,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
                 >
                   <span
                     id={`${id}-company-text`}
-                    x-text="customer.companyName || 'Select...'"
-                    >Select...</span
+                    x-text="customer.companyName || 'Select...'">Select...</span
                   >
                 </span>
                 <Icon name="chevron-down" />
@@ -305,11 +321,11 @@ const deleteTriggerId = `${id}-delete-trigger`;
             <span class="customer-select">
               <span
                 id={`${id}-salesperson-wrap`}
-                :class="{ 'is-placeholder': !customer.salespersonName }"
+                :class="{ 'is-placeholder': !customer.salesperson }"
               >
                 <span
                   id={`${id}-salesperson-text`}
-                  x-text="customer.salespersonName || 'Select...'"
+                  x-text="customer.salesperson?.fullName || 'Select...'"
                   >Select...</span
                 >
               </span>

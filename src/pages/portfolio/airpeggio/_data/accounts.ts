@@ -97,6 +97,7 @@ export interface Account {
   id: string;
   firstName: string;
   lastName: string;
+  fullName: string;
   email: string;
   phone?: string;
   status: AccountStatus;
@@ -527,6 +528,9 @@ const seedToAccount = (seed: AccountSeed): Account => ({
   id: seed.id,
   firstName: seed.firstName,
   lastName: seed.lastName,
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  },
   email: seed.email,
   phone: undefined,
   status: seed.status ?? "Activated",
@@ -564,6 +568,8 @@ export const ACCOUNT_TAG_OPTIONS = [
   "Part 135",
   "Owner",
 ];
+
+export const SALESPEOPLE: Account[] = ACCOUNTS.filter((a) => a.roles.includes("scheduler"));
 
 export const accessLabel = (roles: AccountRole[]): string => {
   if (roles.length === 0) return "";

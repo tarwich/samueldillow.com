@@ -1,6 +1,5 @@
 export * from "./airports";
 export * from "./companies";
-export * from "./salespeople";
 export * from "./customers";
 export * from "./aircraft";
 export * from "./bookings";

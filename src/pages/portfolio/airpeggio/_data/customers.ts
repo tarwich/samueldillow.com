@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
 import { COMPANIES, type Company } from "./companies";
-import { SALESPEOPLE } from "./salespeople";
+import { getAccount, SALESPEOPLE, type Account } from "./accounts";
 
 faker.seed(202);
 
@@ -51,8 +51,8 @@ const STATES = ["TX", "CA", "FL", "NY", "CO", "AZ", "WA", "IL", "GA", "NJ"];
 const buildEmail = (first: string, last: string, company: Company) =>
   `${first}.${last}@${company.domain}`.toLowerCase();
 
-const maybe = <T,>(value: T, weight = 0.7): T | undefined =>
-  faker.number.float({ min: 0, max: 1 }) < weight ? value : undefined;
+const maybe = <T>(value: T, probability: number = 0.5): T | undefined =>
+  faker.helpers.maybe(() => value, { probability });
 
 // US passports come in two formats: legacy 9-digit numeric (still valid until
 // they expire) and the post-2021 books with one letter followed by 8 digits.
@@ -200,7 +200,7 @@ export interface CustomerEditPayload {
   driversLicense: string;
   emergencyContactName: string;
   emergencyContactPhone: string;
-  salespersonName: string;
+  salesperson: Account;
   notes: string;
 }
 
@@ -208,9 +208,6 @@ export function customerEditPayload(
   customer: Customer,
   company?: Company,
 ): string {
-  const salesperson = customer.salespersonId
-    ? SALESPEOPLE.find((s) => s.id === customer.salespersonId)
-    : undefined;
   const payload = {
     id: customer.id,
     firstName: customer.firstName,
@@ -230,7 +227,8 @@ export function customerEditPayload(
     driversLicense: customer.driversLicense ?? "",
     emergencyContactName: customer.emergencyContactName ?? "",
     emergencyContactPhone: customer.emergencyContactPhone ?? "",
-    salespersonName: salesperson?.name ?? "",
+    salespersonId: customer.salespersonId,
+    get salesperson() { return this.salespersonId ? getAccount(this.salespersonId) : null },
     notes: customer.notes ?? "",
   };
 

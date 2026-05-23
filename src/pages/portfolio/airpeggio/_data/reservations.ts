@@ -1,11 +1,10 @@
 import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
-import { ACCOUNTS, type Account } from "./accounts";
+import { ACCOUNTS, SALESPEOPLE, type Account } from "./accounts";
 import { AIRCRAFT, type Aircraft } from "./aircraft";
 import { AIRPORTS, getAirport } from "./airports";
 import { CUSTOMERS, type Customer } from "./customers";
 import { COMPANIES, type Company } from "./companies";
-import { SALESPEOPLE, type Salesperson } from "./salespeople";
 
 faker.seed(707);
 
@@ -123,7 +122,7 @@ const generateLegs = (
     prev = destination;
     cursor = new Date(
       departure.getTime() +
-        (block + faker.number.int({ min: 60, max: 600 })) * 60_000,
+      (block + faker.number.int({ min: 60, max: 600 })) * 60_000,
     );
   }
   return legs;
@@ -244,7 +243,7 @@ const RESERVATION_SEEDS: Reservation[] = [
       aircraftId: N20AS.id,
       companyId: trip151Company.id,
       customerId: trip151Customer.id,
-      salespersonId: SALESPEOPLE[0]?.id,
+      salespersonId: faker.helpers.maybe(() => faker.helpers.arrayElement(SALESPEOPLE).id, { probability: 0.7 }),
       crewAccountIds: [CH.id, CO.id],
       assignedAccountId: CH.id,
       activity: "Charter Flight",
@@ -428,17 +427,17 @@ const generatedFiller: Reservation[] = (() => {
     const approval =
       lifecycle === "scheduled"
         ? faker.helpers.maybe(
-            () =>
-              faker.helpers.arrayElement<ReservationApproval>([
-                "quoted",
-                "approved",
-              ]),
-            { probability: 0.6 },
-          )
+          () =>
+            faker.helpers.arrayElement<ReservationApproval>([
+              "quoted",
+              "approved",
+            ]),
+          { probability: 0.6 },
+        )
         : lifecycle === "planned"
           ? faker.helpers.maybe(() => "pending" as ReservationApproval, {
-              probability: 0.4,
-            })
+            probability: 0.4,
+          })
           : undefined;
     const company = pickCompanyWithCustomers();
     const customer = pickCustomerFor(company.id);
@@ -535,7 +534,7 @@ export const reservationCustomer = (
 
 export const reservationSalesperson = (
   reservation: Reservation,
-): Salesperson | undefined =>
+): Account | undefined =>
   reservation.salespersonId
     ? SALESPEOPLE.find((s) => s.id === reservation.salespersonId)
     : undefined;

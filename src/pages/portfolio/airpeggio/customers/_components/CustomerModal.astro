@@ -238,35 +238,35 @@ const deleteTriggerId = `${id}-delete-trigger`;
       </table>
     </div>
   </details>
-</Modal>
 
-<Fragment slot="footer">
-  <Button variant="primary" data-customer-submit>
-    <span data-customer-submit-label>Update Customer</span>
-  </Button>
-  <Button variant="ghost" @click="$store.customerModal.close()">
-    Cancel
-  </Button>
-  <span class="customer-form__delete" data-customer-delete-wrap>
-    <Button
-      variant="danger"
-      popovertarget={deleteConfirmId}
-      id={deleteTriggerId}
-      class="customer-delete-trigger"
-    >
-      Delete Customer
+  <Fragment slot="footer">
+    <Button variant="primary" data-customer-submit>
+      <span data-customer-submit-label>Update Customer</span>
     </Button>
-    <div id={deleteConfirmId} popover class="customer-delete-confirm">
-      <p>Are you sure you want to delete this customer?</p>
-      <div class="customer-delete-confirm__actions">
-        <Button variant="ghost" popovertarget={deleteConfirmId}>
-          Cancel
-        </Button>
-        <Button variant="danger">Delete Customer</Button>
+    <Button variant="ghost" @click="$store.customerModal.close()">
+      Cancel
+    </Button>
+    <span class="customer-form__delete" data-customer-delete-wrap>
+      <Button
+        variant="danger"
+        popovertarget={deleteConfirmId}
+        id={deleteTriggerId}
+        class="customer-delete-trigger"
+      >
+        Delete Customer
+      </Button>
+      <div id={deleteConfirmId} popover class="customer-delete-confirm">
+        <p>Are you sure you want to delete this customer?</p>
+        <div class="customer-delete-confirm__actions">
+          <Button variant="ghost" popovertarget={deleteConfirmId}>
+            Cancel
+          </Button>
+          <Button variant="danger">Delete Customer</Button>
+        </div>
       </div>
-    </div>
-  </span>
-</Fragment>
+    </span>
+  </Fragment>
+</Modal>
 
 <style>
   :global(.modal:has(.customer-form)) {

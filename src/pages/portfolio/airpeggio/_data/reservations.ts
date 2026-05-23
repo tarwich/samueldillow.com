@@ -1,26 +1,32 @@
-import { faker } from "@faker-js/faker";
-import { nanoid } from "nanoid";
-import { ACCOUNTS, SALESPEOPLE, type Account } from "./accounts";
-import { AIRCRAFT, type Aircraft } from "./aircraft";
-import { AIRPORTS, getAirport } from "./airports";
-import { CUSTOMERS, type Customer } from "./customers";
-import { COMPANIES, type Company } from "./companies";
+import { faker } from '@faker-js/faker';
+import { nanoid } from 'nanoid';
+import {
+  ACCOUNTS,
+  getAccount,
+  PILOTS,
+  SALESPEOPLE,
+  type Account,
+} from './accounts';
+import { AIRCRAFT, type Aircraft } from './aircraft';
+import { AIRPORTS, getAirport } from './airports';
+import { CUSTOMERS, type Customer } from './customers';
+import { COMPANIES, type Company } from './companies';
 
 faker.seed(707);
 
 export type ReservationLifecycle =
-  | "planned"
-  | "scheduled"
-  | "flown"
-  | "cancelled";
-export type ReservationApproval = "pending" | "quoted" | "approved";
+  | 'planned'
+  | 'scheduled'
+  | 'flown'
+  | 'cancelled';
+export type ReservationApproval = 'pending' | 'quoted' | 'approved';
 export type ReservationActivity =
-  | "Charter Flight"
-  | "Aircraft Owner Flight"
-  | "Training Flight"
-  | "Leaseback/Rental Flight"
-  | "Maintenance Reservation";
-export type Regulation = "135" | "91" | "121";
+  | 'Charter Flight'
+  | 'Aircraft Owner Flight'
+  | 'Training Flight'
+  | 'Leaseback/Rental Flight'
+  | 'Maintenance Reservation';
+export type Regulation = '135' | '91' | '121';
 
 export interface ReservationLeg {
   id: string;
@@ -36,7 +42,7 @@ export interface ReservationLeg {
 
 export interface ReservationPilot {
   accountId: string;
-  position: "PIC" | "SIC";
+  position: 'PIC' | 'SIC';
   legIds: string[];
 }
 
@@ -48,7 +54,7 @@ export interface ReservationPassenger {
 export interface ReservationQuote {
   number: number;
   amount: number;
-  status: "paid" | "unpaid";
+  status: 'paid' | 'unpaid';
 }
 
 export interface ReservationFlightLog {
@@ -71,6 +77,7 @@ export interface Reservation {
   companyId?: string;
   customerId?: string;
   salespersonId?: string;
+  salesperson: Account | null;
   crewAccountIds: string[];
   assignedAccountId: string;
   activity: ReservationActivity;
@@ -87,7 +94,32 @@ export interface Reservation {
   flightLogs?: ReservationFlightLog[];
 }
 
+const NOW_REF = new Date('2026-05-14T12:00:00Z');
+
+export interface ReservationTagStyle {
+  background: string;
+  color: string;
+}
+
+export const RESERVATION_TAG_STYLES: Record<string, ReservationTagStyle> = {
+  Organ: { background: '#0b0b0d', color: '#ffffff' },
+  Executive: { background: '#3f8a96', color: '#ffffff' },
+  Broker: { background: '#c7d533', color: '#1a1a1a' },
+  VIP: { background: '#510c62', color: '#ffffff' },
+  Owner: { background: '#d4a017', color: '#1a1a1a' },
+  Repeat: { background: '#d9dde9', color: '#1a1a1a' },
+};
+
+const TAG_NAMES = Object.keys(RESERVATION_TAG_STYLES);
+
+export const reservationTagStyle = (name: string): ReservationTagStyle =>
+  RESERVATION_TAG_STYLES[name] ?? { background: '#d9dde9', color: '#1a1a1a' };
+
 const AIRPORT_CODES = AIRPORTS.map((a) => a.icao);
+
+const COMPANIES_WITH_CUSTOMERS = COMPANIES.filter((co) =>
+  CUSTOMERS.some((cu) => cu.companyId === co.id),
+);
 
 const pickAirport = (exclude?: string): string => {
   let next = exclude;
@@ -97,402 +129,337 @@ const pickAirport = (exclude?: string): string => {
   return next;
 };
 
-const generateLegs = (
-  count: number,
-  start: Date,
-  paxCap: number,
-  paxOverride?: number,
-): ReservationLeg[] => {
-  const legs: ReservationLeg[] = [];
-  let prev: string | undefined;
-  let cursor = new Date(start);
-  for (let i = 0; i < count; i++) {
-    const origin = prev ?? faker.helpers.arrayElement(AIRPORT_CODES);
-    const destination = pickAirport(origin);
-    const block = faker.number.int({ min: 60, max: 240 });
-    const departure = new Date(cursor);
-    legs.push({
-      id: nanoid(),
-      origin,
-      destination,
-      departure,
-      passengers:
-        paxOverride ?? faker.number.int({ min: 0, max: Math.max(1, paxCap) }),
-    });
-    prev = destination;
-    cursor = new Date(
-      departure.getTime() +
-      (block + faker.number.int({ min: 60, max: 600 })) * 60_000,
-    );
-  }
-  return legs;
-};
-
-const date = (iso: string) => new Date(iso);
-
-const aircraftByTail = (tail: string): Aircraft => {
-  const a = AIRCRAFT.find((a) => a.tail === tail);
-  if (!a) throw new Error(`Missing aircraft ${tail}`);
-  return a;
-};
-
-const N20AS = aircraftByTail("N482SD");
-const N765PM = aircraftByTail("N731AP");
-const N904VX = aircraftByTail("N904VX");
-
-const SD = ACCOUNTS[2]; // current user (a3)
-const CH = ACCOUNTS[0]; // a1
-const CO = ACCOUNTS[4]; // a5
-
-// Auto-pick company + booking-customer pairs from the generated DB for each
-// seeded reservation that needs one. Deterministic via faker.seed above.
-const companiesWithCustomers = COMPANIES.filter((co) =>
-  CUSTOMERS.some((cu) => cu.companyId === co.id),
-);
-
-const pickCompanyWithCustomers = (): Company =>
-  faker.helpers.arrayElement(companiesWithCustomers);
+const pickCompany = (): Company =>
+  faker.helpers.arrayElement(COMPANIES_WITH_CUSTOMERS);
 
 const pickCustomerFor = (companyId: string): Customer =>
   faker.helpers.arrayElement(
     CUSTOMERS.filter((c) => c.companyId === companyId),
   );
 
-const trip151Company = pickCompanyWithCustomers();
-const trip151Customer = pickCustomerFor(trip151Company.id);
-const trip151Passenger = faker.helpers.arrayElement(
-  CUSTOMERS.filter((c) => c.id !== trip151Customer.id),
+const REGULATION_BY_ACTIVITY: Record<ReservationActivity, Regulation> = {
+  'Charter Flight': '135',
+  'Aircraft Owner Flight': '91',
+  'Training Flight': '91',
+  'Leaseback/Rental Flight': '91',
+  'Maintenance Reservation': '91',
+};
+
+interface LegRecipe {
+  start: Date;
+  legCount: number;
+  paxCap: number;
+  regulation: Regulation;
+}
+
+const generateLegs = ({
+  start,
+  legCount,
+  paxCap,
+  regulation,
+}: LegRecipe): ReservationLeg[] => {
+  const legs: ReservationLeg[] = [];
+  let prev: string | undefined;
+  let cursor = new Date(start);
+  for (let i = 0; i < legCount; i++) {
+    const origin = prev ?? pickAirport();
+    const destination = pickAirport(origin);
+    const block = faker.number.int({ min: 60, max: 240 });
+    const departure = new Date(cursor);
+    const leg: ReservationLeg = {
+      id: nanoid(),
+      origin,
+      destination,
+      departure,
+      passengers: faker.number.int({ min: 0, max: Math.max(1, paxCap) }),
+    };
+    if (faker.number.float() < 0.6) leg.blockMinutes = block;
+    if (faker.number.float() < 0.5) leg.regulation = regulation;
+    if (faker.number.float() < 0.4) {
+      leg.flightNumber = faker.number.int({ min: 1000, max: 9999 });
+    }
+    legs.push(leg);
+    prev = destination;
+    cursor = new Date(
+      departure.getTime() +
+        (block + faker.number.int({ min: 60, max: 600 })) * 60_000,
+    );
+  }
+  return legs;
+};
+
+const generateRecurringLegs = (
+  start: Date,
+  months: number,
+  origin: string,
+  destination: string,
+): ReservationLeg[] => {
+  const legs: ReservationLeg[] = [];
+  for (let i = 0; i < months; i++) {
+    const outDate = new Date(start);
+    outDate.setUTCMonth(outDate.getUTCMonth() + i);
+    const backDate = new Date(outDate);
+    backDate.setUTCDate(backDate.getUTCDate() + 1);
+    legs.push({
+      id: nanoid(),
+      origin,
+      destination,
+      departure: outDate,
+      passengers: faker.number.int({ min: 1, max: 6 }),
+    });
+    legs.push({
+      id: nanoid(),
+      origin: destination,
+      destination: origin,
+      departure: backDate,
+      passengers: faker.number.int({ min: 1, max: 6 }),
+    });
+  }
+  return legs;
+};
+
+const pickCrew = (aircraft: Aircraft): Account[] => {
+  const needsCopilot =
+    aircraft.engineCount > 1 ||
+    faker.helpers.weightedArrayElement([
+      { value: true, weight: 1 },
+      { value: false, weight: 3 },
+    ]);
+  return faker.helpers.arrayElements(PILOTS, needsCopilot ? 2 : 1);
+};
+
+const tagPool = (): string[] => {
+  if (faker.number.float() >= 0.3) return [];
+  const first = faker.helpers.arrayElement(TAG_NAMES);
+  if (faker.number.float() < 0.2) {
+    const second = faker.helpers.arrayElement(
+      TAG_NAMES.filter((t) => t !== first),
+    );
+    return [first, second];
+  }
+  return [first];
+};
+
+const flightLogFor = (
+  leg: ReservationLeg,
+  aircraft: Aircraft,
+): ReservationFlightLog => {
+  const block = leg.blockMinutes ?? hashedDefaultBlock(leg);
+  const totalHours = +(block / 60).toFixed(1);
+  const fuelOut = faker.number.int({ min: 1800, max: 3200 });
+  const fuelBurn = Math.round(totalHours * 95);
+  const fuelIn = Math.max(0, fuelOut - fuelBurn);
+  const fuelAdd =
+    faker.number.float() < 0.3 ? faker.number.int({ min: 200, max: 900 }) : 0;
+  return {
+    legId: leg.id,
+    hobbsOut: aircraft.airframeHours ? Number(aircraft.airframeHours) || 0 : 0,
+    hobbsIn:
+      (aircraft.airframeHours ? Number(aircraft.airframeHours) || 0 : 0) +
+      totalHours,
+    totalHours,
+    fuelAdd,
+    fuelOut,
+    fuelIn,
+    fuelBurn,
+    pax: leg.passengers,
+  };
+};
+
+interface LifecyclePlan {
+  lifecycle: ReservationLifecycle;
+  dayOffset: number;
+  approval?: ReservationApproval;
+}
+
+const LIFECYCLE_PLAN: LifecyclePlan[] = [
+  ...Array.from({ length: 5 }, (_, i) => ({
+    lifecycle: 'flown' as const,
+    dayOffset: -(7 + i * 14),
+  })),
+  ...Array.from({ length: 2 }, () => ({
+    lifecycle: 'cancelled' as const,
+    dayOffset: faker.number.int({ min: -40, max: 20 }),
+  })),
+  ...Array.from({ length: 5 }, (_, i) => ({
+    lifecycle: 'scheduled' as const,
+    dayOffset: 2 + i * 6,
+    approval: faker.helpers.arrayElement<ReservationApproval>([
+      'quoted',
+      'approved',
+    ]),
+  })),
+  ...Array.from({ length: 4 }, (_, i) => ({
+    lifecycle: 'planned' as const,
+    dayOffset: 30 + i * 12,
+    approval: faker.helpers.maybe(() => 'pending' as ReservationApproval, {
+      probability: 0.5,
+    }),
+  })),
+];
+
+const ACTIVITY_WEIGHTS = [
+  { value: 'Charter Flight' as ReservationActivity, weight: 12 },
+  { value: 'Aircraft Owner Flight' as ReservationActivity, weight: 3 },
+  { value: 'Training Flight' as ReservationActivity, weight: 2 },
+  { value: 'Leaseback/Rental Flight' as ReservationActivity, weight: 1 },
+  { value: 'Maintenance Reservation' as ReservationActivity, weight: 1 },
+];
+
+const buildReservation = (
+  tripNumber: number,
+  quoteSequence: number,
+  plan: LifecyclePlan,
+): Reservation => {
+  const aircraft = faker.helpers.arrayElement(AIRCRAFT);
+  const activity = faker.helpers.weightedArrayElement(ACTIVITY_WEIGHTS);
+  const isCharter = activity === 'Charter Flight';
+  const regulation = REGULATION_BY_ACTIVITY[activity];
+  const crew = pickCrew(aircraft);
+  const salesperson = faker.helpers.maybe(
+    () => faker.helpers.arrayElement(SALESPEOPLE),
+    { probability: isCharter ? 0.85 : 0.4 },
+  );
+  const company = isCharter ? pickCompany() : undefined;
+  const customer = company ? pickCustomerFor(company.id) : undefined;
+
+  const start = new Date(NOW_REF);
+  start.setUTCDate(start.getUTCDate() + plan.dayOffset);
+  start.setUTCHours(
+    faker.number.int({ min: 12, max: 23 }),
+    faker.helpers.arrayElement([0, 15, 30, 45]),
+    0,
+    0,
+  );
+
+  const isRecurring =
+    isCharter && plan.lifecycle === 'scheduled' && faker.number.float() < 0.15;
+  let legs: ReservationLeg[];
+  if (isRecurring) {
+    const origin = pickAirport();
+    const destination = pickAirport(origin);
+    legs = generateRecurringLegs(start, 7, origin, destination);
+  } else {
+    legs = generateLegs({
+      start,
+      legCount: faker.number.int({ min: 1, max: 3 }),
+      paxCap: aircraft.paxCapacity,
+      regulation,
+    });
+  }
+
+  const wantsExplicitPilots = crew.length === 2 && faker.number.float() < 0.6;
+  const pilots: ReservationPilot[] | undefined = wantsExplicitPilots
+    ? crew.map((c, i) => ({
+        accountId: c.id,
+        position: i === 0 ? 'PIC' : 'SIC',
+        legIds: legs.map((l) => l.id),
+      }))
+    : undefined;
+
+  const wantsExtraPassenger =
+    isCharter && customer && faker.number.float() < 0.4;
+  const reservedPassengers: ReservationPassenger[] | undefined =
+    wantsExtraPassenger && customer
+      ? [
+          { customerId: customer.id, legIds: legs.map((l) => l.id) },
+          ...faker.helpers
+            .arrayElements(
+              CUSTOMERS.filter((c) => c.id !== customer.id),
+              faker.number.int({ min: 1, max: 2 }),
+            )
+            .map((c) => ({
+              customerId: c.id,
+              legIds: legs.map((l) => l.id),
+            })),
+        ]
+      : undefined;
+
+  const showQuote =
+    isCharter &&
+    (plan.lifecycle === 'flown' ||
+      plan.lifecycle === 'scheduled' ||
+      (plan.lifecycle === 'cancelled' && faker.number.float() < 0.5));
+  const quote: ReservationQuote | undefined = showQuote
+    ? {
+        number: quoteSequence,
+        amount: faker.number.int({ min: 60, max: 360 }) * 100 * legs.length,
+        status:
+          plan.lifecycle === 'flown' && faker.number.float() < 0.7
+            ? 'paid'
+            : 'unpaid',
+      }
+    : undefined;
+
+  const flightLogs: ReservationFlightLog[] | undefined =
+    plan.lifecycle === 'flown'
+      ? legs.map((leg) => flightLogFor(leg, aircraft))
+      : undefined;
+
+  const orderNumber =
+    plan.lifecycle !== 'planned' && faker.number.float() < 0.4
+      ? `ORD-${faker.number.int({ min: 10_000, max: 99_999 })}`
+      : undefined;
+
+  return {
+    id: nanoid(),
+    tripNumber,
+    orderNumber,
+    aircraftId: aircraft.id,
+    companyId: company?.id,
+    customerId: customer?.id,
+    salespersonId: salesperson?.id,
+    get salesperson() {
+      return (this.salespersonId && getAccount(this.salespersonId)) || null;
+    },
+    crewAccountIds: crew.map((c) => c.id),
+    assignedAccountId:
+      salesperson?.id ?? faker.helpers.arrayElement(SALESPEOPLE).id,
+    activity,
+    lifecycle: plan.lifecycle,
+    approval: plan.approval,
+    legs,
+    tags: tagPool(),
+    autoCalculate: true,
+    pilots,
+    reservedPassengers,
+    quote,
+    flightLogs,
+  };
+};
+
+const STARTING_TRIP_NUMBER = 152;
+
+const generateReservations = (): Reservation[] => {
+  const out: Reservation[] = [];
+  let trip = STARTING_TRIP_NUMBER;
+  let quoteSeq = 80;
+  for (const plan of LIFECYCLE_PLAN) {
+    out.push(buildReservation(trip--, quoteSeq++, plan));
+  }
+  return out;
+};
+
+export const RESERVATIONS: Reservation[] = generateReservations().sort(
+  (a, b) => b.tripNumber - a.tripNumber,
 );
 
-const charterCompany = pickCompanyWithCustomers();
-const charterCustomer = pickCustomerFor(charterCompany.id);
-
-const repeatCompany = pickCompanyWithCustomers();
-const repeatCustomer = pickCustomerFor(repeatCompany.id);
+export const getReservation = (id: string): Reservation | undefined =>
+  RESERVATIONS.find((r) => r.id === id);
 
 const initialsFor = (account: Account): string =>
   (account.firstName[0] + account.lastName[0]).toUpperCase();
 
 export const reservationInitials = initialsFor;
 
-export interface ReservationTagStyle {
-  background: string;
-  color: string;
-}
-
-export const RESERVATION_TAG_STYLES: Record<string, ReservationTagStyle> = {
-  Organ: { background: "#0b0b0d", color: "#ffffff" },
-  Executive: { background: "#3f8a96", color: "#ffffff" },
-  Broker: { background: "#c7d533", color: "#1a1a1a" },
-  VIP: { background: "#510c62", color: "#ffffff" },
-  Owner: { background: "#d4a017", color: "#1a1a1a" },
-  Repeat: { background: "#d9dde9", color: "#1a1a1a" },
-};
-
-const TAG_NAMES = Object.keys(RESERVATION_TAG_STYLES);
-
-export const reservationTagStyle = (name: string): ReservationTagStyle =>
-  RESERVATION_TAG_STYLES[name] ?? { background: "#d9dde9", color: "#1a1a1a" };
-
-const RESERVATION_SEEDS: Reservation[] = [
-  {
-    id: nanoid(),
-    tripNumber: 152,
-    aircraftId: N20AS.id,
-    crewAccountIds: [SD.id],
-    assignedAccountId: SD.id,
-    activity: "Charter Flight",
-    lifecycle: "planned",
-    approval: "pending",
-    legs: [
-      {
-        id: nanoid(),
-        origin: "KDAL",
-        destination: "KHOU",
-        departure: date("2026-05-06T17:43:00Z"),
-        passengers: 0,
-      },
-    ],
-    tags: [],
-    autoCalculate: true,
-  },
-  ((): Reservation => {
-    const legA: ReservationLeg = {
-      id: nanoid(),
-      origin: "KADS",
-      destination: "KDTS",
-      departure: date("2026-05-03T14:00:00Z"),
-      passengers: 6,
-      blockMinutes: 102,
-      regulation: "135",
-      flightNumber: 2489,
-    };
-    const legB: ReservationLeg = {
-      id: nanoid(),
-      origin: "KDTS",
-      destination: "KADS",
-      departure: date("2026-05-09T18:00:00Z"),
-      passengers: 6,
-      blockMinutes: 149,
-      regulation: "135",
-      flightNumber: 2490,
-    };
-    return {
-      id: nanoid(),
-      tripNumber: 151,
-      aircraftId: N20AS.id,
-      companyId: trip151Company.id,
-      customerId: trip151Customer.id,
-      salespersonId: faker.helpers.maybe(() => faker.helpers.arrayElement(SALESPEOPLE).id, { probability: 0.7 }),
-      crewAccountIds: [CH.id, CO.id],
-      assignedAccountId: CH.id,
-      activity: "Charter Flight",
-      lifecycle: "scheduled",
-      approval: "approved",
-      legs: [legA, legB],
-      tags: [],
-      autoCalculate: true,
-      pilots: [
-        { accountId: CH.id, position: "PIC", legIds: [legA.id, legB.id] },
-        { accountId: CO.id, position: "SIC", legIds: [legA.id, legB.id] },
-      ],
-      reservedPassengers: [
-        {
-          customerId: trip151Passenger.id,
-          legIds: [legA.id, legB.id],
-        },
-      ],
-      quote: { number: 83, amount: 19_800, status: "unpaid" },
-      flightLogs: [
-        {
-          legId: legA.id,
-          hobbsOut: 0,
-          hobbsIn: 0,
-          totalHours: 0,
-          fuelAdd: 0,
-          fuelOut: 0,
-          fuelIn: 0,
-          fuelBurn: 0,
-          pax: 0,
-        },
-        {
-          legId: legB.id,
-          hobbsOut: 0,
-          hobbsIn: 0,
-          totalHours: 0,
-          fuelAdd: 0,
-          fuelOut: 0,
-          fuelIn: 0,
-          fuelBurn: 0,
-          pax: 0,
-        },
-      ],
-    };
-  })(),
-  {
-    id: nanoid(),
-    tripNumber: 150,
-    aircraftId: N765PM.id,
-    crewAccountIds: [CH.id, CO.id],
-    assignedAccountId: CH.id,
-    activity: "Aircraft Owner Flight",
-    lifecycle: "planned",
-    legs: [
-      {
-        id: nanoid(),
-        origin: "KDAL",
-        destination: "KDAL",
-        departure: date("2026-04-30T19:50:00Z"),
-        passengers: 1,
-      },
-    ],
-    tags: ["Organ"],
-    autoCalculate: true,
-  },
-  {
-    id: nanoid(),
-    tripNumber: 149,
-    aircraftId: N765PM.id,
-    companyId: charterCompany.id,
-    customerId: charterCustomer.id,
-    salespersonId: SALESPEOPLE[1]?.id,
-    crewAccountIds: [SD.id],
-    assignedAccountId: SD.id,
-    activity: "Charter Flight",
-    lifecycle: "flown",
-    legs: [
-      {
-        id: nanoid(),
-        origin: "KDAL",
-        destination: "KHOU",
-        departure: date("2026-04-23T19:27:00Z"),
-        passengers: 0,
-      },
-    ],
-    tags: ["Executive", "Broker"],
-    autoCalculate: true,
-  },
-  {
-    id: nanoid(),
-    tripNumber: 148,
-    aircraftId: N765PM.id,
-    companyId: charterCompany.id,
-    customerId: charterCustomer.id,
-    salespersonId: SALESPEOPLE[1]?.id,
-    crewAccountIds: [SD.id, CH.id],
-    assignedAccountId: SD.id,
-    activity: "Charter Flight",
-    lifecycle: "scheduled",
-    legs: [
-      ["KLAX", "KMDW", "2026-01-15T22:43:00Z"],
-      ["KMDW", "KLAX", "2026-01-16T08:02:00Z"],
-      ["KLAX", "KMDW", "2026-02-15T22:45:00Z"],
-      ["KMDW", "KLAX", "2026-02-16T22:45:00Z"],
-      ["KLAX", "KMDW", "2026-03-15T21:45:00Z"],
-      ["KMDW", "KLAX", "2026-03-16T21:45:00Z"],
-      ["KLAX", "KMDW", "2026-04-15T21:45:00Z"],
-      ["KMDW", "KLAX", "2026-04-16T21:45:00Z"],
-      ["KLAX", "KMDW", "2026-05-15T21:45:00Z"],
-      ["KMDW", "KLAX", "2026-05-16T21:45:00Z"],
-      ["KLAX", "KMDW", "2026-06-15T21:45:00Z"],
-      ["KMDW", "KLAX", "2026-06-16T21:45:00Z"],
-      ["KLAX", "KMDW", "2026-07-15T21:45:00Z"],
-      ["KMDW", "KLAX", "2026-07-16T21:45:00Z"],
-    ].map(([origin, destination, departure]) => ({
-      id: nanoid(),
-      origin,
-      destination,
-      departure: date(departure),
-      passengers: 0,
-    })),
-    tags: [],
-    autoCalculate: true,
-  },
-  {
-    id: nanoid(),
-    tripNumber: 147,
-    aircraftId: N904VX.id,
-    companyId: repeatCompany.id,
-    customerId: repeatCustomer.id,
-    salespersonId: SALESPEOPLE[2]?.id,
-    crewAccountIds: [SD.id, CH.id],
-    assignedAccountId: SD.id,
-    activity: "Charter Flight",
-    lifecycle: "scheduled",
-    approval: "quoted",
-    legs: [
-      {
-        id: nanoid(),
-        origin: "KDAL",
-        destination: "KTUL",
-        departure: date("2026-02-14T20:17:00Z"),
-        passengers: 2,
-      },
-      {
-        id: nanoid(),
-        origin: "KTUL",
-        destination: "KDEN",
-        departure: date("2026-02-15T22:07:00Z"),
-        passengers: 2,
-      },
-    ],
-    tags: [],
-    autoCalculate: true,
-  },
-];
-
-const generatedFiller: Reservation[] = (() => {
-  const out: Reservation[] = [];
-  let trip = 146;
-  for (let i = 0; i < 14; i++, trip--) {
-    const aircraft = faker.helpers.arrayElement(AIRCRAFT);
-    const start = faker.date.between({
-      from: "2026-01-05T00:00:00Z",
-      to: "2026-05-12T00:00:00Z",
-    });
-    const crewCount = faker.helpers.weightedArrayElement([
-      { value: 1, weight: 1 },
-      { value: 2, weight: 3 },
-    ]);
-    const crew = faker.helpers
-      .arrayElements(ACCOUNTS.filter((a) => a.roles.includes("pilot")), crewCount)
-      .map((a) => a.id);
-    const lifecycle: ReservationLifecycle =
-      faker.helpers.weightedArrayElement<ReservationLifecycle>([
-        { value: "planned", weight: 2 },
-        { value: "scheduled", weight: 4 },
-        { value: "flown", weight: 3 },
-        { value: "cancelled", weight: 1 },
-      ]);
-    const approval =
-      lifecycle === "scheduled"
-        ? faker.helpers.maybe(
-          () =>
-            faker.helpers.arrayElement<ReservationApproval>([
-              "quoted",
-              "approved",
-            ]),
-          { probability: 0.6 },
-        )
-        : lifecycle === "planned"
-          ? faker.helpers.maybe(() => "pending" as ReservationApproval, {
-            probability: 0.4,
-          })
-          : undefined;
-    const company = pickCompanyWithCustomers();
-    const customer = pickCustomerFor(company.id);
-    const tags: string[] =
-      faker.helpers.maybe<string[]>(
-        () => {
-          const first = faker.helpers.arrayElement(TAG_NAMES);
-          const second = faker.helpers.maybe(
-            () => faker.helpers.arrayElement(TAG_NAMES.filter((t) => t !== first)),
-            { probability: 0.2 },
-          );
-          return second ? [first, second] : [first];
-        },
-        { probability: 0.3 },
-      ) ?? [];
-    out.push({
-      id: nanoid(),
-      tripNumber: trip,
-      aircraftId: aircraft.id,
-      companyId: company.id,
-      customerId: customer.id,
-      salespersonId: faker.helpers.arrayElement(SALESPEOPLE).id,
-      crewAccountIds: crew,
-      assignedAccountId: crew[0] ?? SD.id,
-      activity: "Charter Flight",
-      lifecycle,
-      approval,
-      legs: generateLegs(
-        faker.number.int({ min: 1, max: 3 }),
-        start,
-        aircraft.paxCapacity,
-      ),
-      tags,
-      autoCalculate: true,
-    });
-  }
-  return out;
-})();
-
-export const RESERVATIONS: Reservation[] = [
-  ...RESERVATION_SEEDS,
-  ...generatedFiller,
-].sort((a, b) => b.tripNumber - a.tripNumber);
-
-export const getReservation = (id: string): Reservation | undefined =>
-  RESERVATIONS.find((r) => r.id === id);
-
-const monthFmt = new Intl.DateTimeFormat("en-US", {
-  month: "2-digit",
-  day: "2-digit",
-  year: "2-digit",
+const monthFmt = new Intl.DateTimeFormat('en-US', {
+  month: '2-digit',
+  day: '2-digit',
+  year: '2-digit',
 });
-const timeFmt = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
+const timeFmt = new Intl.DateTimeFormat('en-US', {
+  hour: 'numeric',
+  minute: '2-digit',
   hour12: true,
 });
 
@@ -501,7 +468,7 @@ export const formatLegDate = (date: Date): string => monthFmt.format(date);
 export const formatLegTime = (date: Date): string => timeFmt.format(date);
 
 export const formatLegTimezone = (icao: string): string =>
-  getAirport(icao)?.timezone ?? "CDT";
+  getAirport(icao)?.timezone ?? 'CDT';
 
 export const reservationCrewLabel = (reservation: Reservation): string[] =>
   reservation.crewAccountIds
@@ -511,12 +478,13 @@ export const reservationCrewLabel = (reservation: Reservation): string[] =>
 
 export const reservationAssignedLabel = (reservation: Reservation): string => {
   const account = ACCOUNTS.find((a) => a.id === reservation.assignedAccountId);
-  return account ? initialsFor(account) : "-";
+  return account ? initialsFor(account) : '-';
 };
 
 export const reservationAircraft = (
   reservation: Reservation,
-): Aircraft | undefined => AIRCRAFT.find((a) => a.id === reservation.aircraftId);
+): Aircraft | undefined =>
+  AIRCRAFT.find((a) => a.id === reservation.aircraftId);
 
 export const reservationCompany = (
   reservation: Reservation,
@@ -541,19 +509,19 @@ export const reservationSalesperson = (
 
 // Deterministic 60-239 minute block from the leg id, so generated legs have
 // stable arrival times without needing per-leg seed data.
-const hashedDefaultBlock = (leg: ReservationLeg): number => {
+function hashedDefaultBlock(leg: ReservationLeg): number {
   let h = 0;
   for (let i = 0; i < leg.id.length; i++) {
     h = (h * 31 + leg.id.charCodeAt(i)) >>> 0;
   }
   return 60 + (h % 180);
-};
+}
 
 export const legBlockMinutes = (leg: ReservationLeg): number =>
   leg.blockMinutes ?? hashedDefaultBlock(leg);
 
 export const legRegulation = (leg: ReservationLeg): Regulation =>
-  leg.regulation ?? "135";
+  leg.regulation ?? '135';
 
 export const legArrival = (leg: ReservationLeg): Date =>
   new Date(leg.departure.getTime() + legBlockMinutes(leg) * 60_000);
@@ -566,7 +534,7 @@ export const legDutyMinutes = (leg: ReservationLeg): number =>
 export const formatBlockDuration = (minutes: number): string => {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return `${h}h${m.toString().padStart(2, "0")}m`;
+  return `${h}h${m.toString().padStart(2, '0')}m`;
 };
 
 export const reservationPilots = (
@@ -576,7 +544,7 @@ export const reservationPilots = (
   const allLegIds = reservation.legs.map((l) => l.id);
   return reservation.crewAccountIds.map((accountId, index) => ({
     accountId,
-    position: index === 0 ? "PIC" : "SIC",
+    position: index === 0 ? 'PIC' : 'SIC',
     legIds: allLegIds,
   }));
 };
@@ -601,16 +569,14 @@ export const passengerCountForLeg = (
   reservationPassengers(reservation).filter((p) => p.legIds.includes(legId))
     .length;
 
-const usd = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
+const usd = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
 
 export const formatQuoteAmount = (amount: number): string => usd.format(amount);
-
-const NOW_REF = new Date("2026-05-14T12:00:00Z");
 
 export interface PilotLegConflict {
   legId: string;
@@ -620,7 +586,7 @@ export interface PilotLegConflict {
 
 export const pilotConflicts = (
   account: Account,
-  position: "PIC" | "SIC",
+  position: 'PIC' | 'SIC',
   reservation: Reservation,
   pilot: ReservationPilot,
 ): PilotLegConflict[] => {
@@ -662,14 +628,14 @@ export const pilotConflicts = (
   return conflicts;
 };
 
-const dayFmt = new Intl.DateTimeFormat("en-US", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
+const dayFmt = new Intl.DateTimeFormat('en-US', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
 });
-const dayTimeFmt = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
+const dayTimeFmt = new Intl.DateTimeFormat('en-US', {
+  hour: 'numeric',
+  minute: '2-digit',
   hour12: false,
 });
 
@@ -678,11 +644,11 @@ export const formatLegDayLabel = (date: Date): string => dayFmt.format(date);
 export const formatLegHourLabel = (date: Date): string =>
   dayTimeFmt.format(date);
 
-const yyyymmddFmt = new Intl.DateTimeFormat("en-CA", {
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
+const yyyymmddFmt = new Intl.DateTimeFormat('en-CA', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
 });
 
 export const formatLegItineraryDate = (date: Date): string =>
-  yyyymmddFmt.format(date).replace(/-/g, "");
+  yyyymmddFmt.format(date).replace(/-/g, '');

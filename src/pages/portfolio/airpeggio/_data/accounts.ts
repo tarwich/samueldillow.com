@@ -570,6 +570,9 @@ export const ACCOUNT_TAG_OPTIONS = [
 ];
 
 export const SALESPEOPLE: Account[] = ACCOUNTS.filter((a) => a.roles.includes("scheduler"));
+export const PILOTS: Account[] = ACCOUNTS.filter((a) =>
+  a.roles.includes('pilot'),
+);
 
 export const accessLabel = (roles: AccountRole[]): string => {
   if (roles.length === 0) return "";

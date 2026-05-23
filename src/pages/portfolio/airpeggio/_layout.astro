@@ -1,7 +1,8 @@
 ---
-import "./_styles.css";
-import TopNav from "./_components/TopNav.astro";
-import CustomerModal from "./customers/_components/CustomerModal.astro";
+import './_styles.css';
+import TopNav from './_components/TopNav.astro';
+import CustomerModal from './customers/_components/CustomerModal.astro';
+import CompanyModal from './companies/_components/CompanyModal.astro';
 
 interface Props {
   title?: string;
@@ -10,9 +11,9 @@ interface Props {
 }
 
 const {
-  title = "Airpeggio Inbox | Samuel Dillow",
-  description = "Airpeggio fleet-management software reconstruction.",
-  active = "inbox",
+  title = 'Airpeggio Inbox | Samuel Dillow',
+  description = 'Airpeggio fleet-management software reconstruction.',
+  active = 'inbox',
   ...rest
 } = Astro.props;
 ---
@@ -27,8 +28,8 @@ const {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
     <script>
-      import Alpine from "alpinejs";
-      import type { Customer } from "./_data/customers";
+      import Alpine from 'alpinejs';
+      import type { Customer, Company } from './_data';
       // @ts-ignore
       window.Alpine = Alpine;
 
@@ -41,8 +42,18 @@ const {
           this.customer = null;
         },
       };
+      Alpine.store('customerModal', customerModal);
 
-      Alpine.store("customerModal", customerModal);
+      const companyModal = {
+        company: null as Company | null,
+        open(company: Company) {
+          this.company = company;
+        },
+        close() {
+          this.company = null;
+        },
+      };
+      Alpine.store('companyModal', companyModal);
 
       Alpine.start();
     </script>
@@ -52,6 +63,7 @@ const {
     <main class="air-main" {...rest}>
       <slot />
       <CustomerModal />
+      <CompanyModal />
     </main>
   </body>
 </html>

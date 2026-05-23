@@ -1,27 +1,18 @@
 ---
-import AirpeggioLayout from "../_layout.astro";
-import Button from "../_components/Button.astro";
-import ColumnsPopover from "../_components/ColumnsPopover.astro";
-import CompanyModal from "./_components/CompanyModal.astro";
-import CompanyViewModal from "./_components/CompanyViewModal.astro";
-import Icon from "../_components/Icon.astro";
-import PageHeader from "../_components/PageHeader.astro";
-import { COMPANIES } from "../_data";
+import AirpeggioLayout from '../_layout.astro';
+import Button from '../_components/Button.astro';
+import ColumnsPopover from '../_components/ColumnsPopover.astro';
+import CompanyViewModal from './_components/CompanyViewModal.astro';
+import Icon from '../_components/Icon.astro';
+import PageHeader from '../_components/PageHeader.astro';
+import { COMPANIES, formatCompanyForModal } from '../_data';
 
 const companies = [...COMPANIES].sort((a, b) =>
-  a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+  a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }),
 );
-
-// Edit drawer reuses one CompanyModal instance. Server-render with the first
-// company so the form has realistic content; the page script swaps fields on
-// open per row.
-const editCompany = companies[0];
 ---
 
-<AirpeggioLayout
-  title="Airpeggio Companies | Samuel Dillow"
-  active="customers"
->
+<AirpeggioLayout title="Airpeggio Companies | Samuel Dillow" active="customers">
   <div class="companies-view">
     <PageHeader
       search
@@ -30,12 +21,16 @@ const editCompany = companies[0];
     >
       <h1 slot="title">Companies</h1>
       <Fragment slot="actions">
-        <Button variant="primary" icon="plus" data-open-modal="add-company">
+        <Button
+          variant="primary"
+          icon="plus"
+          @click="$store.companyModal.open({})"
+        >
           Add Company
         </Button>
       </Fragment>
       <Fragment slot="tools">
-        <ColumnsPopover columns={["Name", "Address", "Phone", "Email"]} />
+        <ColumnsPopover columns={['Name', 'Address', 'Phone', 'Email']} />
       </Fragment>
     </PageHeader>
 
@@ -65,18 +60,18 @@ const editCompany = companies[0];
                 <tr
                   data-company-id={company.id}
                   data-company-name={company.name}
-                  data-company-address={company.address ?? ""}
-                  data-company-phone={company.phone ?? ""}
-                  data-company-email={company.email ?? ""}
-                  data-company-notes={company.notes ?? ""}
+                  data-company-address={company.address ?? ''}
+                  data-company-phone={company.phone ?? ''}
+                  data-company-email={company.email ?? ''}
+                  data-company-notes={company.notes ?? ''}
                 >
                   <td>
                     <strong>{company.name}</strong>
                   </td>
-                  <td class="text-muted">{company.address ?? ""}</td>
-                  <td class="text-muted">{company.phone ?? ""}</td>
-                  <td class="text-muted">{company.email ?? ""}</td>
-                  <td style={{ verticalAlign: "middle" }}>
+                  <td class="text-muted">{company.address ?? ''}</td>
+                  <td class="text-muted">{company.phone ?? ''}</td>
+                  <td class="text-muted">{company.email ?? ''}</td>
+                  <td style={{ verticalAlign: 'middle' }}>
                     <div class="datatable-actions">
                       <button
                         type="button"
@@ -89,8 +84,8 @@ const editCompany = companies[0];
                       <button
                         type="button"
                         class="companies-row-action"
-                        data-edit-company
                         aria-label={`Edit ${company.name}`}
+                        @click={`$store.companyModal.open(${formatCompanyForModal(company)})`}
                       >
                         <Icon name="edit" />
                       </button>
@@ -124,45 +119,13 @@ const editCompany = companies[0];
       </table>
     </section>
 
-    <CompanyModal id="add-company" mode="add" />
-    <CompanyModal id="edit-company" mode="edit" company={editCompany} />
-
     {
       companies.map((company) => (
-        <CompanyViewModal
-          id={`view-company-${company.id}`}
-          company={company}
-        />
+        <CompanyViewModal id={`view-company-${company.id}`} company={company} />
       ))
     }
   </div>
 </AirpeggioLayout>
-
-<script>
-  document
-    .querySelectorAll<HTMLButtonElement>("[data-edit-company]")
-    .forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const row = btn.closest<HTMLTableRowElement>("tr[data-company-id]");
-        if (!row) return;
-        const modal = document.getElementById("edit-company");
-        if (!(modal instanceof HTMLDialogElement)) return;
-
-        const fields = ["name", "address", "phone", "email", "notes"] as const;
-        for (const key of fields) {
-          const datasetKey =
-            "company" + key.charAt(0).toUpperCase() + key.slice(1);
-          const value = row.dataset[datasetKey] ?? "";
-          const field = modal.querySelector<
-            HTMLInputElement | HTMLTextAreaElement
-          >(`#edit-company-${key}`);
-          if (field) field.value = value;
-        }
-        modal.showModal();
-      });
-    });
-
-</script>
 
 <style>
   .companies-table {

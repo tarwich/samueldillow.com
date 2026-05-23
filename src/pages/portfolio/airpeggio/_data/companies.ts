@@ -1,9 +1,9 @@
-import { faker } from "@faker-js/faker";
-import { nanoid } from "nanoid";
+import { faker } from '@faker-js/faker';
+import { nanoid } from 'nanoid';
 
 faker.seed(101);
 
-export type CompanyType = "broker" | "fbo" | "operator" | "individual";
+export type CompanyType = 'broker' | 'fbo' | 'operator' | 'individual';
 
 export interface Company {
   id: string;
@@ -17,16 +17,16 @@ export interface Company {
 }
 
 const COMPANY_SUFFIXES = [
-  "Aviation",
-  "Air",
-  "Air Group",
-  "Charters",
-  "Charter Group",
-  "Jets",
-  "Jet Partners",
-  "Wings",
-  "Aero",
-  "Aircraft Services",
+  'Aviation',
+  'Air',
+  'Air Group',
+  'Charters',
+  'Charter Group',
+  'Jets',
+  'Jet Partners',
+  'Wings',
+  'Aero',
+  'Aircraft Services',
 ];
 
 const generateCompanyName = (): string => {
@@ -53,14 +53,17 @@ while (COMPANY_NAMES.length < COMPANY_COUNT) {
 }
 
 const slugDomain = (name: string) =>
-  name.toLowerCase().replace(/[^a-z0-9]+/g, "").replace(/^the/, "") + ".com";
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
+    .replace(/^the/, '') + '.com';
 
-const STATES = ["TX", "CA", "FL", "NY", "CO", "AZ", "WA", "IL", "GA", "NJ"];
+const STATES = ['TX', 'CA', 'FL', 'NY', 'CO', 'AZ', 'WA', 'IL', 'GA', 'NJ'];
 
 const fakeAddress = () =>
-  `${faker.location.streetAddress()}, ${faker.location.city()}, ${faker.helpers.arrayElement(STATES)} ${faker.location.zipCode("#####")}`;
+  `${faker.location.streetAddress()}, ${faker.location.city()}, ${faker.helpers.arrayElement(STATES)} ${faker.location.zipCode('#####')}`;
 
-const IMPORTED_NOTE = "Imported 2025-01-08T00:00:00.000Z";
+const IMPORTED_NOTE = 'Imported 2025-01-08T00:00:00.000Z';
 
 export const COMPANIES: Company[] = COMPANY_NAMES.map((name) => {
   const domain = slugDomain(name);
@@ -80,13 +83,13 @@ export const COMPANIES: Company[] = COMPANY_NAMES.map((name) => {
     name,
     domain,
     type: faker.helpers.arrayElement<CompanyType>([
-      "broker",
-      "fbo",
-      "operator",
-      "individual",
+      'broker',
+      'fbo',
+      'operator',
+      'individual',
     ]),
     address: hasAddress ? fakeAddress() : undefined,
-    phone: hasPhone ? faker.phone.number({ style: "national" }) : undefined,
+    phone: hasPhone ? faker.phone.number({ style: 'national' }) : undefined,
     email: hasEmail ? `info@${domain}` : undefined,
     notes,
   };
@@ -94,3 +97,18 @@ export const COMPANIES: Company[] = COMPANY_NAMES.map((name) => {
 
 export const getCompany = (id: string): Company | undefined =>
   COMPANIES.find((c) => c.id === id);
+
+export const formatCompanyForModal = (company: Company) => {
+  const payload = {
+    id: company.id,
+    name: company.name,
+    domain: company.domain,
+    type: company.type,
+    address: company.address,
+    phone: company.phone,
+    email: company.email,
+    notes: company.notes,
+  };
+
+  return JSON.stringify(payload);
+};

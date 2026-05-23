@@ -1,29 +1,29 @@
 ---
-import EntityPreviewCard from "./EntityPreviewCard.astro";
-import PreviewField from "./PreviewField.astro";
-import type { Company } from "../_data";
-import { customersForCompany } from "../_data";
+import EntityPreviewCard from './EntityPreviewCard.astro';
+import PreviewField from './PreviewField.astro';
+import type { Company } from '../_data';
+import { customersForCompany, formatCompanyForModal } from '../_data';
 
 interface Props {
   company: Company;
   triggerClass?: string;
   editModalId?: string;
-  placement?: "top" | "bottom";
+  placement?: 'top' | 'bottom';
 }
 
 const {
   company,
   triggerClass,
-  editModalId = "edit-company",
-  placement = "bottom",
+  editModalId = 'edit-company',
+  placement = 'bottom',
 } = Astro.props;
 
 const customerCount = customersForCompany(company.id).length;
-const companyTypeLabels: Record<Company["type"], string> = {
-  broker: "Broker",
-  fbo: "FBO",
-  individual: "Individual",
-  operator: "Operator",
+const companyTypeLabels: Record<Company['type'], string> = {
+  broker: 'Broker',
+  fbo: 'FBO',
+  individual: 'Individual',
+  operator: 'Operator',
 };
 const companyType = companyTypeLabels[company.type];
 ---
@@ -31,19 +31,12 @@ const companyType = companyTypeLabels[company.type];
 <EntityPreviewCard
   title={company.name}
   icon="account"
-  editEvent="airpeggio:edit-company"
+  onEdit={`$store.companyModal.open(${formatCompanyForModal(company)})`}
   placement={placement}
   width="260px"
-  data-edit-modal-id={editModalId}
-  data-company-hover-edit
-  data-company-name={company.name}
-  data-company-address={company.address ?? ""}
-  data-company-phone={company.phone ?? ""}
-  data-company-email={company.email ?? ""}
-  data-company-notes={company.notes ?? ""}
 >
   <Fragment slot="trigger">
-    <a class:list={["company-hover-card__trigger", triggerClass]}>
+    <a class:list={['company-hover-card__trigger', triggerClass]}>
       <slot name="trigger">{company.name}</slot>
     </a>
   </Fragment>
@@ -64,7 +57,7 @@ const companyType = companyTypeLabels[company.type];
     icon="briefcase"
   />
   <PreviewField
-    value={`${customerCount} ${customerCount === 1 ? "customer" : "customers"}`}
+    value={`${customerCount} ${customerCount === 1 ? 'customer' : 'customers'}`}
     icon="users"
   />
   <PreviewField
@@ -83,10 +76,10 @@ const companyType = companyTypeLabels[company.type];
     const field = modal.querySelector<HTMLInputElement | HTMLTextAreaElement>(
       `#${fieldId}`,
     );
-    if (field) field.value = value ?? "";
+    if (field) field.value = value ?? '';
   }
 
-  document.addEventListener("airpeggio:edit-company", (event) => {
+  document.addEventListener('airpeggio:edit-company', (event) => {
     const customEvent = event as CustomEvent<{ trigger?: EventTarget }>;
     const button = customEvent.detail.trigger;
     if (!(button instanceof HTMLButtonElement)) return;

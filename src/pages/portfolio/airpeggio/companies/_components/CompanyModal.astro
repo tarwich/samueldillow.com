@@ -1,84 +1,79 @@
 ---
-import Button from "../../_components/Button.astro";
-import Modal from "../../_components/Modal.astro";
-import { type Company } from "../../_data";
+import Button from '../../_components/Button.astro';
+import Input from '../../_components/Input.astro';
+import Modal from '../../_components/Modal.astro';
+import Textarea from '../../_components/Textarea.astro';
+import { type Company } from '../../_data';
 
 interface Props {
   id?: string;
-  mode?: "add" | "edit";
+  mode?: 'add' | 'edit';
   company?: Company;
 }
 
-const { id = "company-modal", mode = "edit", company } = Astro.props;
-const isEdit = mode === "edit" && company;
-const title = isEdit ? "Edit Company" : "Add Company";
+const { id = 'company-modal', mode = 'edit', company } = Astro.props;
+const isEdit = mode === 'edit' && company;
+const title = isEdit ? 'Edit Company' : 'Add Company';
 ---
 
-<Modal id={id} title={title}>
-  <form class="company-form" method="dialog">
+<Modal
+  id={id}
+  title={title}
+  x-effect="$store.companyModal.company ? $el.showModal() : $el.close()"
+  @close="$store.companyModal.close()"
+>
+  <form
+    class="company-form"
+    method="dialog"
+    x-data="{company: {}}"
+    x-effect="company = $store.companyModal.company ?? {}"
+  >
     <div class="company-form__grid">
       <div class="company-form__field">
-        <label class="company-form__label" for={`${id}-name`}>
-          Company Name <em>*</em>
-        </label>
-        <input
-          id={`${id}-name`}
-          class="company-input"
-          type="text"
-          value={company?.name ?? ""}
+        <Input
+          label="Company Name"
           placeholder="Enter the company name"
+          x-model="company.name"
           required
         />
       </div>
       <div class="company-form__field">
-        <label class="company-form__label" for={`${id}-address`}>
-          Company Address
-        </label>
-        <input
-          id={`${id}-address`}
-          class="company-input"
-          type="text"
-          value={company?.address ?? ""}
+        <Input
+          label="Company Address"
           placeholder="Enter the company address"
+          x-model="company.address"
+          required
         />
       </div>
       <div class="company-form__field">
-        <label class="company-form__label" for={`${id}-phone`}>
-          Company Phone
-        </label>
-        <input
-          id={`${id}-phone`}
-          class="company-input"
-          type="tel"
-          value={company?.phone ?? ""}
+        <Input
+          label="Company Phone"
           placeholder="Enter the company phone number"
+          x-model="company.phone"
+          required
         />
       </div>
       <div class="company-form__field">
-        <label class="company-form__label" for={`${id}-email`}>
-          Company Email
-        </label>
-        <input
-          id={`${id}-email`}
-          class="company-input"
-          type="email"
-          value={company?.email ?? ""}
+        <Input
+          label="Company Email"
           placeholder="Enter the company email"
+          x-model="company.email"
+          required
         />
       </div>
       <div class="company-form__field company-form__field--full">
-        <label class="company-form__label" for={`${id}-notes`}>Notes</label>
-        <textarea
-          id={`${id}-notes`}
-          class="company-input company-input--textarea"
-          placeholder="Add notes here">{company?.notes ?? ""}</textarea>
+        <Textarea
+          label="Notes"
+          placeholder="Add notes here"
+          x-model="company.notes"
+        />
       </div>
     </div>
   </form>
 
   <Fragment slot="footer">
     <Button variant="primary">
-      {isEdit ? "Update Company" : "Create Company"}
+      {isEdit ? 'Update Company' : 'Create Company'}
     </Button>
     <Button
       variant="ghost"

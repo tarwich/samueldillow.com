@@ -7,13 +7,13 @@ import Icon from "../_components/Icon.astro";
 import IconButton from "../_components/IconButton.astro";
 import PageHeader from "../_components/PageHeader.astro";
 import ViewToggle from "../_components/ViewToggle.astro";
-import ReservationModal from "./_components/ReservationModal.astro";
 import ReserveAircraftModal from "./_components/ReserveAircraftModal.astro";
 import {
   RESERVATIONS,
   formatLegDate,
   formatLegTime,
   formatLegTimezone,
+  formatReservationForModal,
   reservationAircraft,
   reservationAssignedLabel,
   reservationCustomer,
@@ -22,8 +22,6 @@ import {
   reservationTagStyle,
 } from "../_data";
 import CustomerHoverCard from "../_components/CustomerHoverCard.astro";
-import CustomerModal from "../customers/_components/CustomerModal.astro";
-import CompanyModal from "../companies/_components/CompanyModal.astro";
 import CompanyHoverCard from "../_components/CompanyHoverCard.astro";
 
 const tailColors: Record<string, string> = {
@@ -31,10 +29,6 @@ const tailColors: Record<string, string> = {
   lime: "#c7d533",
   blue: "#565bc4",
 };
-
-// Server-render the edit modal with the first reservation so the form has
-// realistic content; a future iteration could swap row data on open.
-const editReservation = RESERVATIONS[0];
 ---
 
 <AirpeggioLayout
@@ -243,7 +237,7 @@ const editReservation = RESERVATIONS[0];
                         type="button"
                         class="reservation-row-action"
                         aria-label={`Edit trip ${reservation.tripNumber}`}
-                        data-open-modal="edit-reservation"
+                        @click={`$store.reservationModal.open(${formatReservationForModal(reservation)})`}
                       >
                         <Icon name="edit" />
                       </button>
@@ -283,10 +277,7 @@ const editReservation = RESERVATIONS[0];
       </nav>
     </footer>
 
-    <ReservationModal id="edit-reservation" reservation={editReservation} />
     <ReserveAircraftModal id="add-reservation" />
-    <CustomerModal id="customer-modal" />
-    <CompanyModal id="edit-company" mode="edit" />
   </div>
 </AirpeggioLayout>
 

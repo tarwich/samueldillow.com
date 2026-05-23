@@ -3,6 +3,7 @@ import './_styles.css';
 import TopNav from './_components/TopNav.astro';
 import CustomerModal from './customers/_components/CustomerModal.astro';
 import CompanyModal from './companies/_components/CompanyModal.astro';
+import ReservationModal from './reservations/_components/ReservationModal.astro';
 
 interface Props {
   title?: string;
@@ -29,7 +30,7 @@ const {
     <title>{title}</title>
     <script>
       import Alpine from 'alpinejs';
-      import type { Customer, Company } from './_data';
+      import type { Customer, Company, Reservation } from './_data';
       // @ts-ignore
       window.Alpine = Alpine;
 
@@ -55,6 +56,17 @@ const {
       };
       Alpine.store('companyModal', companyModal);
 
+      const reservationModal = {
+        reservation: null as Reservation | null,
+        open(reservation: Reservation) {
+          this.reservation = reservation;
+        },
+        close() {
+          this.reservation = null;
+        },
+      };
+      Alpine.store('reservationModal', reservationModal);
+
       Alpine.start();
     </script>
   </head>
@@ -64,6 +76,7 @@ const {
       <slot />
       <CustomerModal />
       <CompanyModal />
+      <ReservationModal />
     </main>
   </body>
 </html>

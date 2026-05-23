@@ -1,33 +1,22 @@
 ---
 import Button from "../../_components/Button.astro";
 import Icon from "../../_components/Icon.astro";
+import Input from "../../_components/Input.astro";
 import Modal from "../../_components/Modal.astro";
+import Select from "../../_components/Select.astro";
+import Textarea from "../../_components/Textarea.astro";
 import {
-  ACCOUNTS,
   AIRCRAFT,
   COMPANIES,
+  CUSTOMERS,
   SALESPEOPLE,
-  accountFullName,
-  getCurrentUser,
-  reservationAircraft,
-  reservationCustomer,
-  reservationCompany,
-  reservationSalesperson,
-  type Reservation,
 } from "../../_data";
 
 interface Props {
   id?: string;
-  reservation: Reservation;
 }
 
-const { id = "edit-reservation", reservation } = Astro.props;
-
-const aircraft = reservationAircraft(reservation);
-const company = reservationCompany(reservation);
-const customer = reservationCustomer(reservation);
-const salesperson = reservationSalesperson(reservation);
-const salespersonLabel = salesperson?.name ?? accountFullName(getCurrentUser());
+const { id = "reservation-modal" } = Astro.props;
 
 const ACTIVITY_OPTIONS = [
   "Charter Flight",
@@ -38,32 +27,29 @@ const ACTIVITY_OPTIONS = [
 ] as const;
 ---
 
-<Modal id={id} title="Edit Reservation">
-  <form class="reservation-form" method="dialog">
+<Modal
+  id={id}
+  title="Edit Reservation"
+  x-effect="$store.reservationModal.reservation ? $el.showModal() : $el.close()"
+  @close="$store.reservationModal.close()"
+>
+  <form
+    class="reservation-form"
+    method="dialog"
+    x-data="{reservation: {}}"
+    x-effect="reservation = $store.reservationModal.reservation ?? {}"
+  >
     <div class="reservation-form__grid reservation-form__grid--top">
-      <div class="reservation-field">
-        <label class="reservation-field__label" for={`${id}-trip`}>
-          Trip Number <em>*</em>
-        </label>
-        <input
-          id={`${id}-trip`}
-          class="reservation-input"
-          type="text"
-          value={reservation.tripNumber}
-        />
-      </div>
-      <div class="reservation-field">
-        <label class="reservation-field__label" for={`${id}-order`}>
-          Order #
-        </label>
-        <input
-          id={`${id}-order`}
-          class="reservation-input"
-          type="text"
-          value={reservation.orderNumber ?? ""}
-          placeholder="Order #"
-        />
-      </div>
+      <Input
+        label="Trip Number"
+        required
+        x-model="reservation.tripNumber"
+      />
+      <Input
+        label="Order #"
+        placeholder="Order #"
+        x-model="reservation.orderNumber"
+      />
     </div>
 
     <section class="reservation-section">
@@ -73,64 +59,41 @@ const ACTIVITY_OPTIONS = [
       </header>
 
       <div class="reservation-form__grid reservation-form__grid--three">
-        <div class="reservation-field">
-          <label class="reservation-field__label" for={`${id}-company`}>
-            Company
-          </label>
-          <div class="reservation-field__row">
-            <span class="reservation-select reservation-select--flex">
-              <span class={company ? "" : "is-placeholder"}>
-                {company?.name ?? "Select..."}
-              </span>
-              <Icon name="chevron-down" />
-            </span>
-            <button
-              type="button"
-              class="reservation-circle-button"
-              aria-label="Add company"
-            >
-              <Icon name="plus" />
-            </button>
+        <div class="reservation-form__picker">
+          <span class="reservation-form__picker-label">Company</span>
+          <div class="reservation-form__picker-row">
+            <Select
+              placeholder="Select..."
+              options={COMPANIES.map((c) => ({ label: c.name, value: c.id }))}
+              x-model="reservation.companyId"
+            />
+            <Button variant="ghost" icon="plus" aria-label="Add company" />
           </div>
         </div>
-        <div class="reservation-field">
-          <label class="reservation-field__label" for={`${id}-customer`}>
-            Customer
-          </label>
-          <div class="reservation-field__row">
-            <span class="reservation-select reservation-select--flex">
-              <span class={customer ? "" : "is-placeholder"}>
-                {customer ? customer.fullName : "Select..."}
-              </span>
-              <Icon name="chevron-down" />
-            </span>
-            <button
-              type="button"
-              class="reservation-circle-button"
-              aria-label="Add customer"
-            >
-              <Icon name="plus" />
-            </button>
+        <div class="reservation-form__picker">
+          <span class="reservation-form__picker-label">Customer</span>
+          <div class="reservation-form__picker-row">
+            <Select
+              placeholder="Select..."
+              options={CUSTOMERS.map((c) => ({
+                label: c.fullName,
+                value: c.id,
+              }))}
+              x-model="reservation.customerId"
+            />
+            <Button variant="ghost" icon="plus" aria-label="Add customer" />
           </div>
         </div>
-        <div class="reservation-field">
-          <label class="reservation-field__label" for={`${id}-salesperson`}>
-            Salesperson
-          </label>
-          <span class="reservation-select">
-            <span>{salespersonLabel}</span>
-            <Icon name="chevron-down" />
-          </span>
-        </div>
+        <Select
+          label="Salesperson"
+          placeholder="Select..."
+          options={SALESPEOPLE.map((s) => ({
+            label: s.fullName,
+            value: s.id,
+          }))}
+          x-model="reservation.salespersonId"
+        />
       </div>
-
-      {/* Reference the broader picklists for visual completeness. */}
-      <select hidden>
-        {COMPANIES.map((c) => <option value={c.id}>{c.name}</option>)}
-      </select>
-      <select hidden>
-        {SALESPEOPLE.map((s) => <option value={s.id}>{s.name}</option>)}
-      </select>
     </section>
 
     <section class="reservation-section">
@@ -140,38 +103,24 @@ const ACTIVITY_OPTIONS = [
       </header>
 
       <div class="reservation-form__grid">
-        <div class="reservation-field">
-          <label class="reservation-field__label" for={`${id}-aircraft`}>
-            Aircraft <em>*</em>
-          </label>
-          <span class="reservation-select">
-            <span class={aircraft ? "" : "is-placeholder"}>
-              {aircraft?.tail ?? "Select..."}
-            </span>
-            <Icon name="chevron-down" />
-          </span>
-          <select hidden>
-            {AIRCRAFT.map((a) => <option value={a.id}>{a.tail}</option>)}
-          </select>
-        </div>
-        <div class="reservation-field">
-          <label class="reservation-field__label" for={`${id}-activity`}>
-            Activity Type <em>*</em>
-          </label>
-          <span class="reservation-select">
-            <span>{reservation.activity}</span>
-            <Icon name="chevron-down" />
-          </span>
-          <select hidden>
-            {ACTIVITY_OPTIONS.map((opt) => <option value={opt}>{opt}</option>)}
-          </select>
-        </div>
+        <Select
+          label="Aircraft"
+          placeholder="Select..."
+          options={AIRCRAFT.map((a) => ({ label: a.tail, value: a.id }))}
+          x-model="reservation.aircraftId"
+        />
+        <Select
+          label="Activity Type"
+          placeholder="Select..."
+          options={ACTIVITY_OPTIONS.map((opt) => ({ label: opt, value: opt }))}
+          x-model="reservation.activity"
+        />
       </div>
 
       <div class="reservation-toggle">
-        <span class="reservation-field__label">Auto-Calculate</span>
+        <span class="reservation-toggle__label">Auto-Calculate</span>
         <label class="reservation-switch">
-          <input type="checkbox" checked={reservation.autoCalculate} />
+          <input type="checkbox" x-model="reservation.autoCalculate" />
           <span class="reservation-switch__track" aria-hidden="true">
             <span class="reservation-switch__thumb"></span>
           </span>
@@ -185,28 +134,16 @@ const ACTIVITY_OPTIONS = [
         <Icon name="chevron-up" />
       </summary>
       <div class="reservation-section__body">
-        <div class="reservation-field">
-          <label class="reservation-field__label" for={`${id}-crew-notes`}>
-            Crew Notes
-          </label>
-          <textarea
-            id={`${id}-crew-notes`}
-            class="reservation-input reservation-input--textarea"
-            placeholder="Add crew notes here"
-            >{reservation.crewNotes ?? ""}</textarea
-          >
-        </div>
-        <div class="reservation-field">
-          <label class="reservation-field__label" for={`${id}-pax-notes`}>
-            Passenger Notes
-          </label>
-          <textarea
-            id={`${id}-pax-notes`}
-            class="reservation-input reservation-input--textarea"
-            placeholder="Add passenger notes here"
-            >{reservation.passengerNotes ?? ""}</textarea
-          >
-        </div>
+        <Textarea
+          label="Crew Notes"
+          placeholder="Add crew notes here"
+          x-model="reservation.crewNotes"
+        />
+        <Textarea
+          label="Passenger Notes"
+          placeholder="Add passenger notes here"
+          x-model="reservation.passengerNotes"
+        />
       </div>
     </details>
 
@@ -216,12 +153,11 @@ const ACTIVITY_OPTIONS = [
         <Icon name="chevron-up" />
       </summary>
       <div class="reservation-section__body">
-        <span class="reservation-select">
-          <span class={reservation.tags.length === 0 ? "is-placeholder" : ""}>
-            {reservation.tags.length === 0
-              ? "Select..."
-              : reservation.tags.join(", ")}
-          </span>
+        <span class="reservation-tags-display">
+          <span
+            x-text="reservation.tags?.length ? reservation.tags.join(', ') : 'Select...'"
+            :class="reservation.tags?.length ? '' : 'is-placeholder'"
+          ></span>
           <Icon name="chevron-down" />
         </span>
       </div>
@@ -248,18 +184,11 @@ const ACTIVITY_OPTIONS = [
         </table>
       </div>
     </details>
-
-    {/* Reference the accounts list so the salesperson dropdown reads as
-        a connected picker even though it's currently single-value. */}
-    <span hidden>{ACCOUNTS.map((a) => accountFullName(a)).join(", ")}</span>
   </form>
 
   <Fragment slot="footer">
     <Button variant="primary">Update Reservation</Button>
-    <Button
-      variant="ghost"
-      onclick={`document.getElementById('${id}')?.close()`}
-    >
+    <Button variant="ghost" @click="$store.reservationModal.close()">
       Cancel
     </Button>
     <span class="reservation-form__cancel">
@@ -304,114 +233,23 @@ const ACTIVITY_OPTIONS = [
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
-  .reservation-field {
+  .reservation-form__picker {
     display: grid;
     gap: 8px;
     min-width: 0;
-  }
 
-  .reservation-field__label {
-    color: var(--air-ink);
-    font-size: 15px;
-    font-weight: 800;
-    line-height: 1;
-
-    em {
-      color: #c83b00;
-      font-style: normal;
-      margin-left: 2px;
-    }
-  }
-
-  .reservation-field__row {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .reservation-input {
-    width: 100%;
-    height: 42px;
-    padding: 0 14px;
-    border: 1px solid var(--air-line);
-    border-radius: 6px;
-    background: #fff;
-    color: var(--air-ink);
-    font: inherit;
-    font-size: 14px;
-    font-weight: 600;
-
-    &::placeholder {
-      color: #98a3b3;
-      font-weight: 500;
+    .reservation-form__picker-label {
+      color: var(--air-ink);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
     }
 
-    &:focus {
-      outline: 0;
-      border-color: var(--air-ink);
-      box-shadow: 0 0 0 2px rgba(11, 18, 34, 0.08);
-    }
-  }
-
-  .reservation-input--textarea {
-    height: auto;
-    min-height: 96px;
-    padding: 12px 14px;
-    resize: vertical;
-  }
-
-  .reservation-select {
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 0 14px;
-    border: 1px solid var(--air-line);
-    border-radius: 6px;
-    background: #fff;
-    color: var(--air-ink);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-
-    .is-placeholder {
-      color: #98a3b3;
-      font-weight: 500;
-    }
-
-    :global(.air-icon) {
-      width: 14px;
-      height: 14px;
-      color: var(--air-muted);
-    }
-  }
-
-  .reservation-select--flex {
-    flex: 1 1 auto;
-  }
-
-  .reservation-circle-button {
-    display: inline-grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
-    padding: 0;
-    border: 1px solid var(--air-line);
-    border-radius: 50%;
-    background: #fff;
-    color: var(--air-ink);
-    cursor: pointer;
-
-    :global(.air-icon) {
-      width: 18px;
-      height: 18px;
-    }
-
-    &:hover {
-      background: var(--air-panel-soft);
+    .reservation-form__picker-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: stretch;
     }
   }
 
@@ -442,6 +280,13 @@ const ACTIVITY_OPTIONS = [
   .reservation-toggle {
     display: grid;
     gap: 8px;
+  }
+
+  .reservation-toggle__label {
+    color: var(--air-ink);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
   }
 
   .reservation-switch {
@@ -527,6 +372,33 @@ const ACTIVITY_OPTIONS = [
     display: grid;
     gap: 18px;
     padding: 22px 20px 24px;
+  }
+
+  .reservation-tags-display {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 14px;
+    border: 1px solid var(--air-line);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--air-ink);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    .is-placeholder {
+      color: #98a3b3;
+      font-weight: 500;
+    }
+
+    :global(.air-icon) {
+      width: 14px;
+      height: 14px;
+      color: var(--air-muted);
+    }
   }
 
   .reservation-documents__actions {

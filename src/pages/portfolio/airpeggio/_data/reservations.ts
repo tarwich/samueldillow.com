@@ -447,6 +447,24 @@ export const RESERVATIONS: Reservation[] = generateReservations().sort(
 export const getReservation = (id: string): Reservation | undefined =>
   RESERVATIONS.find((r) => r.id === id);
 
+export const formatReservationForModal = (reservation: Reservation): string => {
+  const payload = {
+    id: reservation.id,
+    tripNumber: reservation.tripNumber,
+    orderNumber: reservation.orderNumber ?? '',
+    aircraftId: reservation.aircraftId,
+    companyId: reservation.companyId ?? '',
+    customerId: reservation.customerId ?? '',
+    salespersonId: reservation.salespersonId ?? '',
+    activity: reservation.activity,
+    autoCalculate: reservation.autoCalculate,
+    crewNotes: reservation.crewNotes ?? '',
+    passengerNotes: reservation.passengerNotes ?? '',
+    tags: reservation.tags,
+  };
+  return JSON.stringify(payload);
+};
+
 const initialsFor = (account: Account): string =>
   (account.firstName[0] + account.lastName[0]).toUpperCase();
 

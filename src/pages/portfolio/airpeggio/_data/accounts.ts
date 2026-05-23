@@ -569,6 +569,30 @@ export const ACCOUNT_TAG_OPTIONS = [
   "Owner",
 ];
 
+const formatBirthDate = (date?: Date): string =>
+  date
+    ? `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`
+    : "";
+
+export const formatAccountForModal = (account: Account): string => {
+  const payload = {
+    id: account.id,
+    firstName: account.firstName,
+    lastName: account.lastName,
+    email: account.email,
+    phone: account.phone ?? "",
+    status: account.status,
+    birthDate: formatBirthDate(account.birthDate),
+    gender: account.gender ?? "",
+    weight: account.weight ?? 0,
+    roles: account.roles,
+    schedulerPermissions: account.schedulerPermissions,
+    pilotPermissions: account.pilotPermissions,
+    tags: account.tags,
+  };
+  return JSON.stringify(payload);
+};
+
 export const SALESPEOPLE: Account[] = ACCOUNTS.filter((a) => a.roles.includes("scheduler"));
 export const PILOTS: Account[] = ACCOUNTS.filter((a) =>
   a.roles.includes('pilot'),

@@ -5,6 +5,7 @@ import CustomerModal from './customers/_components/CustomerModal.astro';
 import CompanyModal from './companies/_components/CompanyModal.astro';
 import ReservationModal from './reservations/_components/ReservationModal.astro';
 import AircraftModal from './aircraft/_components/AircraftModal.astro';
+import AccountModal from './accounts/_components/AccountModal.astro';
 
 interface Props {
   title?: string;
@@ -31,7 +32,7 @@ const {
     <title>{title}</title>
     <script>
       import Alpine from 'alpinejs';
-      import type { Aircraft, Customer, Company, Reservation } from './_data';
+      import type { Account, Aircraft, Customer, Company, Reservation } from './_data';
       // @ts-ignore
       window.Alpine = Alpine;
 
@@ -79,6 +80,17 @@ const {
       };
       Alpine.store('aircraftModal', aircraftModal);
 
+      const accountModal = {
+        account: null as Partial<Account> | null,
+        open(account: Partial<Account> = {}) {
+          this.account = account;
+        },
+        close() {
+          this.account = null;
+        },
+      };
+      Alpine.store('accountModal', accountModal);
+
       Alpine.start();
     </script>
   </head>
@@ -90,6 +102,7 @@ const {
       <CompanyModal />
       <ReservationModal />
       <AircraftModal />
+      <AccountModal />
     </main>
   </body>
 </html>

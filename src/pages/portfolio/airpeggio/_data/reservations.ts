@@ -494,10 +494,20 @@ export const reservationCrewLabel = (reservation: Reservation): string[] =>
     .filter((a): a is Account => !!a)
     .map(initialsFor);
 
+export const reservationCrewAccounts = (reservation: Reservation): Account[] =>
+  reservation.crewAccountIds
+    .map((id) => ACCOUNTS.find((a) => a.id === id))
+    .filter((a): a is Account => !!a);
+
 export const reservationAssignedLabel = (reservation: Reservation): string => {
   const account = ACCOUNTS.find((a) => a.id === reservation.assignedAccountId);
   return account ? initialsFor(account) : '-';
 };
+
+export const reservationAssignedAccount = (
+  reservation: Reservation,
+): Account | undefined =>
+  ACCOUNTS.find((a) => a.id === reservation.assignedAccountId);
 
 export const reservationAircraft = (
   reservation: Reservation,

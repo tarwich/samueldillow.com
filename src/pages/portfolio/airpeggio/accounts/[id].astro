@@ -1,6 +1,5 @@
 ---
 import AirpeggioLayout from "../_layout.astro";
-import AccountModal from "./_components/AccountModal.astro";
 import TrainingModal from "./_components/TrainingModal.astro";
 import Button from "../_components/Button.astro";
 import Icon from "../_components/Icon.astro";
@@ -9,6 +8,7 @@ import {
   TRAINING_REQUIREMENTS,
   accessLabel,
   accountFullName,
+  formatAccountForModal,
   formatTrainingRequiredFor,
   getAccount,
   recordEffectiveDate,
@@ -115,7 +115,11 @@ const trainingStatusLabel = (status: string): string =>
         <strong>{name}</strong>
       </nav>
     </div>
-    <Button icon="edit" class="account-edit" data-open-modal="edit-account">
+    <Button
+      icon="edit"
+      class="account-edit"
+      @click={`$store.accountModal.open(${formatAccountForModal(account)})`}
+    >
       Edit Details
     </Button>
   </header>
@@ -295,8 +299,6 @@ const trainingStatusLabel = (status: string): string =>
       }
     </div>
   </section>
-
-  <AccountModal id="edit-account" mode="edit" account={account} />
 
   {
     trainingRows.map(({ requirement, records }) => (

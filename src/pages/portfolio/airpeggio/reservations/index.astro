@@ -15,15 +15,17 @@ import {
   formatLegTimezone,
   formatReservationForModal,
   reservationAircraft,
-  reservationAssignedLabel,
+  reservationAssignedAccount,
   reservationCustomer,
-  reservationCrewLabel,
+  reservationCrewAccounts,
   reservationCompany,
+  reservationInitials,
   reservationTagStyle,
 } from "../_data";
 import CustomerHoverCard from "../_components/CustomerHoverCard.astro";
 import CompanyHoverCard from "../_components/CompanyHoverCard.astro";
 import AircraftHoverCard from "../_components/AircraftHoverCard.astro";
+import AccountHoverCard from "../_components/AccountHoverCard.astro";
 
 const tailColors: Record<string, string> = {
   red: "#b24b4a",
@@ -105,8 +107,8 @@ const tailColors: Record<string, string> = {
               const aircraft = reservationAircraft(reservation);
               const company = reservationCompany(reservation);
               const customer = reservationCustomer(reservation);
-              const crew = reservationCrewLabel(reservation);
-              const assigned = reservationAssignedLabel(reservation);
+              const crew = reservationCrewAccounts(reservation);
+              const assigned = reservationAssignedAccount(reservation);
               return (
                 <tr data-reservation-id={reservation.id}>
                   <td>
@@ -178,7 +180,13 @@ const tailColors: Record<string, string> = {
                   <td>
                     <div class="reservation-initials-stack">
                       {crew.length > 0 ? (
-                        crew.map((c) => <span>{c}</span>)
+                        crew.map((account) => (
+                          <AccountHoverCard account={account}>
+                            <span slot="trigger">
+                              {reservationInitials(account)}
+                            </span>
+                          </AccountHoverCard>
+                        ))
                       ) : (
                         <span class="text-muted">—</span>
                       )}
@@ -210,7 +218,18 @@ const tailColors: Record<string, string> = {
                     </div>
                   </td>
                   <td>
-                    <span class="reservation-assigned">{assigned}</span>
+                    {assigned ? (
+                      <AccountHoverCard
+                        account={assigned}
+                        triggerClass="reservation-assigned"
+                      >
+                        <span slot="trigger">
+                          {reservationInitials(assigned)}
+                        </span>
+                      </AccountHoverCard>
+                    ) : (
+                      <span class="reservation-assigned">—</span>
+                    )}
                   </td>
                   <td>
                     {reservation.tags.length > 0 ? (

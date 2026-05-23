@@ -1,12 +1,11 @@
 ---
 import AirpeggioLayout from "../_layout.astro";
-import AccountModal from "./_components/AccountModal.astro";
 import Button from "../_components/Button.astro";
 import ColumnsPopover from "../_components/ColumnsPopover.astro";
 import Icon from "../_components/Icon.astro";
 import PageHeader from "../_components/PageHeader.astro";
 import Popover from "../_components/Popover.astro";
-import { ACCOUNTS, accessLabel, accountFullName } from "../_data";
+import { ACCOUNTS, accessLabel, accountFullName, formatAccountForModal } from "../_data";
 import Select from "../_components/Select.astro";
 
 const lastActiveFmt = new Intl.DateTimeFormat("en-US", {
@@ -18,8 +17,6 @@ const lastActiveFmt = new Intl.DateTimeFormat("en-US", {
 
 const emailFmt = (email: string, max = 30) =>
   email.length > max ? email.slice(0, max - 3) + "..." : email;
-
-const editAccount = ACCOUNTS[0];
 ---
 
 <AirpeggioLayout title="Airpeggio Accounts | Samuel Dillow" active="accounts">
@@ -68,7 +65,7 @@ const editAccount = ACCOUNTS[0];
       <h1 slot="title">Accounts</h1>
       <Fragment slot="actions">
         <Button href="#">Manage Schedule</Button>
-        <Button variant="primary" icon="plus" data-open-modal="add-account">
+        <Button variant="primary" icon="plus" @click="$store.accountModal.open({})">
           Add Account
         </Button>
       </Fragment>
@@ -184,7 +181,7 @@ const editAccount = ACCOUNTS[0];
                         type="button"
                         class="accounts-row-action"
                         aria-label={`Edit ${name}`}
-                        data-open-modal="edit-account"
+                        @click={`$store.accountModal.open(${formatAccountForModal(account)})`}
                       >
                         <Icon name="edit" />
                       </button>
@@ -213,8 +210,6 @@ const editAccount = ACCOUNTS[0];
       </nav>
     </footer>
 
-    <AccountModal id="add-account" mode="add" />
-    <AccountModal id="edit-account" mode="edit" account={editAccount} />
   </div>
 </AirpeggioLayout>
 

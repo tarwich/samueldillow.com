@@ -7,6 +7,7 @@ import ReservationHoverCard from "../_components/ReservationHoverCard.astro";
 import AircraftHoverCard from "../_components/AircraftHoverCard.astro";
 import CustomerHoverCard from "../_components/CustomerHoverCard.astro";
 import CompanyHoverCard from "../_components/CompanyHoverCard.astro";
+import AccountHoverCard from "../_components/AccountHoverCard.astro";
 import {
   ACCOUNTS,
   AIRCRAFT,
@@ -19,10 +20,11 @@ import {
   legArrival,
   recordEffectiveDate,
   reservationAircraft,
-  reservationAssignedLabel,
+  reservationAssignedAccount,
   reservationCustomer,
-  reservationCrewLabel,
+  reservationCrewAccounts,
   reservationCompany,
+  reservationInitials,
   trainingStatus,
   type Account,
 } from "../_data";
@@ -517,8 +519,8 @@ const truncateEmail = (email: string, max = 28) =>
                 const aircraft = reservationAircraft(r);
                 const cust = reservationCompany(r);
                 const c = reservationCustomer(r);
-                const crew = reservationCrewLabel(r);
-                const assigned = reservationAssignedLabel(r);
+                const crew = reservationCrewAccounts(r);
+                const assigned = reservationAssignedAccount(r);
                 return (
                   <tr>
                     <td>
@@ -575,8 +577,12 @@ const truncateEmail = (email: string, max = 28) =>
                     </td>
                     <td>
                       <div class="crew-list">
-                        {crew.map((initials) => (
-                          <span>{initials}</span>
+                        {crew.map((account) => (
+                          <AccountHoverCard account={account}>
+                            <span slot="trigger">
+                              {reservationInitials(account)}
+                            </span>
+                          </AccountHoverCard>
                         ))}
                       </div>
                     </td>
@@ -590,7 +596,17 @@ const truncateEmail = (email: string, max = 28) =>
                         )}
                       </div>
                     </td>
-                    <td>{assigned}</td>
+                    <td>
+                      {assigned ? (
+                        <AccountHoverCard account={assigned}>
+                          <span slot="trigger">
+                            {reservationInitials(assigned)}
+                          </span>
+                        </AccountHoverCard>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                     <td>
                       {r.tags.length === 0 ? (
                         <span class="text-muted">—</span>
@@ -979,13 +995,16 @@ const truncateEmail = (email: string, max = 28) =>
   }
 
   .trip-tail {
-    display: flex;
-    align-items: center;
-    gap: 6px;
     margin-top: 6px;
     color: var(--air-purple);
     font-size: 13px;
     font-weight: 700;
+  }
+
+  .trip-tail__inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 
     :global(.air-icon) {
       width: 14px;

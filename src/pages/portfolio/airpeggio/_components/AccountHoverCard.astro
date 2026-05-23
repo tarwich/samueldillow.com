@@ -1,7 +1,7 @@
 ---
 import EntityPreviewCard from "./EntityPreviewCard.astro";
 import PreviewField from "./PreviewField.astro";
-import { accessLabel, type Account } from "../_data";
+import { accessLabel, formatAccountForModal, type Account } from "../_data";
 
 interface Props {
   account: Account;
@@ -18,6 +18,7 @@ const access = accessLabel(account.roles);
   title={account.fullName}
   icon="customer"
   viewHref={viewHref}
+  onEdit={`$store.accountModal.open(${formatAccountForModal(account)})`}
   placement={placement}
   width="260px"
 >

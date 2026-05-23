@@ -40,7 +40,7 @@ const run = (cmd: string, args: string[]) =>
   new Promise<void>((res, rej) => {
     const child = spawn(cmd, args, { stdio: "inherit" });
     child.on("error", rej);
-    child.on("exit", (code) =>
+    child.on("exit", (code: number | null) =>
       code === 0 ? res() : rej(new Error(`${cmd} exited with code ${code}`)),
     );
   });
@@ -49,7 +49,7 @@ async function ensureTypst(): Promise<string> {
   const onPath = await new Promise<boolean>((res) => {
     const c = spawn("typst", ["--version"], { stdio: "ignore" });
     c.on("error", () => res(false));
-    c.on("exit", (code) => res(code === 0));
+    c.on("exit", (code: number | null) => res(code === 0));
   });
   if (onPath) return "typst";
 
@@ -99,11 +99,11 @@ function parseFrontmatter(raw: string): Entry {
 }
 
 async function loadEntries(): Promise<Entry[]> {
-  const files = (await readdir(RESUME_DIR)).filter((f) => f.endsWith(".md"));
+  const files = (await readdir(RESUME_DIR)).filter((f: string) => f.endsWith(".md"));
   const entries = await Promise.all(
-    files.map(async (f) => parseFrontmatter(await readFile(join(RESUME_DIR, f), "utf8"))),
+    files.map(async (f: string) => parseFrontmatter(await readFile(join(RESUME_DIR, f), "utf8"))),
   );
-  return entries.sort((a, b) => b.startDate.valueOf() - a.startDate.valueOf());
+  return entries.sort((a: Entry, b: Entry) => b.startDate.valueOf() - a.startDate.valueOf());
 }
 
 const formatRange = (start: Date, end?: Date) =>

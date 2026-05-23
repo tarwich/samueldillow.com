@@ -1,27 +1,44 @@
 ---
-import Icon from "../../_components/Icon.astro";
+import HoverCard from '../../_components/HoverCard.astro';
+import Icon from '../../_components/Icon.astro';
 
-export type ChecklistStatus = "complete" | "warning" | "error" | "pending";
+export type ChecklistStatus = 'complete' | 'warning' | 'error' | 'pending';
 
 interface Props {
   status: ChecklistStatus;
   label: string;
+  messages?: string[];
 }
 
-const { status, label } = Astro.props;
+const { status, label, messages } = Astro.props;
 
 const STATUS_ICON: Record<ChecklistStatus, string> = {
-  complete: "check",
-  warning: "alert",
-  error: "alert",
-  pending: "clock",
+  complete: 'check',
+  warning: 'alert',
+  error: 'alert',
+  pending: 'clock',
 };
 ---
 
-<div class:list={["checklist-item", `checklist-item--${status}`]}>
-  <span class="checklist-item__icon" aria-hidden="true">
-    <Icon name={STATUS_ICON[status]} />
-  </span>
+<div class:list={['checklist-item', `checklist-item--${status}`]}>
+  {
+    messages ? (
+      <HoverCard placement="right">
+        <span class="checklist-item__icon" aria-hidden="true" slot="trigger">
+          <Icon name={STATUS_ICON[status]} />
+        </span>
+        <ul class="checklist-item__messages">
+          {messages?.map((message) => (
+            <li>{message}</li>
+          ))}
+        </ul>
+      </HoverCard>
+    ) : (
+      <span class="checklist-item__icon" aria-hidden="true">
+        <Icon name={STATUS_ICON[status]} />
+      </span>
+    )
+  }
   <span class="checklist-item__label">{label}</span>
   <div class="checklist-item__body"><slot /></div>
   <div class="checklist-item__actions"><slot name="actions" /></div>
@@ -43,9 +60,9 @@ const STATUS_ICON: Record<ChecklistStatus, string> = {
     @media (max-width: 880px) {
       grid-template-columns: 40px 1fr;
       grid-template-areas:
-        "icon label"
-        "body body"
-        "actions actions";
+        'icon label'
+        'body body'
+        'actions actions';
 
       .checklist-item__icon {
         grid-area: icon;
@@ -121,5 +138,12 @@ const STATUS_ICON: Record<ChecklistStatus, string> = {
     font-size: 14px;
     font-weight: 700;
     white-space: nowrap;
+  }
+
+  .checklist-item__messages {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: #fff;
   }
 </style>

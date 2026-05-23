@@ -16,7 +16,7 @@ interface Props {
   onEdit?: string;
   viewLabel?: string;
   width?: string;
-  placement?: "top" | "bottom";
+  placement?: "top" | "bottom" | "left" | "right";
   class?: string;
   [key: string]: unknown;
 }
@@ -44,7 +44,7 @@ const {
     <slot name="trigger" />
   </Fragment>
 
-  <article class:list={["entity-preview-card", className]}>
+  <article slot="card" class:list={["entity-preview-card", className]}>
     <div class="entity-preview-card__body">
       <header class="entity-preview-card__head">
         <h2 class="air-truncate">{title}</h2>

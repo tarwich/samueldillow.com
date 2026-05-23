@@ -1,9 +1,9 @@
 ---
-import { nanoid } from "nanoid";
+import { nanoid } from 'nanoid';
 
 interface Props {
   id?: string;
-  placement?: "top" | "bottom";
+  placement?: 'top' | 'bottom' | 'left' | 'right';
   width?: string;
   openDelay?: number;
   closeDelay?: number;
@@ -11,8 +11,8 @@ interface Props {
 
 const {
   id = `hover-card-${nanoid(8)}`,
-  placement = "bottom",
-  width = "360px",
+  placement = 'bottom',
+  width = '360px',
   openDelay = 120,
   closeDelay = 140,
 } = Astro.props;
@@ -43,12 +43,16 @@ const panelId = `${id}-panel`;
   >
     <span class="hover-card__arrow" data-hover-card-arrow aria-hidden="true">
     </span>
-    <slot />
+    <slot name="card">
+      <div class="hover-card__card">
+        <slot />
+      </div>
+    </slot>
   </div>
 </div>
 
 <script>
-  type HoverCardPlacement = "top" | "bottom";
+  type HoverCardPlacement = 'top' | 'bottom' | 'left' | 'right';
 
   interface HoverCardState {
     openTimer?: number;
@@ -56,38 +60,81 @@ const panelId = `${id}-panel`;
   }
 
   const instances = Array.from(
-    document.querySelectorAll<HTMLElement>("[data-hover-card]"),
+    document.querySelectorAll<HTMLElement>('[data-hover-card]'),
   );
 
   function positionHoverCard(card: HTMLElement) {
-    const trigger = card.querySelector<HTMLElement>("[data-hover-card-trigger]");
-    const panel = card.querySelector<HTMLElement>("[data-hover-card-panel]");
-    const arrow = card.querySelector<HTMLElement>("[data-hover-card-arrow]");
+    const trigger = card.querySelector<HTMLElement>(
+      '[data-hover-card-trigger]',
+    );
+    const panel = card.querySelector<HTMLElement>('[data-hover-card-panel]');
+    const arrow = card.querySelector<HTMLElement>('[data-hover-card-arrow]');
     if (!trigger || !panel) return;
 
-    const placement = (card.dataset.placement ?? "bottom") as HoverCardPlacement;
+    const placement = (card.dataset.placement ??
+      'bottom') as HoverCardPlacement;
     const gap = 10;
     const margin = 12;
     const triggerRect = trigger.getBoundingClientRect();
     const panelRect = panel.getBoundingClientRect();
-    const availableWidth = window.innerWidth - margin * 2;
+    const viewportW = window.innerWidth;
+    const viewportH = window.innerHeight;
+    const isHorizontal = placement === 'left' || placement === 'right';
+
+    if (isHorizontal) {
+      const width = panelRect.width;
+      const height = panelRect.height;
+      const verticalCenter = triggerRect.top + triggerRect.height / 2;
+      const preferredLeft =
+        placement === 'left'
+          ? triggerRect.left - width - gap
+          : triggerRect.right + gap;
+      const fallbackLeft =
+        placement === 'left'
+          ? triggerRect.right + gap
+          : triggerRect.left - width - gap;
+      const left =
+        preferredLeft < margin || preferredLeft + width > viewportW - margin
+          ? Math.max(margin, Math.min(viewportW - width - margin, fallbackLeft))
+          : preferredLeft;
+      const top = Math.max(
+        margin,
+        Math.min(viewportH - height - margin, verticalCenter - height / 2),
+      );
+
+      panel.style.left = `${left}px`;
+      panel.style.top = `${top}px`;
+      panel.style.width = '';
+
+      const resolvedPlacement = left < triggerRect.left ? 'left' : 'right';
+      panel.dataset.resolvedPlacement = resolvedPlacement;
+
+      if (arrow) {
+        arrow.style.left = '';
+        const arrowTop = verticalCenter - top;
+        arrow.style.top = `${Math.min(Math.max(18, arrowTop), height - 18)}px`;
+      }
+      return;
+    }
+
+    const availableWidth = viewportW - margin * 2;
     const width = Math.min(panelRect.width, availableWidth);
     const center = triggerRect.left + triggerRect.width / 2;
     const left = Math.min(
       Math.max(margin, center - width / 2),
-      window.innerWidth - width - margin,
+      viewportW - width - margin,
     );
     const preferredTop =
-      placement === "top"
+      placement === 'top'
         ? triggerRect.top - panelRect.height - gap
         : triggerRect.bottom + gap;
     const fallbackTop =
-      placement === "top"
+      placement === 'top'
         ? triggerRect.bottom + gap
         : triggerRect.top - panelRect.height - gap;
     const top =
       preferredTop < margin ||
-      preferredTop + panelRect.height > window.innerHeight - margin
+      preferredTop + panelRect.height > viewportH - margin
         ? Math.max(margin, fallbackTop)
         : preferredTop;
 
@@ -95,10 +142,11 @@ const panelId = `${id}-panel`;
     panel.style.top = `${top}px`;
     panel.style.width = `${width}px`;
 
-    const resolvedPlacement = top < triggerRect.top ? "top" : "bottom";
+    const resolvedPlacement = top < triggerRect.top ? 'top' : 'bottom';
     panel.dataset.resolvedPlacement = resolvedPlacement;
 
     if (arrow) {
+      arrow.style.top = '';
       const arrowLeft = center - left;
       arrow.style.left = `${Math.min(Math.max(18, arrowLeft), width - 18)}px`;
     }
@@ -108,10 +156,10 @@ const panelId = `${id}-panel`;
     window.clearTimeout(state.closeTimer);
     const delay = Number(card.dataset.openDelay ?? 120);
     state.openTimer = window.setTimeout(() => {
-      const panel = card.querySelector<HTMLElement>("[data-hover-card-panel]");
+      const panel = card.querySelector<HTMLElement>('[data-hover-card-panel]');
       if (!panel) return;
       panel.hidden = false;
-      card.dataset.open = "true";
+      card.dataset.open = 'true';
       positionHoverCard(card);
     }, delay);
   }
@@ -120,7 +168,7 @@ const panelId = `${id}-panel`;
     window.clearTimeout(state.openTimer);
     const delay = Number(card.dataset.closeDelay ?? 140);
     state.closeTimer = window.setTimeout(() => {
-      const panel = card.querySelector<HTMLElement>("[data-hover-card-panel]");
+      const panel = card.querySelector<HTMLElement>('[data-hover-card-panel]');
       if (!panel) return;
       panel.hidden = true;
       delete card.dataset.open;
@@ -129,29 +177,31 @@ const panelId = `${id}-panel`;
 
   for (const card of instances) {
     if (card.dataset.hoverCardReady) continue;
-    card.dataset.hoverCardReady = "true";
+    card.dataset.hoverCardReady = 'true';
 
-    const trigger = card.querySelector<HTMLElement>("[data-hover-card-trigger]");
-    const panel = card.querySelector<HTMLElement>("[data-hover-card-panel]");
+    const trigger = card.querySelector<HTMLElement>(
+      '[data-hover-card-trigger]',
+    );
+    const panel = card.querySelector<HTMLElement>('[data-hover-card-panel]');
     if (!trigger || !panel) continue;
 
     const state: HoverCardState = {};
     const open = () => openHoverCard(card, state);
     const close = () => closeHoverCard(card, state);
 
-    trigger.addEventListener("pointerenter", open);
-    trigger.addEventListener("pointerleave", close);
-    trigger.addEventListener("focusin", open);
-    trigger.addEventListener("focusout", close);
-    panel.addEventListener("pointerenter", open);
-    panel.addEventListener("pointerleave", close);
-    panel.addEventListener("focusin", open);
-    panel.addEventListener("focusout", close);
+    trigger.addEventListener('pointerenter', open);
+    trigger.addEventListener('pointerleave', close);
+    trigger.addEventListener('focusin', open);
+    trigger.addEventListener('focusout', close);
+    panel.addEventListener('pointerenter', open);
+    panel.addEventListener('pointerleave', close);
+    panel.addEventListener('focusin', open);
+    panel.addEventListener('focusout', close);
 
-    trigger.addEventListener("click", (event) => {
-      if (window.matchMedia("(hover: hover)").matches) return;
+    trigger.addEventListener('click', (event) => {
+      if (window.matchMedia('(hover: hover)').matches) return;
       event.preventDefault();
-      const isOpen = card.dataset.open === "true";
+      const isOpen = card.dataset.open === 'true';
       if (isOpen) {
         closeHoverCard(card, { closeTimer: 0 });
       } else {
@@ -160,26 +210,26 @@ const panelId = `${id}-panel`;
     });
   }
 
-  window.addEventListener("resize", () => {
+  window.addEventListener('resize', () => {
     for (const card of instances) {
-      if (card.dataset.open === "true") positionHoverCard(card);
+      if (card.dataset.open === 'true') positionHoverCard(card);
     }
   });
 
   window.addEventListener(
-    "scroll",
+    'scroll',
     () => {
       for (const card of instances) {
-        if (card.dataset.open === "true") positionHoverCard(card);
+        if (card.dataset.open === 'true') positionHoverCard(card);
       }
     },
     true,
   );
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
     for (const card of instances) {
-      const panel = card.querySelector<HTMLElement>("[data-hover-card-panel]");
+      const panel = card.querySelector<HTMLElement>('[data-hover-card-panel]');
       if (!panel) continue;
       panel.hidden = true;
       delete card.dataset.open;
@@ -206,28 +256,57 @@ const panelId = `${id}-panel`;
     overflow: visible;
   }
 
+  .hover-card__card {
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid var(--air-line);
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+  }
+
   .hover-card__arrow {
     position: absolute;
     width: 0;
     height: 0;
-    transform: translateX(-50%);
   }
 
-  .hover-card__panel[data-resolved-placement="bottom"] {
+  .hover-card__panel[data-resolved-placement='bottom'] {
     .hover-card__arrow {
       top: -10px;
+      transform: translateX(-50%);
       border-right: 10px solid transparent;
       border-bottom: 10px solid var(--air-purple);
       border-left: 10px solid transparent;
     }
   }
 
-  .hover-card__panel[data-resolved-placement="top"] {
+  .hover-card__panel[data-resolved-placement='top'] {
     .hover-card__arrow {
       bottom: -10px;
+      transform: translateX(-50%);
       border-top: 10px solid var(--air-purple);
       border-right: 10px solid transparent;
       border-left: 10px solid transparent;
+    }
+  }
+
+  .hover-card__panel[data-resolved-placement='left'] {
+    .hover-card__arrow {
+      right: -10px;
+      transform: translateY(-50%);
+      border-left: 10px solid var(--air-purple);
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+    }
+  }
+
+  .hover-card__panel[data-resolved-placement='right'] {
+    .hover-card__arrow {
+      left: -10px;
+      transform: translateY(-50%);
+      border-right: 10px solid var(--air-purple);
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
     }
   }
 </style>

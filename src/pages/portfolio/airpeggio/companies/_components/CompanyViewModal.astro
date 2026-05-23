@@ -1,19 +1,15 @@
 ---
 import Icon from "../../_components/Icon.astro";
 import Modal from "../../_components/Modal.astro";
-import {
-  contactDisplayName,
-  contactsForCustomer,
-  type Customer,
-} from "../../_data";
+import { customersForCompany, type Company } from "../../_data";
 
 interface Props {
   id: string;
-  company: Customer;
+  company: Company;
 }
 
 const { id, company } = Astro.props;
-const contacts = contactsForCustomer(company.id);
+const customers = customersForCompany(company.id);
 ---
 
 <Modal id={id} title="View Company">
@@ -42,9 +38,9 @@ const contacts = contactsForCustomer(company.id);
 
         <div class="company-view__notes">
           <p>Notes:</p>
-          <textarea
-            readonly
-            class="company-view__notes-area">{company.notes ?? ""}</textarea>
+          <textarea readonly class="company-view__notes-area"
+            >{company.notes ?? ""}</textarea
+          >
         </div>
       </div>
     </section>
@@ -63,25 +59,25 @@ const contacts = contactsForCustomer(company.id);
           </thead>
           <tbody>
             {
-              contacts.length === 0 ? (
+              customers.length === 0 ? (
                 <tr>
                   <td colspan="4" class="company-view__contacts-empty">
                     No customers
                   </td>
                 </tr>
               ) : (
-                contacts.map((contact) => (
+                customers.map((customer) => (
                   <tr>
                     <td>
-                      <strong>{contactDisplayName(contact)}</strong>
+                      <strong>{customer.fullName}</strong>
                     </td>
-                    <td class="text-muted">{contact.companyTitle ?? ""}</td>
-                    <td class="text-muted">{contact.email}</td>
+                    <td class="text-muted">{customer.companyTitle ?? ""}</td>
+                    <td class="text-muted">{customer.email}</td>
                     <td>
                       <a
                         class="company-view__row-action"
-                        href={`/portfolio/airpeggio/customers/${contact.id}/`}
-                        aria-label={`View ${contactDisplayName(contact)}`}
+                        href={`/portfolio/airpeggio/customers/${customer.id}/`}
+                        aria-label={`View ${customer.fullName}`}
                       >
                         <Icon name="eye" />
                       </a>

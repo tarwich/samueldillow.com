@@ -12,8 +12,7 @@ import {
   ACCOUNTS,
   RESERVATIONS,
   accountFullName,
-  contactFullName,
-  getContact,
+  getCustomer,
   formatBlockDuration,
   formatLegItineraryDate,
   formatLegTimezone,
@@ -25,8 +24,8 @@ import {
   legRegulation,
   pilotConflicts,
   reservationAircraft,
-  reservationContact,
   reservationCustomer,
+  reservationCompany,
   reservationPassengers,
   reservationPilots,
   reservationSalesperson,
@@ -46,8 +45,8 @@ if (!reservation) {
 }
 
 const aircraft = reservationAircraft(reservation);
-const contact = reservationContact(reservation);
-const company = reservationCustomer(reservation);
+const customer = reservationCustomer(reservation);
+const company = reservationCompany(reservation);
 const salesperson = reservationSalesperson(reservation);
 const pilots = reservationPilots(reservation);
 const passengers = reservationPassengers(reservation);
@@ -283,8 +282,8 @@ const checklistPassengerStatus = passengers.length > 0 ? "complete" : "pending";
           ) : (
             <span>
               {passengers.length} passenger{passengers.length === 1 ? "" : "s"}
-              {contact && (
-                <span class="text-muted"> · primary: {contactFullName(contact)}</span>
+              {customer && (
+                <span class="text-muted"> · primary: {customer.fullName}</span>
               )}
             </span>
           )
@@ -329,7 +328,7 @@ const checklistPassengerStatus = passengers.length > 0 ? "complete" : "pending";
       </div>
       <div>
         <dt>Customer</dt>
-        <dd>{contact ? contactFullName(contact) : "-"}</dd>
+        <dd>{customer ? customer.fullName : "-"}</dd>
       </div>
       <div>
         <dt>Salesperson</dt>
@@ -611,11 +610,11 @@ const checklistPassengerStatus = passengers.length > 0 ? "complete" : "pending";
               </tr>
             ) : (
               passengers.map((pax) => {
-                const c = getContact(pax.contactId);
+                const c = getCustomer(pax.customerId);
                 if (!c) return null;
                 return (
                   <tr>
-                    <td><strong>{contactFullName(c)}</strong></td>
+                    <td><strong>{c.fullName}</strong></td>
                     <td>
                       <div class="people-info">
                         <span>
@@ -626,7 +625,7 @@ const checklistPassengerStatus = passengers.length > 0 ? "complete" : "pending";
                         <span><strong>Weight:</strong> {c.weight ?? ""}</span>
                       </div>
                     </td>
-                    <td>{c.email || (!c.hidePhone && c.phone) || ""}</td>
+                    <td>{c.email || c.phone || ""}</td>
                     {reservation.legs.map((leg) => (
                       <td class="people-leg-cell">
                         <span
@@ -643,7 +642,7 @@ const checklistPassengerStatus = passengers.length > 0 ? "complete" : "pending";
                       <button
                         type="button"
                         class="reservation-row-action"
-                        aria-label={`Remove ${contactFullName(c)}`}
+                        aria-label={`Remove ${c.fullName}`}
                       >
                         <Icon name="trash" />
                       </button>

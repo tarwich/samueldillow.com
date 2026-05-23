@@ -1,11 +1,11 @@
 ---
 import EntityPreviewCard from "./EntityPreviewCard.astro";
 import PreviewField from "./PreviewField.astro";
-import type { Customer } from "../_data";
-import { contactsForCustomer } from "../_data";
+import type { Company } from "../_data";
+import { customersForCompany } from "../_data";
 
 interface Props {
-  company: Customer;
+  company: Company;
   triggerClass?: string;
   editModalId?: string;
   placement?: "top" | "bottom";
@@ -18,9 +18,8 @@ const {
   placement = "bottom",
 } = Astro.props;
 
-const viewHref = "/portfolio/airpeggio/companies/";
-const contactCount = contactsForCustomer(company.id).length;
-const companyTypeLabels: Record<Customer["type"], string> = {
+const customerCount = customersForCompany(company.id).length;
+const companyTypeLabels: Record<Company["type"], string> = {
   broker: "Broker",
   fbo: "FBO",
   individual: "Individual",
@@ -32,7 +31,6 @@ const companyType = companyTypeLabels[company.type];
 <EntityPreviewCard
   title={company.name}
   icon="account"
-  viewHref={viewHref}
   editEvent="airpeggio:edit-company"
   placement={placement}
   width="260px"
@@ -45,7 +43,7 @@ const companyType = companyTypeLabels[company.type];
   data-company-notes={company.notes ?? ""}
 >
   <Fragment slot="trigger">
-    <a class:list={["company-hover-card__trigger", triggerClass]} href={viewHref}>
+    <a class:list={["company-hover-card__trigger", triggerClass]}>
       <slot name="trigger">{company.name}</slot>
     </a>
   </Fragment>
@@ -66,7 +64,7 @@ const companyType = companyTypeLabels[company.type];
     icon="briefcase"
   />
   <PreviewField
-    value={`${contactCount} ${contactCount === 1 ? "contact" : "contacts"}`}
+    value={`${customerCount} ${customerCount === 1 ? "customer" : "customers"}`}
     icon="users"
   />
   <PreviewField

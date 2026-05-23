@@ -2,7 +2,7 @@
 import Button from "../../_components/Button.astro";
 import Icon from "../../_components/Icon.astro";
 import Modal from "../../_components/Modal.astro";
-import { AIRCRAFT, CUSTOMERS, SALESPEOPLE } from "../../_data";
+import { AIRCRAFT, COMPANIES, SALESPEOPLE } from "../../_data";
 
 interface Props {
   id?: string;
@@ -64,7 +64,7 @@ const REG_OPTIONS = ["91", "135", "121"] as const;
           </button>
         </div>
         <select hidden>
-          {CUSTOMERS.map((c) => <option value={c.id}>{c.name}</option>)}
+          {COMPANIES.map((c) => <option value={c.id}>{c.name}</option>)}
         </select>
       </div>
       <div class="reserve-field">

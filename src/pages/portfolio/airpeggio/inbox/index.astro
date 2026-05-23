@@ -12,13 +12,7 @@ import CustomerModal from "../customers/_components/CustomerModal.astro";
 import SelectField from "./_components/SelectField.astro";
 import TextField from "../_components/TextField.astro";
 import QuickQuoteModal from "./_components/QuickQuoteModal.astro";
-import {
-  INBOX_REQUESTS,
-  contactFullName,
-  getAirport,
-  getContact,
-  getCustomer,
-} from "../_data";
+import { INBOX_REQUESTS, getAirport, getCustomer, getCompany } from "../_data";
 
 const dateFmt = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -50,12 +44,12 @@ const requests = [...INBOX_REQUESTS]
   .sort((a, b) => b.receivedAt.getTime() - a.receivedAt.getTime())
   .slice(0, 12)
   .map((req) => {
-    const contact = getContact(req.contactId);
-    const customer = contact ? getCustomer(contact.customerId) : undefined;
-    return { req, contact, customer };
+    const customer = getCustomer(req.customerId);
+    const company = customer ? getCompany(customer.companyId) : undefined;
+    return { req, customer, company };
   });
 
-const editContact = requests.find(({ contact }) => contact)?.contact;
+const editCustomer = requests.find(({ customer }) => customer)?.customer;
 
 const airportPositions: Record<string, { x: number; y: number }> = {
   KVNY: { x: 276, y: 184 },
@@ -217,7 +211,7 @@ const routePath = (
         </thead>
         <tbody>
           {
-            requests.map(({ req, contact, customer }) => (
+            requests.map(({ req, customer, company }) => (
               <tr>
                 <td>
                   <>
@@ -231,25 +225,25 @@ const routePath = (
                 <td>Request</td>
                 <td>
                   <>
-                    {
-                      contact ? (
-                        <CustomerHoverCard
-                          contact={contact}
-                          customer={customer}
-                          triggerClass="inbox-customer-link"
-                        >
-                          <strong slot="trigger">{contactFullName(contact)}</strong>
-                        </CustomerHoverCard>
-                      ) : (
-                        <strong>Unknown</strong>
-                      )
-                    }
+                    {customer ? (
+                      <CustomerHoverCard
+                        customer={customer}
+                        company={company}
+                        triggerClass="inbox-customer-link"
+                      >
+                        <strong slot="trigger">
+                          {customer.fullName}
+                        </strong>
+                      </CustomerHoverCard>
+                    ) : (
+                      <strong>Unknown</strong>
+                    )}
                     <br />
                     <span class="text-muted">
-                      {contact ? truncateEmail(contact.email) : ""}
+                      {customer ? truncateEmail(customer.email) : ""}
                     </span>
                     <br />
-                    <span class="text-muted">{customer?.name ?? ""}</span>
+                    <span class="text-muted">{company?.name ?? ""}</span>
                   </>
                 </td>
                 <td>
@@ -386,7 +380,11 @@ const routePath = (
     </section>
 
     <QuickQuoteModal />
-    {editContact && <CustomerModal id="edit-customer" mode="edit" customer={editContact} />}
+    {
+      editCustomer && (
+        <CustomerModal id="edit-customer" mode="edit" customer={editCustomer} />
+      )
+    }
   </div>
 </AirpeggioLayout>
 

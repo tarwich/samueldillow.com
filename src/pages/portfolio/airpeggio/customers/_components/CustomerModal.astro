@@ -2,12 +2,12 @@
 import Button from "../../_components/Button.astro";
 import Icon from "../../_components/Icon.astro";
 import Modal from "../../_components/Modal.astro";
-import { CUSTOMERS, SALESPEOPLE, type Contact } from "../../_data";
+import { COMPANIES, SALESPEOPLE, type Customer } from "../../_data";
 
 interface Props {
   id?: string;
   mode?: "add" | "edit";
-  customer?: Contact;
+  customer?: Customer;
 }
 
 const { id = "customer-modal", mode = "edit", customer } = Astro.props;
@@ -22,7 +22,7 @@ const formatDate = (date?: Date) =>
     : "";
 
 const company = customer
-  ? CUSTOMERS.find((c) => c.id === customer.customerId)
+  ? COMPANIES.find((c) => c.id === customer.companyId)
   : undefined;
 
 const deleteConfirmId = `${id}-confirm-delete`;
@@ -48,18 +48,6 @@ const deleteTriggerId = `${id}-delete-trigger`;
               type="text"
               value={customer?.firstName ?? ""}
               placeholder="Enter the first name"
-            />
-          </div>
-          <div class="customer-form__field">
-            <label class="customer-form__label" for={`${id}-middle`}
-              >Middle name</label
-            >
-            <input
-              id={`${id}-middle`}
-              class="customer-input"
-              type="text"
-              value={customer?.middleName ?? ""}
-              placeholder="Enter the middle name"
             />
           </div>
           <div class="customer-form__field">
@@ -217,7 +205,7 @@ const deleteTriggerId = `${id}-delete-trigger`;
               id={`${id}-mobile`}
               class="customer-input"
               type="tel"
-              value={customer?.hidePhone ? "" : customer?.phone ?? ""}
+              value={customer?.phone ?? ""}
               placeholder="Enter mobile number here"
             />
           </div>

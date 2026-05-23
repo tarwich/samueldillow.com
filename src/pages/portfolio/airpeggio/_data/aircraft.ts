@@ -1,8 +1,28 @@
 import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
-import { AIRCRAFT_OWNER_CONTACT_IDS } from "./contacts";
+import { CUSTOMERS } from "./customers";
+import { COMPANIES } from "./companies";
 
 faker.seed(303);
+
+// Pick three companies from the generated DB to act as aircraft owners,
+// then choose one of each company's customers as the owner customer. Keeps
+// "View Owner Profile" links resolving to real customer entries without
+// hand-writing names that could resemble real people or companies.
+const companiesWithCustomers = COMPANIES.filter((co) =>
+  CUSTOMERS.some((cu) => cu.companyId === co.id),
+);
+const ownerCompanies = faker.helpers.arrayElements(companiesWithCustomers, 3);
+const ownerSeats = ownerCompanies.map((company) => {
+  const customer = faker.helpers.arrayElement(
+    CUSTOMERS.filter((c) => c.companyId === company.id),
+  );
+  return {
+    owner: company.name,
+    ownerEmail: company.email ?? `owner@${company.domain}`,
+    ownerCustomerId: customer.id,
+  };
+});
 
 export type AircraftEngineType = "piston" | "turboprop" | "jet";
 
@@ -33,7 +53,7 @@ export interface Aircraft {
   tail: string;
   owner: string;
   ownerEmail: string;
-  ownerContactId: string;
+  ownerCustomerId: string;
   serialNumber: string;
   model: string;
   class: string;
@@ -60,7 +80,7 @@ type AircraftTemplate = Pick<
   | "tail"
   | "owner"
   | "ownerEmail"
-  | "ownerContactId"
+  | "ownerCustomerId"
   | "serialNumber"
   | "model"
   | "class"
@@ -193,9 +213,7 @@ const generateAircraft = (template: AircraftTemplate): Aircraft => {
 const AIRCRAFT_TEMPLATES: AircraftTemplate[] = [
   {
     tail: "N482SD",
-    owner: "Northstar Aero",
-    ownerEmail: "owner@northaero.example",
-    ownerContactId: AIRCRAFT_OWNER_CONTACT_IDS.N482SD,
+    ...ownerSeats[0],
     serialNumber: "SD-4820",
     model: "S22T",
     class: "Single Engine Land",
@@ -213,9 +231,7 @@ const AIRCRAFT_TEMPLATES: AircraftTemplate[] = [
   },
   {
     tail: "N731AP",
-    owner: "Airpeggio Demo Fleet",
-    ownerEmail: "ops@airpeggio.example",
-    ownerContactId: AIRCRAFT_OWNER_CONTACT_IDS.N731AP,
+    ...ownerSeats[1],
     serialNumber: "AP-0765",
     model: "Learjet 45",
     class: "Jet",
@@ -233,9 +249,7 @@ const AIRCRAFT_TEMPLATES: AircraftTemplate[] = [
   },
   {
     tail: "N904VX",
-    owner: "Summit Flight Group",
-    ownerEmail: "dispatch@summitflight.example",
-    ownerContactId: AIRCRAFT_OWNER_CONTACT_IDS.N904VX,
+    ...ownerSeats[2],
     serialNumber: "VX-0889",
     model: "Citation CJ4",
     class: "Jet",

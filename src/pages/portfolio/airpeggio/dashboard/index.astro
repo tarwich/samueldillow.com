@@ -16,9 +16,9 @@ import {
   recordEffectiveDate,
   reservationAircraft,
   reservationAssignedLabel,
-  reservationContact,
-  reservationCrewLabel,
   reservationCustomer,
+  reservationCrewLabel,
+  reservationCompany,
   trainingStatus,
   type Account,
 } from "../_data";
@@ -503,8 +503,8 @@ const truncateEmail = (email: string, max = 28) =>
             <tbody>
               {upcomingReservations.map((r) => {
                 const aircraft = reservationAircraft(r);
-                const cust = reservationCustomer(r);
-                const c = reservationContact(r);
+                const cust = reservationCompany(r);
+                const c = reservationCustomer(r);
                 const crew = reservationCrewLabel(r);
                 const assigned = reservationAssignedLabel(r);
                 return (

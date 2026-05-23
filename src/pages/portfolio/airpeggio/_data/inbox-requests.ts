@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
 import { AIRPORTS } from "./airports";
-import { CONTACTS } from "./contacts";
+import { CUSTOMERS } from "./customers";
 
 faker.seed(404);
 
@@ -20,7 +20,7 @@ export interface InboxRequestLeg {
 
 export interface InboxRequest {
   id: string;
-  contactId: string;
+  customerId: string;
   receivedAt: Date;
   status: InboxRequestStatus;
   legs: InboxRequestLeg[];
@@ -65,7 +65,7 @@ function makeLegs(): InboxRequestLeg[] {
 
 export const INBOX_REQUESTS: InboxRequest[] = Array.from({ length: 24 }, (_, i) => ({
   id: nanoid(),
-  contactId: faker.helpers.arrayElement(CONTACTS).id,
+  customerId: faker.helpers.arrayElement(CUSTOMERS).id,
   receivedAt: new Date(
     NOW.getTime() - i * faker.number.int({ min: 5, max: 90 }) * 60_000,
   ),

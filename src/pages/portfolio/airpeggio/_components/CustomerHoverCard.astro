@@ -1,27 +1,26 @@
 ---
 import EntityPreviewCard from "./EntityPreviewCard.astro";
 import PreviewField from "./PreviewField.astro";
-import type { Contact, Customer } from "../_data";
-import { contactDisplayName } from "../_data";
+import type { Customer, Company } from "../_data";
 
 interface Props {
-  contact: Contact;
-  customer?: Customer;
+  customer: Customer;
+  company?: Company;
   triggerClass?: string;
   editModalId?: string;
   placement?: "top" | "bottom";
 }
 
 const {
-  contact,
   customer,
+  company,
   triggerClass,
   editModalId = "edit-customer",
   placement = "bottom",
 } = Astro.props;
-const name = contactDisplayName(contact);
-const viewHref = `/portfolio/airpeggio/customers/${contact.id}/`;
-const phone = contact.hidePhone ? "" : contact.phone;
+const name = customer.fullName;
+const viewHref = `/portfolio/airpeggio/customers/${customer.id}/`;
+const phone = customer.phone;
 ---
 
 <EntityPreviewCard
@@ -33,18 +32,17 @@ const phone = contact.hidePhone ? "" : contact.phone;
   width="260px"
   data-edit-modal-id={editModalId}
   data-customer-hover-edit
-  data-customer-first={contact.firstName}
-  data-customer-middle={contact.middleName ?? ""}
-  data-customer-last={contact.lastName}
-  data-customer-dob={contact.dateOfBirth?.toISOString() ?? ""}
-  data-customer-gender={contact.gender ?? ""}
-  data-customer-weight={contact.weight ?? ""}
-  data-customer-company={customer?.name ?? ""}
-  data-customer-title={contact.companyTitle ?? ""}
+  data-customer-first={customer.firstName}
+  data-customer-last={customer.lastName}
+  data-customer-dob={customer.dateOfBirth?.toISOString() ?? ""}
+  data-customer-gender={customer.gender ?? ""}
+  data-customer-weight={customer.weight ?? ""}
+  data-customer-company={company?.name ?? ""}
+  data-customer-title={customer.companyTitle ?? ""}
   data-customer-mobile={phone}
-  data-customer-email={contact.email}
-  data-customer-city={contact.city ?? ""}
-  data-customer-state={contact.state ?? ""}
+  data-customer-email={customer.email}
+  data-customer-city={customer.city ?? ""}
+  data-customer-state={customer.state ?? ""}
 >
   <Fragment slot="trigger">
     <a class:list={["customer-hover-card__trigger", triggerClass]} href={viewHref}>
@@ -53,7 +51,7 @@ const phone = contact.hidePhone ? "" : contact.phone;
   </Fragment>
 
   <PreviewField
-    value={contact.email}
+    value={customer.email}
     fallback="No email provided"
     icon="mail"
   />
@@ -63,12 +61,12 @@ const phone = contact.hidePhone ? "" : contact.phone;
     icon="phone"
   />
   <PreviewField
-    value={customer?.name}
+    value={company?.name}
     fallback="No company assigned"
     icon="account"
   />
   <PreviewField
-    value={contact.companyTitle}
+    value={customer.companyTitle}
     fallback="No title provided"
     icon="briefcase"
   />
@@ -103,7 +101,6 @@ const phone = contact.hidePhone ? "" : contact.phone;
     if (!(modal instanceof HTMLDialogElement)) return;
 
     setField(modal, `${modalId}-first`, button.dataset.customerFirst);
-    setField(modal, `${modalId}-middle`, button.dataset.customerMiddle);
     setField(modal, `${modalId}-last`, button.dataset.customerLast);
     setField(modal, `${modalId}-dob`, formatDate(button.dataset.customerDob));
     setField(modal, `${modalId}-weight`, button.dataset.customerWeight);

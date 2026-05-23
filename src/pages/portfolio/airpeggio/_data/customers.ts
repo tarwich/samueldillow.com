@@ -1,96 +1,136 @@
 import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
+import { COMPANIES, type Company } from "./companies";
+import { SALESPEOPLE } from "./salespeople";
 
-faker.seed(101);
+faker.seed(202);
 
-export type CustomerType = "broker" | "fbo" | "operator" | "individual";
+export type Gender = "M" | "F" | "X";
 
 export interface Customer {
   id: string;
-  name: string;
-  domain: string;
-  type: CustomerType;
-  address?: string;
-  phone?: string;
-  email?: string;
+  companyId: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  companyTitle?: string;
+  gender?: Gender;
+  dateOfBirth?: Date;
+  weight?: number;
+  passportNumber?: string;
+  passportCountry?: string;
+  passportExpiry?: Date;
+  city?: string;
+  state?: string;
+  driversLicense?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  salespersonId?: string;
+  lastActive?: Date;
+  tripsCount: number;
   notes?: string;
 }
 
-const COMPANY_SUFFIXES = [
-  "Aviation",
-  "Air",
-  "Air Group",
-  "Charters",
-  "Charter Group",
-  "Jets",
-  "Jet Partners",
-  "Wings",
-  "Aero",
-  "Aircraft Services",
+const COMPANY_TITLES = [
+  "CEO",
+  "COO",
+  "CFO",
+  "Director of Travel",
+  "Executive Assistant",
+  "Operations Manager",
+  "Account Manager",
+  "Pilot",
+  "Owner",
+  "Founder",
 ];
-
-const generateCompanyName = (): string => {
-  const suffix = faker.helpers.arrayElement(COMPANY_SUFFIXES);
-  const style = faker.number.int({ min: 0, max: 2 });
-  switch (style) {
-    case 0:
-      return `${faker.location.city()} ${suffix}`;
-    case 1:
-      return `${faker.person.lastName()} ${suffix}`;
-    default:
-      return faker.company.name();
-  }
-};
-
-const COMPANY_COUNT = 30;
-const seenNames = new Set<string>();
-const COMPANY_NAMES: string[] = [];
-while (COMPANY_NAMES.length < COMPANY_COUNT) {
-  const name = generateCompanyName();
-  if (seenNames.has(name)) continue;
-  seenNames.add(name);
-  COMPANY_NAMES.push(name);
-}
-
-const slugDomain = (name: string) =>
-  name.toLowerCase().replace(/[^a-z0-9]+/g, "").replace(/^the/, "") + ".com";
 
 const STATES = ["TX", "CA", "FL", "NY", "CO", "AZ", "WA", "IL", "GA", "NJ"];
 
-const fakeAddress = () =>
-  `${faker.location.streetAddress()}, ${faker.location.city()}, ${faker.helpers.arrayElement(STATES)} ${faker.location.zipCode("#####")}`;
+const buildEmail = (first: string, last: string, company: Company) =>
+  `${first}.${last}@${company.domain}`.toLowerCase();
 
-const IMPORTED_NOTE = "Imported 2025-01-08T00:00:00.000Z";
+const maybe = <T,>(value: T, weight = 0.7): T | undefined =>
+  faker.number.float({ min: 0, max: 1 }) < weight ? value : undefined;
 
-export const CUSTOMERS: Customer[] = COMPANY_NAMES.map((name) => {
-  const domain = slugDomain(name);
-  const hasAddress = faker.number.float() < 0.35;
-  const hasPhone = faker.number.float() < 0.4;
-  const hasEmail = faker.number.float() < 0.5;
-  const noteRoll = faker.number.float();
-  const notes =
-    noteRoll < 0.6
-      ? IMPORTED_NOTE
-      : noteRoll < 0.85
-        ? undefined
-        : faker.lorem.sentence();
+const NOW = new Date("2026-05-13T12:00:00Z");
+
+function makeCustomer(company: Company): Customer {
+  const firstName = faker.person.firstName();
+  const lastName = faker.person.lastName();
+  const email =
+    faker.helpers.maybe(() => buildEmail(firstName, lastName, company), {
+      probability: 0.6,
+    }) ?? faker.internet.email({ firstName, lastName }).toLowerCase();
 
   return {
     id: nanoid(),
-    name,
-    domain,
-    type: faker.helpers.arrayElement<CustomerType>([
-      "broker",
-      "fbo",
-      "operator",
-      "individual",
+    companyId: company.id,
+    firstName,
+    lastName,
+    get fullName() {
+      return `${this.firstName} ${this.lastName}`;
+    },
+    email,
+    phone: faker.phone.number({ style: "national" }),
+    companyTitle: maybe(faker.helpers.arrayElement(COMPANY_TITLES), 0.55),
+    gender: maybe(faker.helpers.arrayElement<Gender>(["M", "F", "X"]), 0.7),
+    dateOfBirth: maybe(
+      faker.date.birthdate({ min: 28, max: 72, mode: "age" }),
+      0.55,
+    ),
+    weight: maybe(faker.number.int({ min: 120, max: 240 }), 0.4),
+    passportNumber: maybe(
+      faker.string.alphanumeric({ length: 9, casing: "upper" }),
+      0.25,
+    ),
+    passportCountry: maybe(faker.location.countryCode("alpha-3"), 0.25),
+    passportExpiry: maybe(faker.date.future({ years: 8 }), 0.2),
+    city: maybe(faker.location.city(), 0.6),
+    state: maybe(faker.helpers.arrayElement(STATES), 0.6),
+    driversLicense: maybe(
+      faker.string.alphanumeric({ length: 8, casing: "upper" }),
+      0.35,
+    ),
+    emergencyContactName: maybe(faker.person.fullName(), 0.35),
+    emergencyContactPhone: maybe(
+      faker.phone.number({ style: "national" }),
+      0.35,
+    ),
+    salespersonId: maybe(faker.helpers.arrayElement(SALESPEOPLE).id, 0.45),
+    lastActive: maybe(
+      new Date(
+        NOW.getTime() -
+        faker.number.int({ min: 0, max: 220 }) * 24 * 60 * 60_000,
+      ),
+      0.55,
+    ),
+    tripsCount: faker.helpers.weightedArrayElement([
+      { value: 0, weight: 6 },
+      { value: faker.number.int({ min: 1, max: 4 }), weight: 3 },
+      { value: faker.number.int({ min: 5, max: 18 }), weight: 1 },
     ]),
-    address: hasAddress ? fakeAddress() : undefined,
-    phone: hasPhone ? faker.phone.number({ style: "national" }) : undefined,
-    email: hasEmail ? `info@${domain}` : undefined,
-    notes,
+    notes: maybe(faker.lorem.sentence(), 0.15),
   };
+}
+
+const generated: Customer[] = COMPANIES.flatMap((company) => {
+  const count = faker.number.int({ min: 6, max: 12 });
+  return Array.from({ length: count }, () => makeCustomer(company));
+});
+
+export const CUSTOMERS: Customer[] = generated.sort((a, b) => {
+  const last = a.lastName.localeCompare(b.lastName, "en", {
+    sensitivity: "base",
+  });
+  if (last !== 0) return last;
+  return a.firstName.localeCompare(b.firstName, "en", { sensitivity: "base" });
 });
 
 export const getCustomer = (id: string): Customer | undefined =>
   CUSTOMERS.find((c) => c.id === id);
+
+export const customersForCompany = (companyId: string): Customer[] =>
+  CUSTOMERS.filter((c) => c.companyId === companyId);
+

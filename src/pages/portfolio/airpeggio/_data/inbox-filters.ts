@@ -2,8 +2,8 @@ import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
 import { AIRCRAFT } from "./aircraft";
 import { AIRPORTS } from "./airports";
-import { CONTACTS } from "./contacts";
 import { CUSTOMERS } from "./customers";
+import { COMPANIES } from "./companies";
 
 faker.seed(505);
 
@@ -78,15 +78,15 @@ const pickMany = <T>(items: T[], min: number, max: number): T[] => {
 
 export const INBOX_FILTERS: InboxFilter[] = FILTER_NAMES.map((name, index) => {
   const airports = pickMany(AIRPORTS, 1, 3);
-  const contacts = pickMany(CONTACTS, 1, 2);
-  const customers = contacts
-    .map((contact) =>
-      CUSTOMERS.find((customer) => customer.id === contact.customerId),
+  const customers = pickMany(CUSTOMERS, 1, 2);
+  const companies = customers
+    .map((customer) =>
+      COMPANIES.find((company) => company.id === customer.companyId),
     )
-    .filter((customer): customer is NonNullable<typeof customer> => Boolean(customer));
+    .filter((company): company is NonNullable<typeof company> => Boolean(company));
   const aircraft = faker.helpers.arrayElement(AIRCRAFT);
   const fallbackDomain =
-    faker.helpers.arrayElement(customers)?.domain ?? "airpeggio.example";
+    faker.helpers.arrayElement(companies)?.domain ?? "airpeggio.example";
 
   return {
     id: nanoid(),
@@ -94,11 +94,11 @@ export const INBOX_FILTERS: InboxFilter[] = FILTER_NAMES.map((name, index) => {
     enabled: faker.datatype.boolean({ probability: 0.9 }),
     priority: index < 3 ? 0 : faker.number.int({ min: 1, max: 4 }),
     toEmails: pickMany(TO_EMAILS, 1, 2),
-    fromEmails: unique(customers.map((customer) => customer.domain)),
+    fromEmails: unique(companies.map((company) => company.domain)),
     blacklistEmails: faker.datatype.boolean({ probability: 0.25 })
       ? [`blocked.${faker.internet.domainName()}`]
       : [],
-    notifyEmails: contacts.map((contact) => contact.email),
+    notifyEmails: customers.map((customer) => customer.email),
     fallbackEmail: faker.datatype.boolean({ probability: 0.35 })
       ? `unqualified@${fallbackDomain}`
       : undefined,

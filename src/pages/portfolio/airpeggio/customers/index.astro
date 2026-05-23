@@ -7,14 +7,9 @@ import CompanyModal from "../companies/_components/CompanyModal.astro";
 import CustomerModal from "./_components/CustomerModal.astro";
 import Icon from "../_components/Icon.astro";
 import PageHeader from "../_components/PageHeader.astro";
-import {
-  CONTACTS,
-  CUSTOMERS,
-  SALESPEOPLE,
-  contactDisplayName,
-} from "../_data";
+import { CUSTOMERS, COMPANIES, SALESPEOPLE } from "../_data";
 
-const customerById = new Map(CUSTOMERS.map((c) => [c.id, c]));
+const companyById = new Map(COMPANIES.map((c) => [c.id, c]));
 const salespersonById = new Map(SALESPEOPLE.map((s) => [s.id, s]));
 
 const emailFmt = (email: string, max = 28) =>
@@ -26,25 +21,22 @@ const lastActiveFmt = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
-const rows = CONTACTS.slice(0, 10).map((contact) => {
-  const company = customerById.get(contact.customerId);
-  const salesperson = contact.salespersonId
-    ? salespersonById.get(contact.salespersonId)
+const rows = CUSTOMERS.slice(0, 10).map((customer) => {
+  const company = companyById.get(customer.companyId);
+  const salesperson = customer.salespersonId
+    ? salespersonById.get(customer.salespersonId)
     : undefined;
-  return { contact, company, salesperson };
+  return { customer, company, salesperson };
 });
 
 // Edit drawer reuses one CustomerModal instance. Server-render with the first
-// contact so the form has realistic content; the page script swaps fields on
+// customer so the form has realistic content; the page script swaps fields on
 // open per row.
-const editContact = CONTACTS[0];
+const editCustomer = CUSTOMERS[0];
 const editCompany = rows.find(({ company }) => company)?.company;
 ---
 
-<AirpeggioLayout
-  title="Airpeggio Customers | Samuel Dillow"
-  active="customers"
->
+<AirpeggioLayout title="Airpeggio Customers | Samuel Dillow" active="customers">
   <div class="customers-view">
     <PageHeader
       search
@@ -96,55 +88,53 @@ const editCompany = rows.find(({ company }) => company)?.company;
         </thead>
         <tbody>
           {
-            rows.map(({ contact, company, salesperson }) => (
-              <tr data-customer-id={contact.id}>
+            rows.map(({ customer, company, salesperson }) => (
+              <tr data-customer-id={customer.id}>
                 <td>
                   <a
                     class="customers-name-link"
-                    href={`/portfolio/airpeggio/customers/${contact.id}/`}
+                    href={`/portfolio/airpeggio/customers/${customer.id}/`}
                   >
-                    <strong>{contactDisplayName(contact)}</strong>
+                    <strong>{customer.fullName}</strong>
                   </a>
                   <br />
-                  <span class="text-muted">{emailFmt(contact.email)}</span>
+                  <span class="text-muted">{emailFmt(customer.email)}</span>
                 </td>
                 <td>
-                  {
-                    company ? (
-                      <CompanyHoverCard
-                        company={company}
-                        triggerClass="customers-company-link"
-                      >
-                        <strong slot="trigger">{company.name}</strong>
-                      </CompanyHoverCard>
-                    ) : (
-                      ""
-                    )
-                  }
+                  {company ? (
+                    <CompanyHoverCard
+                      company={company}
+                      triggerClass="customers-company-link"
+                    >
+                      <strong slot="trigger">{company.name}</strong>
+                    </CompanyHoverCard>
+                  ) : (
+                    ""
+                  )}
+                </td>
+                <td class="customers-cell-center">{customer.phone}</td>
+                <td class="customers-cell-center">{customer.tripsCount}</td>
+                <td class="customers-cell-center">
+                  {salesperson?.name ?? "-"}
                 </td>
                 <td class="customers-cell-center">
-                  {contact.hidePhone ? "" : contact.phone}
-                </td>
-                <td class="customers-cell-center">{contact.tripsCount}</td>
-                <td class="customers-cell-center">{salesperson?.name ?? "-"}</td>
-                <td class="customers-cell-center">
-                  {contact.lastActive
-                    ? lastActiveFmt.format(contact.lastActive)
+                  {customer.lastActive
+                    ? lastActiveFmt.format(customer.lastActive)
                     : "-"}
                 </td>
                 <td style={{ verticalAlign: "middle" }}>
                   <div class="datatable-actions">
                     <a
                       class="customers-row-action"
-                      href={`/portfolio/airpeggio/customers/${contact.id}/`}
-                      aria-label={`View ${contactDisplayName(contact)}`}
+                      href={`/portfolio/airpeggio/customers/${customer.id}/`}
+                      aria-label={`View ${customer.fullName}`}
                     >
                       <Icon name="eye" />
                     </a>
                     <button
                       type="button"
                       class="customers-row-action"
-                      aria-label={`Edit ${contactDisplayName(contact)}`}
+                      aria-label={`Edit ${customer.fullName}`}
                       data-open-modal="edit-customer"
                     >
                       <Icon name="edit" />
@@ -162,7 +152,8 @@ const editCompany = rows.find(({ company }) => company)?.company;
       <div class="customers-page-size">
         <span>Items per page</span>
         <button type="button">20 <Icon name="chevron-down" /></button>
-        <strong>Records 1 - {Math.min(20, rows.length)} of {rows.length}</strong>
+        <strong>Records 1 - {Math.min(20, rows.length)} of {rows.length}</strong
+        >
       </div>
       <nav class="customers-page-nav" aria-label="Customer pages">
         <button type="button" disabled>First</button>
@@ -174,7 +165,7 @@ const editCompany = rows.find(({ company }) => company)?.company;
     </footer>
 
     <CustomerModal id="add-customer" mode="add" />
-    <CustomerModal id="edit-customer" mode="edit" customer={editContact} />
+    <CustomerModal id="edit-customer" mode="edit" customer={editCustomer} />
     {
       editCompany && (
         <CompanyModal id="edit-company" mode="edit" company={editCompany} />

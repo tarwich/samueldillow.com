@@ -16,11 +16,15 @@ import {
   formatLegTimezone,
   reservationAircraft,
   reservationAssignedLabel,
-  reservationContact,
-  reservationCrewLabel,
   reservationCustomer,
+  reservationCrewLabel,
+  reservationCompany,
   reservationTagStyle,
 } from "../_data";
+import CustomerHoverCard from "../_components/CustomerHoverCard.astro";
+import CustomerModal from "../customers/_components/CustomerModal.astro";
+import CompanyModal from "../companies/_components/CompanyModal.astro";
+import CompanyHoverCard from "../_components/CompanyHoverCard.astro";
 
 const tailColors: Record<string, string> = {
   red: "#b24b4a",
@@ -104,8 +108,8 @@ const editReservation = RESERVATIONS[0];
           {
             RESERVATIONS.map((reservation) => {
               const aircraft = reservationAircraft(reservation);
+              const company = reservationCompany(reservation);
               const customer = reservationCustomer(reservation);
-              const contact = reservationContact(reservation);
               const crew = reservationCrewLabel(reservation);
               const assigned = reservationAssignedLabel(reservation);
               return (
@@ -127,22 +131,26 @@ const editReservation = RESERVATIONS[0];
                     </div>
                   </td>
                   <td>
-                    {contact ? (
+                    {customer ? (
                       <div class="reservation-customer">
-                        <strong>
-                          {contact.firstName} {contact.lastName}
-                        </strong>
-                        {customer && contact.email && (
-                          <span class="text-muted reservation-customer__email">
-                            {contact.email.length > 22
-                              ? contact.email.slice(0, 19) + "..."
-                              : contact.email}
-                          </span>
+                        {customer ? (
+                          <CustomerHoverCard
+                            customer={customer}
+                            company={company}
+                          >
+                            <strong slot="trigger">{customer.fullName}</strong>
+                          </CustomerHoverCard>
+                        ) : (
+                          <span class="text-muted">—</span>
                         )}
-                        {customer && (
-                          <span class="reservation-customer__company">
-                            {customer.name}
-                          </span>
+                        {company ? (
+                          <CompanyHoverCard company={company}>
+                            <span class="reservation-customer__company" slot="trigger">
+                              {company.name}
+                            </span>
+                          </CompanyHoverCard>
+                        ) : (
+                          <span class="text-muted">—</span>
                         )}
                       </div>
                     ) : (
@@ -277,6 +285,8 @@ const editReservation = RESERVATIONS[0];
 
     <ReservationModal id="edit-reservation" reservation={editReservation} />
     <ReserveAircraftModal id="add-reservation" />
+    <CustomerModal id="edit-customer" mode="edit" />
+    <CompanyModal id="edit-company" mode="edit" />
   </div>
 </AirpeggioLayout>
 
@@ -392,7 +402,7 @@ const editReservation = RESERVATIONS[0];
   .reservation-customer__company {
     font-size: 14px;
     font-weight: 600;
-    color: var(--air-ink);
+    color: color-mix(in srgb, var(--air-ink) 60%, white);
   }
 
   .reservation-itinerary {

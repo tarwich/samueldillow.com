@@ -6,9 +6,9 @@ import CompanyModal from "./_components/CompanyModal.astro";
 import CompanyViewModal from "./_components/CompanyViewModal.astro";
 import Icon from "../_components/Icon.astro";
 import PageHeader from "../_components/PageHeader.astro";
-import { CUSTOMERS } from "../_data";
+import { COMPANIES } from "../_data";
 
-const companies = [...CUSTOMERS].sort((a, b) =>
+const companies = [...COMPANIES].sort((a, b) =>
   a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
 );
 

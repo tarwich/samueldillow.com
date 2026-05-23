@@ -3,28 +3,23 @@ import AirpeggioLayout from "../_layout.astro";
 import Button from "../_components/Button.astro";
 import CustomerModal from "./_components/CustomerModal.astro";
 import Icon from "../_components/Icon.astro";
-import {
-  CONTACTS,
-  CUSTOMERS,
-  contactDisplayName,
-  getContact,
-} from "../_data";
+import { CUSTOMERS, COMPANIES, getCustomer } from "../_data";
 
 export function getStaticPaths() {
-  return CONTACTS.map((contact) => ({
-    params: { id: contact.id },
-    props: { contact },
+  return CUSTOMERS.map((customer) => ({
+    params: { id: customer.id },
+    props: { customer },
   }));
 }
 
-const contact = Astro.props.contact ?? getContact(Astro.params.id ?? "");
+const customer = Astro.props.customer ?? getCustomer(Astro.params.id ?? "");
 
-if (!contact) {
+if (!customer) {
   return Astro.redirect("/portfolio/airpeggio/customers/");
 }
 
-const company = CUSTOMERS.find((c) => c.id === contact.customerId);
-const displayName = contactDisplayName(contact);
+const company = COMPANIES.find((c) => c.id === customer.companyId);
+const displayName = customer.fullName;
 
 const dateFmt = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -40,17 +35,17 @@ const fmt = (value: unknown): string => {
 };
 
 const personalFields = [
-  ["Date of Birth", fmt(contact.dateOfBirth)],
-  ["Gender", fmt(contact.gender)],
-  ["Weight", contact.weight !== undefined ? String(contact.weight) : "0"],
-  ["Passport Number", fmt(contact.passportNumber)],
-  ["Passport Country", fmt(contact.passportCountry)],
-  ["Passport Expiry", fmt(contact.passportExpiry)],
-  ["Drivers License", fmt(contact.driversLicense)],
-  ["Emergency Contact Name", fmt(contact.emergencyContactName)],
-  ["Emergency Contact", fmt(contact.emergencyContactPhone)],
+  ["Date of Birth", fmt(customer.dateOfBirth)],
+  ["Gender", fmt(customer.gender)],
+  ["Weight", customer.weight !== undefined ? String(customer.weight) : "0"],
+  ["Passport Number", fmt(customer.passportNumber)],
+  ["Passport Country", fmt(customer.passportCountry)],
+  ["Passport Expiry", fmt(customer.passportExpiry)],
+  ["Drivers License", fmt(customer.driversLicense)],
+  ["Emergency Contact Name", fmt(customer.emergencyContactName)],
+  ["Emergency Contact", fmt(customer.emergencyContactPhone)],
   ["Company Name", fmt(company?.name)],
-  ["Company Title", fmt(contact.companyTitle)],
+  ["Company Title", fmt(customer.companyTitle)],
 ] as const;
 ---
 
@@ -83,7 +78,7 @@ const personalFields = [
     <h2>{displayName}</h2>
     <p>
       <Icon name="mail" />
-      <span>{contact.email}</span>
+      <span>{customer.email}</span>
     </p>
   </section>
 
@@ -165,7 +160,7 @@ const personalFields = [
     </div>
   </section>
 
-  <CustomerModal id="edit-customer" mode="edit" customer={contact} />
+  <CustomerModal id="edit-customer" mode="edit" customer={customer} />
 </AirpeggioLayout>
 
 <style>

@@ -3,12 +3,8 @@ import { nanoid } from "nanoid";
 import { ACCOUNTS, type Account } from "./accounts";
 import { AIRCRAFT, type Aircraft } from "./aircraft";
 import { AIRPORTS, getAirport } from "./airports";
-import {
-  CONTACTS,
-  RESERVATION_151_PASSENGER_ID,
-  type Contact,
-} from "./contacts";
 import { CUSTOMERS, type Customer } from "./customers";
+import { COMPANIES, type Company } from "./companies";
 import { SALESPEOPLE, type Salesperson } from "./salespeople";
 
 faker.seed(707);
@@ -46,7 +42,7 @@ export interface ReservationPilot {
 }
 
 export interface ReservationPassenger {
-  contactId: string;
+  customerId: string;
   legIds: string[];
 }
 
@@ -73,8 +69,8 @@ export interface Reservation {
   tripNumber: number;
   orderNumber?: string;
   aircraftId: string;
+  companyId?: string;
   customerId?: string;
-  contactId?: string;
   salespersonId?: string;
   crewAccountIds: string[];
   assignedAccountId: string;
@@ -149,26 +145,31 @@ const SD = ACCOUNTS[2]; // current user (a3)
 const CH = ACCOUNTS[0]; // a1
 const CO = ACCOUNTS[4]; // a5
 
-const aboveCustomer: Customer | undefined =
-  CUSTOMERS.find((c) => c.name.toLowerCase().includes("above")) ?? CUSTOMERS[0];
-const aboveContact: Contact = (() => {
-  const match = CONTACTS.find((c) => c.email.includes("mailinator")) ??
-    CONTACTS.find((c) => c.customerId === aboveCustomer.id) ??
-    CONTACTS[0];
-  return match;
-})();
+// Auto-pick company + booking-customer pairs from the generated DB for each
+// seeded reservation that needs one. Deterministic via faker.seed above.
+const companiesWithCustomers = COMPANIES.filter((co) =>
+  CUSTOMERS.some((cu) => cu.companyId === co.id),
+);
 
-const hofmannCustomer: Customer = CUSTOMERS[1] ?? CUSTOMERS[0];
-const hofmannContact: Contact = (() => {
-  const existing = CONTACTS.find(
-    (c) =>
-      c.lastName.toLowerCase() === "hofmann" ||
-      c.firstName.toLowerCase() === "chris",
+const pickCompanyWithCustomers = (): Company =>
+  faker.helpers.arrayElement(companiesWithCustomers);
+
+const pickCustomerFor = (companyId: string): Customer =>
+  faker.helpers.arrayElement(
+    CUSTOMERS.filter((c) => c.companyId === companyId),
   );
-  if (existing) return existing;
-  const stand = CONTACTS.find((c) => c.customerId === hofmannCustomer.id);
-  return stand ?? CONTACTS[1];
-})();
+
+const trip151Company = pickCompanyWithCustomers();
+const trip151Customer = pickCustomerFor(trip151Company.id);
+const trip151Passenger = faker.helpers.arrayElement(
+  CUSTOMERS.filter((c) => c.id !== trip151Customer.id),
+);
+
+const charterCompany = pickCompanyWithCustomers();
+const charterCustomer = pickCustomerFor(charterCompany.id);
+
+const repeatCompany = pickCompanyWithCustomers();
+const repeatCustomer = pickCustomerFor(repeatCompany.id);
 
 const initialsFor = (account: Account): string =>
   (account.firstName[0] + account.lastName[0]).toUpperCase();
@@ -241,8 +242,8 @@ const RESERVATION_SEEDS: Reservation[] = [
       id: nanoid(),
       tripNumber: 151,
       aircraftId: N20AS.id,
-      customerId: hofmannCustomer.id,
-      contactId: hofmannContact.id,
+      companyId: trip151Company.id,
+      customerId: trip151Customer.id,
       salespersonId: SALESPEOPLE[0]?.id,
       crewAccountIds: [CH.id, CO.id],
       assignedAccountId: CH.id,
@@ -258,7 +259,7 @@ const RESERVATION_SEEDS: Reservation[] = [
       ],
       reservedPassengers: [
         {
-          contactId: RESERVATION_151_PASSENGER_ID,
+          customerId: trip151Passenger.id,
           legIds: [legA.id, legB.id],
         },
       ],
@@ -313,8 +314,8 @@ const RESERVATION_SEEDS: Reservation[] = [
     id: nanoid(),
     tripNumber: 149,
     aircraftId: N765PM.id,
-    customerId: aboveCustomer.id,
-    contactId: aboveContact.id,
+    companyId: charterCompany.id,
+    customerId: charterCustomer.id,
     salespersonId: SALESPEOPLE[1]?.id,
     crewAccountIds: [SD.id],
     assignedAccountId: SD.id,
@@ -336,8 +337,8 @@ const RESERVATION_SEEDS: Reservation[] = [
     id: nanoid(),
     tripNumber: 148,
     aircraftId: N765PM.id,
-    customerId: aboveCustomer.id,
-    contactId: aboveContact.id,
+    companyId: charterCompany.id,
+    customerId: charterCustomer.id,
     salespersonId: SALESPEOPLE[1]?.id,
     crewAccountIds: [SD.id, CH.id],
     assignedAccountId: SD.id,
@@ -372,8 +373,8 @@ const RESERVATION_SEEDS: Reservation[] = [
     id: nanoid(),
     tripNumber: 147,
     aircraftId: N904VX.id,
-    customerId: CUSTOMERS[2]?.id,
-    contactId: CONTACTS.find((c) => c.customerId === CUSTOMERS[2]?.id)?.id,
+    companyId: repeatCompany.id,
+    customerId: repeatCustomer.id,
     salespersonId: SALESPEOPLE[2]?.id,
     crewAccountIds: [SD.id, CH.id],
     assignedAccountId: SD.id,
@@ -439,9 +440,8 @@ const generatedFiller: Reservation[] = (() => {
               probability: 0.4,
             })
           : undefined;
-    const customer = faker.helpers.arrayElement(CUSTOMERS);
-    const contact =
-      CONTACTS.find((c) => c.customerId === customer.id) ?? CONTACTS[0];
+    const company = pickCompanyWithCustomers();
+    const customer = pickCustomerFor(company.id);
     const tags: string[] =
       faker.helpers.maybe<string[]>(
         () => {
@@ -458,8 +458,8 @@ const generatedFiller: Reservation[] = (() => {
       id: nanoid(),
       tripNumber: trip,
       aircraftId: aircraft.id,
+      companyId: company.id,
       customerId: customer.id,
-      contactId: contact.id,
       salespersonId: faker.helpers.arrayElement(SALESPEOPLE).id,
       crewAccountIds: crew,
       assignedAccountId: crew[0] ?? SD.id,
@@ -519,18 +519,18 @@ export const reservationAircraft = (
   reservation: Reservation,
 ): Aircraft | undefined => AIRCRAFT.find((a) => a.id === reservation.aircraftId);
 
+export const reservationCompany = (
+  reservation: Reservation,
+): Company | undefined =>
+  reservation.companyId
+    ? COMPANIES.find((c) => c.id === reservation.companyId)
+    : undefined;
+
 export const reservationCustomer = (
   reservation: Reservation,
 ): Customer | undefined =>
   reservation.customerId
     ? CUSTOMERS.find((c) => c.id === reservation.customerId)
-    : undefined;
-
-export const reservationContact = (
-  reservation: Reservation,
-): Contact | undefined =>
-  reservation.contactId
-    ? CONTACTS.find((c) => c.id === reservation.contactId)
     : undefined;
 
 export const reservationSalesperson = (
@@ -586,10 +586,10 @@ export const reservationPassengers = (
   reservation: Reservation,
 ): ReservationPassenger[] => {
   if (reservation.reservedPassengers) return reservation.reservedPassengers;
-  if (!reservation.contactId) return [];
+  if (!reservation.customerId) return [];
   return [
     {
-      contactId: reservation.contactId,
+      customerId: reservation.customerId,
       legIds: reservation.legs.map((l) => l.id),
     },
   ];

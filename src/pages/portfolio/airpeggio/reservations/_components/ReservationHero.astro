@@ -1,7 +1,6 @@
 ---
 import Icon from "../../_components/Icon.astro";
 import {
-  contactFullName,
   formatLegDayLabel,
   formatLegHourLabel,
   formatLegTimezone,
@@ -9,8 +8,8 @@ import {
   legRegulation,
   passengerCountForLeg,
   reservationAircraft,
-  reservationContact,
   reservationCustomer,
+  reservationCompany,
   type Reservation,
 } from "../../_data";
 
@@ -21,8 +20,8 @@ interface Props {
 const { reservation } = Astro.props;
 
 const aircraft = reservationAircraft(reservation);
-const contact = reservationContact(reservation);
-const company = reservationCustomer(reservation);
+const customer = reservationCustomer(reservation);
+const company = reservationCompany(reservation);
 
 const tailColors: Record<string, string> = {
   red: "#b24b4a",
@@ -37,7 +36,9 @@ const tailColors: Record<string, string> = {
       aircraft && (
         <p class="reservation-hero__line reservation-hero__line--tail">
           <Icon name="aircraft" />
-          <strong style={`color: ${tailColors[aircraft.color] ?? "var(--air-ink)"}`}>
+          <strong
+            style={`color: ${tailColors[aircraft.color] ?? "var(--air-ink)"}`}
+          >
             {aircraft.tail}
           </strong>
         </p>
@@ -45,11 +46,13 @@ const tailColors: Record<string, string> = {
     }
     <p class="reservation-hero__line">
       <Icon name="customer" />
-      {contact ? (
-        <span>{contactFullName(contact)}</span>
-      ) : (
-        <span class="text-muted">No customer assigned</span>
-      )}
+      {
+        customer ? (
+          <span>{customer.fullName}</span>
+        ) : (
+          <span class="text-muted">No customer assigned</span>
+        )
+      }
     </p>
     <p class="reservation-hero__line reservation-hero__line--muted">
       <Icon name="account" />
@@ -75,7 +78,8 @@ const tailColors: Record<string, string> = {
               <Icon name="calendar" />
               <span>
                 <strong>
-                  {formatLegDayLabel(leg.departure)} {formatLegHourLabel(leg.departure)} {tz}
+                  {formatLegDayLabel(leg.departure)}{" "}
+                  {formatLegHourLabel(leg.departure)} {tz}
                 </strong>
                 <Icon name="arrow-right" />
                 <strong>

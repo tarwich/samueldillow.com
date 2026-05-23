@@ -7,10 +7,9 @@ import IconButton from "../_components/IconButton.astro";
 import {
   AIRCRAFT,
   BOOKINGS,
-  CONTACTS,
-  contactFullName,
+  CUSTOMERS,
   getAirport,
-  getCustomer,
+  getCompany,
   legsForBooking,
 } from "../_data";
 import ColumnsPopover from "../_components/ColumnsPopover.astro";
@@ -44,9 +43,9 @@ const formatDeparture = (date: Date, originIcao: string) => {
 
 interface TripRow {
   tripNumber: number;
-  contactName: string;
-  contactEmail: string;
   customerName: string;
+  customerEmail: string;
+  companyName: string;
   origin: string;
   destination: string;
   departure: Date;
@@ -59,11 +58,11 @@ function tripRowsFor(aircraftId: string): TripRow[] {
   for (const booking of BOOKINGS) {
     if (booking.aircraftId !== aircraftId) continue;
 
-    const customer = getCustomer(booking.customerId);
-    if (!customer) continue;
+    const company = getCompany(booking.companyId);
+    if (!company) continue;
 
-    const contact = CONTACTS.find((c) => c.customerId === customer.id);
-    if (!contact) continue;
+    const customer = CUSTOMERS.find((c) => c.companyId === company.id);
+    if (!customer) continue;
 
     const legs = legsForBooking(booking.id);
     const tripNumber = parseInt(booking.reference.slice(-4), 10);
@@ -71,9 +70,9 @@ function tripRowsFor(aircraftId: string): TripRow[] {
     for (const leg of legs) {
       rows.push({
         tripNumber,
-        contactName: contactFullName(contact),
-        contactEmail: contact.email,
-        customerName: customer.name,
+        customerName: customer.fullName,
+        customerEmail: customer.email,
+        companyName: company.name,
         origin: leg.origin,
         destination: leg.destination,
         departure: leg.departure,
@@ -254,13 +253,13 @@ const lastUpdated = "May. 13th at 11:03 AM";
                         </span>
                       </td>
                       <td>
-                        <strong>{row.contactName}</strong>
+                        <strong>{row.customerName}</strong>
                         <br />
                         <span class="text-muted">
-                          {truncateEmail(row.contactEmail)}
+                          {truncateEmail(row.customerEmail)}
                         </span>
                         <br />
-                        <span class="text-muted">{row.customerName}</span>
+                        <span class="text-muted">{row.companyName}</span>
                       </td>
                       <td>
                         <strong>

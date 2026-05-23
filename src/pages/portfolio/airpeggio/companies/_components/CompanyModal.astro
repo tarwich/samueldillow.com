@@ -1,12 +1,12 @@
 ---
 import Button from "../../_components/Button.astro";
 import Modal from "../../_components/Modal.astro";
-import { type Customer } from "../../_data";
+import { type Company } from "../../_data";
 
 interface Props {
   id?: string;
   mode?: "add" | "edit";
-  company?: Customer;
+  company?: Company;
 }
 
 const { id = "company-modal", mode = "edit", company } = Astro.props;

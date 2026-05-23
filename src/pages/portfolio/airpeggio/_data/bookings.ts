@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { nanoid } from "nanoid";
-import { CUSTOMERS } from "./customers";
+import { COMPANIES } from "./companies";
 import { AIRCRAFT } from "./aircraft";
 
 faker.seed(505);
@@ -15,7 +15,7 @@ export type BookingStatus =
 export interface Booking {
   id: string;
   reference: string;
-  customerId: string;
+  companyId: string;
   aircraftId: string;
   status: BookingStatus;
   createdAt: Date;
@@ -24,7 +24,7 @@ export interface Booking {
 export const BOOKINGS: Booking[] = Array.from({ length: 30 }, (_, i) => ({
   id: nanoid(),
   reference: `BK-2026-${String(i + 1).padStart(4, "0")}`,
-  customerId: faker.helpers.arrayElement(CUSTOMERS).id,
+  companyId: faker.helpers.arrayElement(COMPANIES).id,
   aircraftId: faker.helpers.arrayElement(AIRCRAFT).id,
   status: faker.helpers.weightedArrayElement<BookingStatus>([
     { value: "quoted", weight: 3 },
@@ -42,5 +42,5 @@ export const BOOKINGS: Booking[] = Array.from({ length: 30 }, (_, i) => ({
 export const getBooking = (id: string): Booking | undefined =>
   BOOKINGS.find((b) => b.id === id);
 
-export const bookingsForCustomer = (customerId: string): Booking[] =>
-  BOOKINGS.filter((b) => b.customerId === customerId);
+export const bookingsForCompany = (companyId: string): Booking[] =>
+  BOOKINGS.filter((b) => b.companyId === companyId);

@@ -5,14 +5,13 @@ import Modal from "../../_components/Modal.astro";
 import {
   ACCOUNTS,
   AIRCRAFT,
-  CUSTOMERS,
+  COMPANIES,
   SALESPEOPLE,
   accountFullName,
-  contactFullName,
   getCurrentUser,
   reservationAircraft,
-  reservationContact,
   reservationCustomer,
+  reservationCompany,
   reservationSalesperson,
   type Reservation,
 } from "../../_data";
@@ -25,8 +24,8 @@ interface Props {
 const { id = "edit-reservation", reservation } = Astro.props;
 
 const aircraft = reservationAircraft(reservation);
-const company = reservationCustomer(reservation);
-const contact = reservationContact(reservation);
+const company = reservationCompany(reservation);
+const customer = reservationCustomer(reservation);
 const salesperson = reservationSalesperson(reservation);
 const salespersonLabel = salesperson?.name ?? accountFullName(getCurrentUser());
 
@@ -100,8 +99,8 @@ const ACTIVITY_OPTIONS = [
           </label>
           <div class="reservation-field__row">
             <span class="reservation-select reservation-select--flex">
-              <span class={contact ? "" : "is-placeholder"}>
-                {contact ? contactFullName(contact) : "Select..."}
+              <span class={customer ? "" : "is-placeholder"}>
+                {customer ? customer.fullName : "Select..."}
               </span>
               <Icon name="chevron-down" />
             </span>
@@ -127,7 +126,7 @@ const ACTIVITY_OPTIONS = [
 
       {/* Reference the broader picklists for visual completeness. */}
       <select hidden>
-        {CUSTOMERS.map((c) => <option value={c.id}>{c.name}</option>)}
+        {COMPANIES.map((c) => <option value={c.id}>{c.name}</option>)}
       </select>
       <select hidden>
         {SALESPEOPLE.map((s) => <option value={s.id}>{s.name}</option>)}

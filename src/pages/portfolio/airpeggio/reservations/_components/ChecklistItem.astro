@@ -3,14 +3,16 @@ import HoverCard from '../../_components/HoverCard.astro';
 import Icon from '../../_components/Icon.astro';
 
 export type ChecklistStatus = 'complete' | 'warning' | 'error' | 'pending';
+export type ChecklistMessage = string | { title: string; items: string[] };
 
 interface Props {
   status: ChecklistStatus;
   label: string;
-  messages?: string[];
+  messages?: ChecklistMessage[];
 }
 
 const { status, label, messages } = Astro.props;
+const hasMessages = !!messages && messages.length > 0;
 
 const STATUS_ICON: Record<ChecklistStatus, string> = {
   complete: 'check',
@@ -22,15 +24,26 @@ const STATUS_ICON: Record<ChecklistStatus, string> = {
 
 <div class:list={['checklist-item', `checklist-item--${status}`]}>
   {
-    messages ? (
-      <HoverCard placement="right">
+    hasMessages ? (
+      <HoverCard placement="right" width="320px">
         <span class="checklist-item__icon" aria-hidden="true" slot="trigger">
           <Icon name={STATUS_ICON[status]} />
         </span>
         <ul class="checklist-item__messages">
-          {messages?.map((message) => (
-            <li>{message}</li>
-          ))}
+          {messages!.map((message) =>
+            typeof message === 'string' ? (
+              <li class="checklist-item__message">{message}</li>
+            ) : (
+              <li class="checklist-item__group">
+                <div class="checklist-item__group-title">{message.title}</div>
+                <ul class="checklist-item__group-items">
+                  {message.items.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </li>
+            ),
+          )}
         </ul>
       </HoverCard>
     ) : (
@@ -141,9 +154,36 @@ const STATUS_ICON: Record<ChecklistStatus, string> = {
   }
 
   .checklist-item__messages {
+    display: grid;
+    gap: 10px;
     list-style: none;
     padding: 0;
     margin: 0;
-    background: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--air-ink);
+  }
+
+  .checklist-item__message {
+    margin: 0;
+  }
+
+  .checklist-item__group-title {
+    font-weight: 700;
+    color: var(--air-ink);
+    margin-bottom: 2px;
+  }
+
+  .checklist-item__group-items {
+    list-style: disc;
+    padding-left: 18px;
+    margin: 0;
+    color: var(--air-muted);
+    font-weight: 500;
+
+    li + li {
+      margin-top: 2px;
+    }
   }
 </style>

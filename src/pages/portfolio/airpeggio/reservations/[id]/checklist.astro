@@ -42,13 +42,25 @@ const pilotAccount = (id: string) => ACCOUNTS.find((a) => a.id === id);
 const base = `/portfolio/airpeggio/reservations/${reservation.id}`;
 
 const checklistAircraftStatus = aircraft ? 'complete' : 'warning';
+const checklistAircraftMessages = aircraft
+  ? undefined
+  : ['Aircraft is not assigned'];
+
 const checklistItineraryStatus =
-  reservation.legs.length === 0 ? 'warning' : 'warning';
+  reservation.legs.length === 0 ? 'warning' : 'complete';
+const checklistItineraryMessages =
+  reservation.legs.length === 0 ? ['No legs added'] : undefined;
+
 const checklistQuoteStatus = reservation.quote
   ? reservation.quote.status === 'paid'
     ? 'complete'
     : 'warning'
   : 'warning';
+const checklistQuoteMessages = !reservation.quote
+  ? ['No quote attached']
+  : reservation.quote.status !== 'paid'
+    ? [`Quote #${reservation.quote.number} is unpaid`]
+    : undefined;
 
 interface ConflictGroup {
   legIndices: number[];
@@ -76,7 +88,21 @@ const pilotConflictsList = pilots.map((p) => {
 });
 const anyPilotConflict = pilotConflictsList.some((p) => p.conflicts.length > 0);
 const checklistPilotStatus = anyPilotConflict ? 'warning' : 'complete';
+const checklistPilotMessages = anyPilotConflict
+  ? pilotConflictsList
+      .filter((p) => p.account && p.groups.length > 0)
+      .map(({ account, groups }) => ({
+        title: account!.fullName,
+        items: groups.map((g) => {
+          const legs = g.legIndices.map((i) => i + 1).join(', ');
+          return `Legs ${legs}: ${g.message}`;
+        }),
+      }))
+  : undefined;
+
 const checklistPassengerStatus = passengers.length > 0 ? 'complete' : 'pending';
+const checklistPassengerMessages =
+  passengers.length === 0 ? ['No passengers added'] : undefined;
 ---
 
 <ReservationDetailLayout reservation={reservation} active="checklist">
@@ -88,7 +114,7 @@ const checklistPassengerStatus = passengers.length > 0 ? 'complete' : 'pending';
       <ChecklistItem
         status={checklistAircraftStatus}
         label="Aircraft"
-        messages={['Aircraft is not assigned']}
+        messages={checklistAircraftMessages}
       >
         {
           aircraft ? (
@@ -104,7 +130,11 @@ const checklistPassengerStatus = passengers.length > 0 ? 'complete' : 'pending';
         </Fragment>
       </ChecklistItem>
 
-      <ChecklistItem status={checklistItineraryStatus} label="Itinerary">
+      <ChecklistItem
+        status={checklistItineraryStatus}
+        label="Itinerary"
+        messages={checklistItineraryMessages}
+      >
         <div class="reservation-checklist__itinerary">
           {
             reservation.legs.slice(0, 4).map((leg, i) => (
@@ -128,7 +158,11 @@ const checklistPassengerStatus = passengers.length > 0 ? 'complete' : 'pending';
         </Fragment>
       </ChecklistItem>
 
-      <ChecklistItem status={checklistQuoteStatus} label="Quote">
+      <ChecklistItem
+        status={checklistQuoteStatus}
+        label="Quote"
+        messages={checklistQuoteMessages}
+      >
         {
           reservation.quote ? (
             <span class="quote-summary">
@@ -176,64 +210,63 @@ const checklistPassengerStatus = passengers.length > 0 ? 'complete' : 'pending';
       </ChecklistItem>
 
       <div class="checklist-pilots-wrap">
-        <ChecklistItem status={checklistPilotStatus} label="Pilots">
+        <ChecklistItem
+          status={checklistPilotStatus}
+          label="Pilots"
+          messages={checklistPilotMessages}
+        >
           <div class="checklist-pilot-list">
-            {
-              pilotConflictsList.map(({ pilot, account }) => {
-                if (!account) return null;
-                return (
-                  <div class="checklist-pilot">
-                    <span class="checklist-pilot__pos">{pilot.position}</span>
-                    <span class="checklist-pilot__name">
-                      <AccountHoverCard account={account} />
-                    </span>
-                    <span class="checklist-pilot__legs">Legs</span>
-                    {reservation.legs.map((leg) => (
-                      <span
-                        class:list={[
-                          'checklist-leg-check',
-                          pilot.legIds.includes(leg.id) && 'is-on',
-                        ]}
-                        aria-label={`Leg ${leg.origin}-${leg.destination}: ${pilot.legIds.includes(leg.id) ? 'assigned' : 'unassigned'}`}
-                      >
-                        {pilot.legIds.includes(leg.id) && <Icon name="check" />}
-                      </span>
-                    ))}
-                  </div>
-                );
-              })
-            }
+            <table class="checklist-pilot">
+              {
+                pilotConflictsList.map(({ pilot, account }) => {
+                  if (!account) return null;
+                  return (
+                    <tr>
+                      <td>
+                        <span class="checklist-pilot__pos">
+                          {pilot.position}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="checklist-pilot__name">
+                          <AccountHoverCard account={account} />
+                        </span>
+                      </td>
+                      <td>
+                        <span class="checklist-pilot__legs">Legs</span>
+                      </td>
+                      {reservation.legs.map((leg) => (
+                        <td>
+                          <span
+                            class:list={[
+                              'checklist-leg-check',
+                              pilot.legIds.includes(leg.id) && 'is-on',
+                            ]}
+                            aria-label={`Leg ${leg.origin}-${leg.destination}: ${pilot.legIds.includes(leg.id) ? 'assigned' : 'unassigned'}`}
+                          >
+                            {pilot.legIds.includes(leg.id) && (
+                              <Icon name="check" />
+                            )}
+                          </span>
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })
+              }
+            </table>
           </div>
-          {
-            anyPilotConflict && (
-              <div class="pilot-conflicts" role="note">
-                {pilotConflictsList
-                  .filter((p) => p.groups.length > 0 && p.account)
-                  .map(({ account, groups }) => (
-                    <div class="pilot-conflicts__person">
-                      <strong>
-                        <AccountHoverCard account={account!} />
-                      </strong>
-                      <ul>
-                        {groups.map((g) => (
-                          <li>
-                            Legs {g.legIndices.map((i) => i + 1).join(', ')}:
-                            has conflicts: {g.message}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-              </div>
-            )
-          }
           <Fragment slot="actions">
             <a href={`${base}/people/`}>View Pilots</a>
           </Fragment>
         </ChecklistItem>
       </div>
 
-      <ChecklistItem status={checklistPassengerStatus} label="Passengers">
+      <ChecklistItem
+        status={checklistPassengerStatus}
+        label="Passengers"
+        messages={checklistPassengerMessages}
+      >
         {
           passengers.length === 0 ? (
             <span class="text-muted">No passengers added</span>
@@ -297,11 +330,14 @@ const checklistPassengerStatus = passengers.length > 0 ? 'complete' : 'pending';
   }
 
   .checklist-pilot {
-    display: inline-flex;
     align-items: center;
     gap: 10px;
     font-size: 14px;
     font-weight: 700;
+
+    td {
+      vertical-align: middle;
+    }
   }
 
   .checklist-pilot__pos {
@@ -318,32 +354,6 @@ const checklistPassengerStatus = passengers.length > 0 ? 'complete' : 'pending';
     margin-left: 8px;
     color: var(--air-muted);
     font-weight: 600;
-  }
-
-  .pilot-conflicts {
-    margin-top: 12px;
-    padding: 12px 14px;
-    border: 1px solid #f3d8a2;
-    border-radius: 6px;
-    background: #fff8e8;
-    color: var(--air-ink);
-    font-size: 13px;
-    line-height: 1.45;
-
-    strong {
-      display: block;
-      margin-bottom: 4px;
-      font-weight: 800;
-    }
-
-    ul {
-      margin: 0 0 8px;
-      padding-left: 18px;
-    }
-
-    .pilot-conflicts__person + .pilot-conflicts__person {
-      margin-top: 8px;
-    }
   }
 
   .quote-summary {

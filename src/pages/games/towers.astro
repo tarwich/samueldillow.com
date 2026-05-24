@@ -29,6 +29,53 @@ import "../../styles/towers.css";
       >
       </div>
       <div id="towers-status" class="towers-status"></div>
+      <div
+        class="towers-entry-panel"
+        aria-label="Towers entry controls"
+      >
+        <div class="towers-entry-modes" role="group" aria-label="Entry mode">
+          <button
+            id="towers-mode-answer"
+            type="button"
+            aria-pressed="true"
+          >
+            Answer
+          </button>
+          <button
+            id="towers-mode-pencil"
+            type="button"
+            aria-pressed="false"
+          >
+            Pencil
+          </button>
+        </div>
+        <div class="towers-entry-values" role="group" aria-label="Cell values">
+          <button type="button" data-towers-value="1">1</button>
+          <button type="button" data-towers-value="2">2</button>
+          <button type="button" data-towers-value="3">3</button>
+          <button type="button" data-towers-value="4">4</button>
+          <button type="button" data-towers-value="5">5</button>
+          <button type="button" id="towers-erase" aria-label="Erase cell">
+            <svg
+              class="towers-icon towers-icon-erase"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z" />
+              <path d="m12 9 6 6" />
+              <path d="m18 9-6 6" />
+            </svg>
+          </button>
+        </div>
+      </div>
       <div class="towers-controls">
         <select id="towers-difficulty" title="Difficulty">
           <option value="easy">Easy</option>
@@ -71,10 +118,10 @@ import "../../styles/towers.css";
         </label>
       </div>
       <p class="towers-hint">
-        Click a cell, then <kbd>1</kbd>&ndash;<kbd>5</kbd> to fill,
-        <kbd>Shift</kbd>+<kbd>1</kbd>&ndash;<kbd>5</kbd> to toggle a pencil-mark.
-        <kbd>0</kbd>/<kbd>Backspace</kbd> erases the answer (or candidates when the
-        cell is empty).
+        Tap a cell, then use Answer or Pencil to enter a number. On a keyboard,
+        <kbd>1</kbd>&ndash;<kbd>5</kbd> fills,
+        <kbd>Shift</kbd>+<kbd>1</kbd>&ndash;<kbd>5</kbd> toggles a pencil-mark, and
+        <kbd>0</kbd>/<kbd>Backspace</kbd> erases.
       </p>
     </div>
   </section>

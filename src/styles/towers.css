@@ -12,11 +12,15 @@
   --tw-win: #6fff9e;
   --tw-btn: #3a4150;
   --tw-btn-hover: #4a5260;
+  --tw-board-size: min(456px, calc(100vw - 56px));
+  --tw-board-gap: 2px;
 
   background: var(--tw-bg);
   color: var(--tw-text);
   border-radius: 12px;
   padding: 32px 24px;
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -27,11 +31,16 @@
 
 .towers-board {
   display: grid;
-  grid-template-columns: 40px repeat(5, 72px) 40px;
-  grid-template-rows: 40px repeat(5, 72px) 40px;
-  gap: 2px;
+  grid-template-columns: minmax(28px, 0.56fr) repeat(5, minmax(36px, 1fr)) minmax(28px, 0.56fr);
+  grid-template-rows: minmax(28px, 0.56fr) repeat(5, minmax(36px, 1fr)) minmax(28px, 0.56fr);
+  gap: var(--tw-board-gap);
   padding: 2px;
   border-radius: 6px;
+  width: var(--tw-board-size);
+  max-width: 100%;
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  touch-action: manipulation;
 }
 
 .towers-clue,
@@ -51,6 +60,9 @@
     background 0.1s,
     box-shadow 0.1s;
   outline: none;
+  min-width: 0;
+  min-height: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .towers-cell:hover {
@@ -68,7 +80,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.25rem;
+  font-size: clamp(1.55rem, calc(var(--tw-board-size) / 12), 2.25rem);
   font-weight: 300;
   transition: color 0.2s;
 }
@@ -79,7 +91,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  font-size: 0.75rem;
+  font-size: clamp(0.58rem, calc(var(--tw-board-size) / 42), 0.75rem);
   color: var(--tw-candidate);
   font-weight: 400;
 }
@@ -118,7 +130,7 @@
 
 .towers-clue {
   color: var(--tw-text-dim);
-  font-size: 1.15rem;
+  font-size: clamp(0.9rem, calc(var(--tw-board-size) / 25), 1.15rem);
   font-weight: 400;
   transition: opacity 0.2s;
   position: relative;
@@ -146,7 +158,7 @@
   border-radius: 4px;
   color: var(--tw-text);
   font: inherit;
-  font-size: 1.15rem;
+  font-size: clamp(0.9rem, calc(var(--tw-board-size) / 25), 1.15rem);
   text-align: center;
   padding: 0;
   outline: none;
@@ -184,6 +196,58 @@
 
 .towers-board.won .towers-cell .towers-answer {
   color: var(--tw-win);
+}
+
+.towers-entry-panel {
+  width: min(456px, 100%);
+  display: grid;
+  gap: 10px;
+
+  & button {
+    min-height: 42px;
+    touch-action: manipulation;
+  }
+}
+
+.towers-entry-modes,
+.towers-entry-values {
+  display: grid;
+  gap: 8px;
+}
+
+.towers-entry-modes {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  & button[aria-pressed="true"] {
+    background: var(--tw-cell-active);
+    color: #ffffff;
+  }
+}
+
+.towers-entry-values {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(44px, 0.72fr);
+
+  & button {
+    padding-inline: 0;
+  }
+
+  & #towers-erase {
+    grid-column: span 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.towers-icon {
+  flex: 0 0 25px;
+  display: block;
+  width: 25px;
+  height: 25px;
+  min-width: 25px;
+  inline-size: 25px;
+  block-size: 25px;
+  stroke-width: 2.55;
 }
 
 .towers-controls {
@@ -230,6 +294,10 @@
   cursor: pointer;
   font-family: inherit;
   transition: background 0.1s;
+}
+
+.towers-app button {
+  min-width: 44px;
 }
 
 .towers-app button:hover:not(:disabled),
@@ -303,4 +371,57 @@
   font-size: 0.78rem;
   color: var(--tw-text);
   font-family: inherit;
+}
+
+@media (pointer: fine) and (min-width: 700px) {
+  .towers-entry-panel {
+    width: min(360px, 100%);
+  }
+
+  .towers-entry-panel button {
+    min-height: 36px;
+    padding-block: 8px;
+  }
+}
+
+@media (max-width: 520px) {
+  .towers-app {
+    --tw-board-size: min(456px, calc(100vw - 52px));
+    --tw-board-gap: 1px;
+
+    border-radius: 8px;
+    padding: 20px 10px;
+    gap: 16px;
+  }
+
+  .towers-entry-values {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+
+    & #towers-erase {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .towers-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+
+    & button,
+    & select,
+    & input#towers-seed-input {
+      width: 100%;
+    }
+  }
+
+  .towers-toggles {
+    justify-content: flex-start;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .towers-hint {
+    max-width: 100%;
+    text-align: left;
+  }
 }

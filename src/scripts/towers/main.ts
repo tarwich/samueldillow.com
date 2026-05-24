@@ -3,6 +3,8 @@ import { SIZE, decodeCustom, encodeCustom } from "./puzzle";
 import { TowersGame, type Difficulty } from "./state";
 import { buildBoard, render, type BoardRefs, type RenderTargets } from "./view";
 
+type EntryMode = "answer" | "pencil";
+
 function el<T extends HTMLElement>(id: string): T {
   const node = document.getElementById(id);
   if (!node) throw new Error(`Towers: missing #${id}`);
@@ -27,13 +29,48 @@ export function initTowers(): void {
   const autoAnswerEl = el<HTMLInputElement>("towers-auto-answer");
   const seedInputEl = el<HTMLInputElement>("towers-seed-input");
   const shareBtn = el<HTMLButtonElement>("towers-share");
+  const answerModeBtn = el<HTMLButtonElement>("towers-mode-answer");
+  const pencilModeBtn = el<HTMLButtonElement>("towers-mode-pencil");
+  const eraseBtn = el<HTMLButtonElement>("towers-erase");
+  const valueBtns = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-towers-value]"),
+  );
 
   const game = new TowersGame();
   game.autoClues = autoCluesEl.checked;
   game.autoAnswer = autoAnswerEl.checked;
 
   let refs: BoardRefs;
-  const draw = () => render(game, refs, targets);
+  let entryMode: EntryMode = "answer";
+
+  function syncEntryControls(): void {
+    const hasActiveCell = game.active !== null;
+    answerModeBtn.setAttribute("aria-pressed", String(entryMode === "answer"));
+    pencilModeBtn.setAttribute("aria-pressed", String(entryMode === "pencil"));
+    eraseBtn.disabled = !hasActiveCell;
+    for (const btn of valueBtns) btn.disabled = !hasActiveCell;
+  }
+
+  const draw = () => {
+    render(game, refs, targets);
+    syncEntryControls();
+  };
+
+  function withActiveCell(fn: (r: number, c: number) => boolean): void {
+    if (!game.active) return;
+    const { r, c } = game.active;
+    if (fn(r, c)) draw();
+  }
+
+  function enterValue(n: number, mode = entryMode): void {
+    withActiveCell((r, c) =>
+      mode === "pencil" ? game.toggleCandidate(r, c, n) : game.setAnswer(r, c, n),
+    );
+  }
+
+  function eraseActiveCell(): void {
+    withActiveCell((r, c) => game.eraseCell(r, c));
+  }
 
   refs = buildBoard(
     board,
@@ -143,6 +180,22 @@ export function initTowers(): void {
     game.autoAnswer = autoAnswerEl.checked;
   });
 
+  answerModeBtn.addEventListener("click", () => {
+    entryMode = "answer";
+    syncEntryControls();
+  });
+  pencilModeBtn.addEventListener("click", () => {
+    entryMode = "pencil";
+    syncEntryControls();
+  });
+  eraseBtn.addEventListener("click", eraseActiveCell);
+  for (const btn of valueBtns) {
+    btn.addEventListener("click", () => {
+      const n = Number(btn.dataset.towersValue);
+      if (n >= 1 && n <= SIZE) enterValue(n);
+    });
+  }
+
   seedInputEl.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -204,27 +257,24 @@ export function initTowers(): void {
       return;
     }
 
-    if (!game.active) return;
-    const { r, c } = game.active;
-
     // Shift + digit: toggle candidate. Use e.code so Shift+1 still reads as
     // "1" instead of "!" across keyboard layouts.
     if (e.shiftKey && e.code && e.code.startsWith("Digit")) {
       const n = Number(e.code.slice(5));
       if (n >= 1 && n <= SIZE) {
-        if (game.toggleCandidate(r, c, n)) draw();
+        enterValue(n, "pencil");
         e.preventDefault();
         return;
       }
     }
 
     if (!e.shiftKey && e.key >= "1" && e.key <= String(SIZE)) {
-      if (game.setAnswer(r, c, Number(e.key))) draw();
+      enterValue(Number(e.key), "answer");
       e.preventDefault();
       return;
     }
     if (e.key === "0" || e.key === "Backspace" || e.key === "Delete") {
-      if (game.eraseCell(r, c)) draw();
+      eraseActiveCell();
       e.preventDefault();
       return;
     }
@@ -235,8 +285,9 @@ export function initTowers(): void {
       ArrowLeft: [0, -1],
       ArrowRight: [0, 1],
     };
-    if (moves[e.key]) {
+    if (moves[e.key] && game.active) {
       const [dr, dc] = moves[e.key];
+      const { r, c } = game.active;
       const nr = Math.max(0, Math.min(SIZE - 1, r + dr));
       const nc = Math.max(0, Math.min(SIZE - 1, c + dc));
       if (game.setActive(nr, nc)) {

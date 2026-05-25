@@ -4,7 +4,7 @@ import Button from '../../_components/Button.astro';
 import Icon from '../../_components/Icon.astro';
 import ReservationHero from './ReservationHero.astro';
 import ReservationTabNav from './ReservationTabNav.astro';
-import type { Reservation } from '../../_data';
+import { formatReservationForModal, type Reservation } from '../../_data';
 
 interface Props {
   reservation: Reservation;
@@ -36,7 +36,11 @@ const { reservation, active } = Astro.props;
     </div>
     <div class="reservation-detail-head__actions">
       <Button>Send Trip Sheet</Button>
-      <Button icon="edit">Edit Details</Button>
+      <Button
+        icon="edit"
+        @click={`$store.reservationModal.open(${formatReservationForModal(reservation)})`}
+        >Edit Details</Button
+      >
       <Button icon="receipt">Notes</Button>
     </div>
   </header>

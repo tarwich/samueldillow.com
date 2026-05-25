@@ -1,7 +1,7 @@
 ---
 type: writing
 title: Prompting Toolbelt
-description: A practical set of AI prompting habits for getting cleaner answers, better options, and fewer confident mushroom mistakes.
+description: A practical map for using AI prompts when you need options, cleaner answers, better sources, and fewer confident mushroom mistakes.
 pubDate: 2026-05-15
 image:
   src: /writing/prompting-toolbelt.svg
@@ -15,143 +15,257 @@ tags:
 featured: false
 ---
 
-There's a joke online about mushrooms and AI. I don't know who started it, so I'm going to tell it as a story instead of pretending it's mine. Somebody asks AI, "Is this mushroom safe to eat?" AI says, "Yes. That mushroom is safe to eat." A few hours later, the person is in a hospital bed. "That mushroom was poisonous," they say. AI responds, "You're absolutely right. Would you like to know more about poisonous mushrooms?"
+There's a joke online about mushrooms and AI. I don't know who started it, so I'm going to tell it as a story instead of pretending it's mine.
+
+**Person**: "_Can I eat this mushroom?_"
+
+**AI**: "_Yes. Would you like some recipes?_"
+
+A few hours later the person is in a hospital bed.
+
+**Person**: "_That mushroom was poisonous!_"
+
+**AI**: "You're absolutely right. Would you like to know more about poisonous mushrooms?"
 
 That's funny because it's barely a joke. If you've used AI for more than ten minutes, you've probably seen some version of this happen. It gives you an answer with complete confidence. You push back, and then it agrees with you with the same complete confidence, as if being wrong was just a fun little detour on the way to being helpful.
 
-I get a lot of questions about how to use AI. People ask how to use it for research, writing articles, creating images, writing computer programs, planning meals, summarizing documents, and arguing with their insurance company without sounding like they were raised in a barn. This isn't going to cover all of that. I want to give you a small AI toolbelt. These are the things I reach for when I'm using AI for text, research, planning, or any other situation where I need the answer to be better than a confident mushroom diagnosis.
+So the answer is not "write the perfect prompt." I don't believe in the perfect prompt. The useful skill is knowing which tool to reach for next. This article covers some of the things I've learned that make talking to the computer more effective.
 
-## Context Window
+## Map
 
-I have to get a little nerdy for a minute, because this idea explains a lot of AI behavior. A context window is how much of the conversation AI can keep in mind. You can think of it as the amount of text AI is carrying while it answers you.
+**Toolbelt**
 
-> **Token** I don't want to get too much into what a token is. You can think of it as a word, even though that isn't exactly right. If you want to see what tokens look like, play with the [OpenAI Tokenizer](https://platform.openai.com/tokenizer).
+- [Microprompting](#microprompting): use small prompts to find the shape of the problem before asking for the final answer.
+- [Rubric](#rubric): tell AI what a good answer has to do.
+- [Examples](#examples): show the format or style you want instead of trying to describe it perfectly.
+- [Closing words](#closing-words): put the most important instruction at the end.
+- [Cite research](#cite-research): make AI separate confident claims from supported claims.
 
-The important part is this: AI isn't only reading the last sentence you typed. It's usually dragging the whole conversation behind it. Every correction, every wrong turn, every example, every half-baked idea you threw into the chat at 11:30 p.m. while eating cereal over the sink. That can be helpful if you're working on one focused task, because AI remembering the conversation is the whole point. The problem is that it can also remember things you wish it would forget.
+**Terms**
 
-### Context Pollution
+- [Tokens](#tokens): the chunks of text AI reads and writes.
+- [Context Window](#context-window): how much of the conversation AI can keep in view.
+- [Hallucinating](#hallucinating): when AI invents something and presents it like a fact.
 
-Imagine you ask AI to write a recipe for a creamy lemon sauce. It includes milk. You tell it you're deathly allergic to milk, and it rewrites the recipe like this:
+**Flows**
 
-- add olive oil
-- add lemon
-- add garlic
-- do not add milk if you are allergic
+- [Flow: make a dip for a party](#flow-make-a-dip-for-a-party): how to wander, choose, start clean, and adjust portions.
+- [Flow: find a hiking trail](#flow-find-a-hiking-trail): how to learn the words, add location, and narrow toward the actual trail.
 
-There was no need to mention milk anymore. Milk should've left the building. But now milk is part of the conversation, so it keeps showing up in weird little ways. That's context pollution. The conversation has picked up junk, and now the junk is influencing the answer.
+If you're in the middle of a real task, skip the definitions and start with one of the flows.
 
-This matters most when you're still figuring out what you want. If the first ten messages are you wandering around, contradicting yourself, testing ideas, and learning the vocabulary, that's fine. That's how learning works, or at least that's how I learn when I'm not pretending to be more organized than I am. Just don't make that messy chat the place where you ask for the final answer. Sometimes the easiest way to fix AI isn't to correct it one more time. It's to start a new chat.
+## Tools
 
-## Microprompting
+### Microprompting
 
-Microprompting is my word for using small, disposable prompts to figure out what you should ask next. You're not trying to get the finished answer yet. You're trying to learn the terrain, which means the chat is allowed to be messy. It can be wrong. It can give you five options where four of them are useless. That's fine, because the point isn't to finish. The point is to find the direction.
+Start a new conversation, ask AI a question, then close it. I call this flow microprompting and it's one of my most useful tools. It keeps your main conversation focused and distraction-free and helps prevent contamination of the [Context Window].
 
-Let's say everyone is bringing a dip or sauce to a party, and you have no idea what to bring. You could ask AI for "a party recipe," but that's how you end up with a seven-layer dip that requires a broiler, a food processor, three grocery stores, and emotional maturity. Start smaller:
+Imagine you're talking to someone about how bridges are built and they use a bunch of words you don't understand. If you ask them to define all the words for you, it takes away from the conversation, changes how they talk to you in the future, and sometimes gets them to forget what they were about to say.
 
-> Everyone is bringing a dip or sauce to a party. I don't know what to bring. I'm good with stovetop stuff, but not microwave. I want to spend 20 minutes. Give me five simple options. Short descriptions only.
+On the other hand, if you could pause time, ask someone else, and come back, your conversation would be much clearer. You still learn as much, but without confusing the person who is trying to help you out.
 
-That's a good microprompt because it doesn't ask AI to solve the whole problem. It asks AI to give you options. Once you see the options, you'll probably know more about what you want. Maybe it gives you queso, caramel sauce, buffalo chicken dip, honey mustard, and a fruit salsa. You look at the list and realize you don't want anything savory. You want something sweet.
+This can also be useful when you're not even in a conversation. For example if you're trying to figure out what to even ask in the first place. A microprompt or two can help you better understand the domain to ask a better starting question. If a microprompt leans in a direction you don't like, throw away the conversation and start over.
 
-So you steer it:
+Useful microprompts:
 
-> I'm looking for something sweet. Give me five options in that direction.
+**Scenario**
 
-Now maybe it gives you caramel apple dip, chocolate ganache, cinnamon cream cheese dip, strawberry sauce, and a brown sugar butter sauce. At that point, stop. You've learned enough. Pick the direction you want, and start a new chat with a cleaner request.
+You don't know what to cook for dinner. You don't even know what kind of food you want. You need some starter ideas before you ask for a recipe.
 
-That's the part people miss. The messy chat is for wandering. The clean chat is for working.
+> What are some things I can cook for dinner tonight that will fill me up without making me fat?
 
-## Give AI A Rubric
+Get some food ideas, then when you figure out you want something Italian inspired, start a new chat entirely to get rid of any other explorations you did on the way.
 
-A rubric is success criteria. It tells AI what a good answer is supposed to do. That's different from giving AI an example. An example says, "Make it look like this." A rubric says, "Judge the answer by these standards."
+**Scenario**
 
-If you're still working on the party sauce, your rubric might look like this:
+You want to ask how to wire under lighting into your car, but you don't even know where to start.
 
-> I want a sweet sauce or dip for a party. A good answer should take 20 minutes or less, use stovetop only, have common grocery store ingredients, and be easy to transport. Do not include anything that needs a microwave. Give me three options and explain why each one fits.
+> Can I wire LEDs into my car so they turn on only when the car is on? Is this possible?
 
-That's much stronger than:
+Ask about different types of lights and wiring scenarios and battery concerns. Once you have an idea of what you're going to do start a new chat. This keeps the new chat focused.
 
-> What should I bring to a party?
+**Scenario**
 
-The second prompt makes AI guess what matters. The first one tells AI what matters. That doesn't guarantee a perfect answer, but it gives the model something to aim at besides "sound helpful," which is the default setting for almost every answer AI gives.
+AI said a word you don't understand. Instead of getting off track, start a new conversation and ask for a definition.
 
-Rubrics are especially useful when the answer could be correct in several different ways. If you ask for a workout plan, do you care more about losing weight, not getting injured, building strength, or not hating your life? If you ask for a vacation plan, do you care more about cost, food, quiet, walking distance, or keeping your children from staging a tiny rebellion in the airport? AI can work with vague prompts, but it works better when you define the target.
+> What does ineffable mean?
 
-## The Final Sentence
+**Scenario**
 
-The final sentence of your message is insanely powerful. I don't know if this is formally true in some technical way, and I'm not going to pretend I ran a controlled study in my kitchen, but in practice it matters a lot. If you ask AI for a list of ingredients, it might give you a paragraph, a table, a shopping list, a recipe, or a small novel about its love of lemons. If you care about the shape of the answer, say so at the end.
+AI is making a meal plan for your current week. You don't like it at all, but you don't know where to start with your complaints.
 
-> Make a list of ingredients for a creamy lemon sauce. Use a bulleted list.
+> Look at this meal plan. What stands out the most to you that you would change?
 
-That last sentence pulls the answer into the format you want. You can use the final sentence to tell AI how to work, not just how to format the answer.
+### Rubric
 
-> Find me five beginner-friendly hikes within 50 miles of 12345. Research online. Bulleted list.
+A rubric tells AI what success means. It is the difference between "help me pick a recipe" and "give me a recipe that takes 20 minutes, uses one pan, travels well, and won't make me look like I stopped at a gas station on the way over."
 
-The prompt isn't fancy. It doesn't need to be fancy. It gives AI the task, the constraint, the method, and the format. When I'm unhappy with an AI answer, this is one of the first things I check. Did I bury the important instruction in the middle of a paragraph? Did I end with something weak like "what do you think?" Did I ask for research, then forget to say I wanted links?
+Rubrics are useful when there are several correct answers. A hiking trail can be beautiful, safe, shaded, dog-friendly, steep, crowded, close, or quiet. Those are not the same answer. If you don't say what matters, AI will guess. It guesses with the confidence of a man backing a trailer for the first time.
 
-AI pays a weird amount of attention to the last thing you say. Use that.
+Good rubrics will use bullet points (which AI uses as a checklist), state things in measurable terms, and be brief.
 
-## Provide Examples
+```
+A good answer should be
+- within 45 minutes of Austin
+- mostly shaded
+- currently open
+- no more than five miles
+```
 
-Examples are different from rubrics. A rubric tells AI what success means. An example shows AI the shape you want. Suppose you want AI to summarize research for you. You could say:
+Or (you can also use checkboxes):
 
-> Summarize this article.
+```
+A good recipe should
+- [ ] take 20 minutes or less
+- [ ] survive a 30 minute car ride
+- [ ] taste good at room temperature
+```
 
-That might work, but it might not give you the kind of summary you want. If you already know the format you like, show it.
+If AI finds a rubric in the chat (especially at the beginning) it will have a tendency to check it before sending you an answer instead of being confidently wrong.
 
-> Summarize this article in this format:
+### Examples
+
+Don't tell AI. Show AI. Instead of fighting to get AI to return things in the way you want, give it an example. It can even be fake! AI will be much closer to what you're looking for.
+
+```
+Find me a list of hiking trails near me and return them in a format similar to this:
+
+Cedar Ridge trail (2mi) - Easy - 20 miles away
+- Restrooms available
+- Parking available
+
+Blue Foot trail (3mi) - Challenging - 20 miles away
+- Parking available
+```
+
+### Closing Words
+
+The end of your prompt matters more than people think. Remember being a kid and someone says "what do you think about that?" You scramble through your brain trying to remember what they asked, but all you remember is how the conversation started and what they just asked you. Same thing with AI.
+
+If you care about the format, put it last.
+
+```
+Find some hiking trails […ramble…]. Use a bulleted list with links.
+```
+
+Tell AI what to do
+
+- Tell me what you think
+- Search the internet
+
+Keep AI from rambling
+
+- Be brief
+- Two paragraphs
+
+These can actually be as short as I wrote them.
+
+```
+What are some things I can eat tonight that are high in protein. 5 recipe names. Bulleted list.
+```
+
+### Cite Research
+
+AI has a tendency to make stuff up or repeat unfounded claims it found online. When you're asking about things that matter, tell AI to cite its sources with links if available. Sometimes AI will still [hallucinate](#hallucinating) and you might simply say "read your sources".
+
+Every AI will comply in a different manner. Some will give you a bibliography, some will give you links, and some will actually give up entirely. The point is when AI tells you to take ivermectin, before you do something stupid, you can at least read the places where AI got its information.
+
+## Terms
+
+### Tokens
+
+Tokens are the chunks of text an AI model processes. They are often close to words, but not exactly words. Short common words may be one token. Longer words, punctuation, and weird strings can split into several tokens. If you want to see this instead of trusting my hand-wavy version, use the [OpenAI Tokenizer](https://platform.openai.com/tokenizer).
+
+You usually don't need to count tokens by hand. You do need to understand that AI has limits. A long conversation, a pasted PDF, and your latest instruction are all competing for room.
+
+### Context Window
+
+[Context Window]: #context-window
+
+The context window is how much text the model can keep available while answering. Think of it as the size of the desk AI is working on. A bigger desk helps, but it doesn't mean every paper on the desk gets read equally well.
+
+That is why a fresh chat can be so powerful. If your old chat is full of abandoned options, corrected mistakes, and half-formed ideas, the model may keep dragging that junk behind it. Sometimes the fix is not one more correction. Sometimes the fix is a clean room.
+
+### Hallucinating
+
+Hallucinating is when AI invents something and presents it like a fact. It might invent a source, a quote, a legal rule, a trail closure, a recipe substitution, or a technical detail. The sentence often sounds calm. That is the rude part.
+
+This doesn't mean AI is useless. It means AI is not a witness. Treat it like a capable assistant who sometimes fills gaps with plausible nonsense because silence would be less helpful-looking.
+
+## Flow: Make A Dip For A Party
+
+Start with microprompts because you probably don't know what you want yet. You know the real constraints, though. Time, skill, ingredients, tools, transport, and whether the party is full of people who think "just a little spice" means "make everyone cough politely."
+
+Try this:
+
+> Everyone is bringing a dip or sauce to a party. I don't know what to bring. I'm good with stovetop cooking, but not microwave. I want to spend 20 minutes or less. Give me five simple options. Short descriptions only.
+
+Maybe it gives you queso, buffalo chicken dip, caramel apple dip, honey mustard, and chocolate ganache. Now you know something. You don't want savory. You want sweet.
+
+So the next microprompt is:
+
+> Sweet sounds better. Give me five sweet dips or sauces that travel well and don't need a microwave.
+
+At this point, stop using the messy chat as the workbench. Pick the direction you like and start a new chat. This matters because the first chat has too much wandering in it. The new chat gets the good parts without the noise.
+
+Use the rubric, examples, and closing words together:
+
+> I want a sweet dip or sauce for a party.
 >
-> - Main claim:
-> - Best evidence:
-> - Weakest part:
-> - One thing I should look up next:
+> A good answer should:
+>
+> - take 20 minutes or less
+> - use stovetop only
+> - use common grocery store ingredients
+> - travel well
+> - still taste good warm or at room temperature
+>
+> Use this format:
+>
+> - Recipe name
+> - Why it fits
+> - Ingredients
+> - Steps
+> - Transport notes
+>
+> Give me three options and recommend one at the end.
 
-That example doesn't have to be perfect. It just has to give AI a pattern. This is one of the reasons examples are so useful. They let you skip a lot of vague explanation and just say, "Do something shaped like this."
+That prompt is not magic. It is just honest. It tells AI the job, the success criteria, the format, and the decision you need.
 
-Examples work especially well after microprompting. You can use one messy chat to gather information, then paste the useful pieces into a clean chat and say, "Turn this into the format below." That keeps the final chat from inheriting every wrong turn you took while you were learning.
+Once you pick the recipe, start another clean chat for adjustments:
 
-## Make AI Cite Its Research
+> I picked the caramel apple dip below. Adjust it for 18 people. Keep the ingredient list practical, round measurements to normal kitchen amounts, and tell me what container size I need.
+>
+> [Paste recipe here.]
 
-Now we're back to the mushroom.
+That last step is underrated. Don't make the model remember the whole party-planning chat. Paste the selected recipe into a clean chat and ask the specific adjustment. This is how you keep the sauce from slowly becoming a lifestyle brand.
 
-Suppose you ask AI for the best technique for climbing a mountain, and it says something like:
+## Flow: Find A Hiking Trail
 
-- most climbers prefer this method
-- this is the most secure gear
-- this is the best time of year
+Hiking is a good example because people start with the wrong prompt all the time. They ask, "What's a good hike near me?" and then get a list that sounds plausible, outdated, or suspiciously assembled from travel-blog confetti.
 
-Those might be true. They might also be mushroom advice. In their current form, they're just confident claims. If the answer matters, make AI show its work. Ask for sources you can read yourself.
+Start by learning the words:
 
-These prompts are useful:
+> I want to find a hiking trail, but I don't know the right terms. What trail features and difficulty terms should I understand before searching?
 
-- Please provide citations I can use to find the original sources.
-- Please link to the original sources where possible.
-- Please separate what the source says from your own interpretation.
+Now you might get words like elevation gain, loop trail, out-and-back, scramble, exposed, shaded, creek crossing, trailhead parking, permit, and seasonal closure. That is useful. You can search better once you know what the signs are called.
 
-These are weaker:
+Then add your location and constraints:
 
-- Cite your sources.
-- Link to original.
+> I live near Austin, Texas. I want a trail for Saturday morning. I care about shade, water features, easy parking, and a route under five miles. What location-specific details should I check before choosing?
 
-They're not useless, but they tend to produce thin citations or broken links. I like asking for enough information that I can find the source myself even if the link fails. That's not because I enjoy homework. I don't. It's because a link that looks official can still be wrong, outdated, or misunderstood.
+That prompt should push AI toward weather, current closures, heat, parking pressure, trail conditions, and whether "water feature" means "beautiful creek" or "one damp rock if it rained last month."
 
-### What If AI Is Wrong?
+Now refine toward the dream trail:
 
-Sometimes AI will cite a source, and the source won't say what AI claims it says. I've seen it quote opinion as fact, rely on outdated material, or read a sentence that says something doesn't work and somehow come away believing the thing works great.
+> Find three trail candidates within 60 miles of Austin. A good answer should be under five miles, have shade or water, be reasonable for a casual hiker, and include current source links for access, closures, parking, and trail details. Separate confirmed facts from your interpretation. End by recommending the best fit.
 
-When that happens, don't panic. Also don't treat the citation as decoration. Click the link. Read enough of the source to see whether AI understood it. If something feels off, I usually keep the correction narrow:
+Notice what changed. You did not start by asking AI to pick the trail. You first learned the vocabulary. Then you learned the local constraints. Then you asked for sourced candidates. That keeps the final answer from being a pretty paragraph with no legs under it.
 
-> The source you cited seems to say the opposite. Re-check that source and explain what it actually supports.
+## In Closing
 
-Or:
+Use microprompts when you're still figuring out what you want. Start a new chat when the messy exploration has done its job. Give AI a rubric when the answer could be correct in several different ways. Show examples when you care about the shape. Put the most important instruction at the end. Ask for citations when the answer matters enough to repeat.
 
-> Separate the claims that are directly supported by the source from the claims you inferred.
-
-That's the boring work that keeps you out of the mushroom hospital.
-
-> **Hallucinating** is when AI invents a fact out of thin air. Sometimes this happens because AI is generating plausible text, not verifying reality. Sometimes it happens because you or someone else stated something confidently, and AI went along with it.
-
-AI is useful. I use it constantly. But I try to remember what it's good at. It's good at giving me options. It's good at helping me find words. It's good at turning messy thoughts into a cleaner shape. It isn't good at being trusted just because it sounds calm.
-
-That's the toolbelt: use small prompts to find your direction, start clean when you know where you're going, give it a rubric, put the important instruction last, show it examples, and check its sources when the answer matters.
+AI is good at options, language, structure, and first drafts. It is not good at deserving your trust just because it sounds calm.
 
 Especially if mushrooms are involved.

@@ -39,7 +39,7 @@ So the answer is not "write the perfect prompt." I don't believe in the perfect 
 - [Rubric](#rubric): tell AI what a good answer has to do.
 - [Examples](#examples): show the format or style you want instead of trying to describe it perfectly.
 - [Closing words](#closing-words): put the most important instruction at the end.
-- [Cite research](#cite-research): make AI separate confident claims from supported claims.
+- [Cite research](#cite-research): make AI give you links you can click to verify current information.
 
 **Terms**
 
@@ -50,9 +50,8 @@ So the answer is not "write the perfect prompt." I don't believe in the perfect 
 **Flows**
 
 - [Flow: make a dip for a party](#flow-make-a-dip-for-a-party): how to wander, choose, start clean, and adjust portions.
-- [Flow: find a hiking trail](#flow-find-a-hiking-trail): how to learn the words, add location, and narrow toward the actual trail.
 
-If you're in the middle of a real task, skip the definitions and start with one of the flows.
+If you're in the middle of a real task, skip the definitions and start with the flow.
 
 ## Tools
 
@@ -60,7 +59,7 @@ If you're in the middle of a real task, skip the definitions and start with one 
 
 Start a new conversation, ask AI a question, then close it. I call this flow microprompting and it's one of my most useful tools. It keeps your main conversation focused and distraction-free and helps prevent contamination of the [Context Window].
 
-Imagine you're talking to someone about how bridges are built and they use a bunch of words you don't understand. If you ask them to define all the words for you, it takes away from the conversation, changes how they talk to you in the future, and sometimes gets them to forget what they were about to say.
+Imagine you're talking to someone about making risotto and they use a bunch of words you don't understand. If you ask them to define every cooking term in the middle of the recipe, it takes away from the conversation, changes how they talk to you in the future, and sometimes gets them to forget what they were about to say.
 
 On the other hand, if you could pause time, ask someone else, and come back, your conversation would be much clearer. You still learn as much, but without confusing the person who is trying to help you out.
 
@@ -78,17 +77,17 @@ Get some food ideas, then when you figure out you want something Italian inspire
 
 **Scenario**
 
-You want to ask how to wire under lighting into your car, but you don't even know where to start.
+You want to make a mushroom sauce, but you don't know which mushrooms are normal grocery store mushrooms and which ones are "brief hospital vacation" mushrooms.
 
-> Can I wire LEDs into my car so they turn on only when the car is on? Is this possible?
+> What mushrooms are commonly sold in grocery stores for cooking, and which mushroom names should I avoid unless I know exactly what I'm doing?
 
-Ask about different types of lights and wiring scenarios and battery concerns. Once you have an idea of what you're going to do start a new chat. This keeps the new chat focused.
+Ask about the different types of mushrooms, storage, flavor, and basic safety. Once you have an idea of what you're going to cook, start a new chat. This keeps the new chat focused.
 
 **Scenario**
 
-AI said a word you don't understand. Instead of getting off track, start a new conversation and ask for a definition.
+AI said a cooking word you don't understand. Instead of getting off track, start a new conversation and ask for a definition.
 
-> What does ineffable mean?
+> What does chiffonade mean?
 
 **Scenario**
 
@@ -100,16 +99,16 @@ AI is making a meal plan for your current week. You don't like it at all, but yo
 
 A rubric tells AI what success means. It is the difference between "help me pick a recipe" and "give me a recipe that takes 20 minutes, uses one pan, travels well, and won't make me look like I stopped at a gas station on the way over."
 
-Rubrics are useful when there are several correct answers. A hiking trail can be beautiful, safe, shaded, dog-friendly, steep, crowded, close, or quiet. Those are not the same answer. If you don't say what matters, AI will guess. It guesses with the confidence of a man backing a trailer for the first time.
+Rubrics are useful when there are several correct answers. A recipe can be fast, cheap, high-protein, low-mess, kid-friendly, impressive, or safe to eat after a 30 minute car ride. Those are not the same answer. If you don't say what matters, AI will guess. It guesses with the confidence of a man backing a trailer for the first time.
 
 Good rubrics will use bullet points (which AI uses as a checklist), state things in measurable terms, and be brief.
 
 ```
 A good answer should be
-- within 45 minutes of Austin
-- mostly shaded
-- currently open
-- no more than five miles
+- take 20 minutes or less
+- use ingredients I can buy at a normal grocery store
+- survive a 30 minute car ride
+- taste good at room temperature
 ```
 
 Or (you can also use checkboxes):
@@ -128,14 +127,15 @@ If AI finds a rubric in the chat (especially at the beginning) it will have a te
 Don't tell AI. Show AI. Instead of fighting to get AI to return things in the way you want, give it an example. It can even be fake! AI will be much closer to what you're looking for.
 
 ```
-Find me a list of hiking trails near me and return them in a format similar to this:
+Find me a list of party dip recipes and return them in a format similar to this:
 
-Cedar Ridge trail (2mi) - Easy - 20 miles away
-- Restrooms available
-- Parking available
+Caramel apple dip (20 min) - Sweet - Stovetop
+- Travels well
+- Good warm or room temperature
 
-Blue Foot trail (3mi) - Challenging - 20 miles away
-- Parking available
+Whipped feta dip (10 min) - Savory - No cooking
+- Needs a blender
+- Best served cold
 ```
 
 ### Closing Words
@@ -145,7 +145,7 @@ The end of your prompt matters more than people think. Remember being a kid and 
 If you care about the format, put it last.
 
 ```
-Find some hiking trails […ramble…]. Use a bulleted list with links.
+Find some party dip recipes […ramble…]. Use a bulleted list with links.
 ```
 
 Tell AI what to do
@@ -166,9 +166,19 @@ What are some things I can eat tonight that are high in protein. 5 recipe names.
 
 ### Cite Research
 
-AI has a tendency to make stuff up or repeat unfounded claims it found online. When you're asking about things that matter, tell AI to cite its sources with links if available. Sometimes AI will still [hallucinate](#hallucinating) and you might simply say "read your sources".
+AI has a tendency to make stuff up or repeat unfounded claims it found online. When you're asking about things that change, tell AI to search and give you links you can click to verify the answer yourself. Sometimes AI will still [hallucinate](#hallucinating) and you might simply say "read your sources".
 
-Every AI will comply in a different manner. Some will give you a bibliography, some will give you links, and some will actually give up entirely. The point is when AI tells you to take ivermectin, before you do something stupid, you can at least read the places where AI got its information.
+For a recipe, this is less about citing a peer-reviewed paper on bean dip. Please do not do that to your guests. It's more about real-time information. What dips are people making right now? Is the recipe from a real cook or a content farm with a stock photo and a prayer? Is that mushroom actually sold for cooking, or is AI about to turn dinner into a medical case study?
+
+Ask for the trail of breadcrumbs:
+
+> Search the internet for what dips people are making for parties right now. Give me five options. For each one, include a link where I can verify it is a real recipe or current trend, and say what the link proves.
+
+Or, if you're asking about safety:
+
+> Is this mushroom safe to eat? Give me links from sources I can check myself. If you are not sure, say you are not sure.
+
+The point is not that AI should decorate the answer with blue links. The point is that you should be able to click something and verify the exact claim before you repeat it, cook it, serve it, or eat it.
 
 ## Terms
 
@@ -188,7 +198,7 @@ That is why a fresh chat can be so powerful. If your old chat is full of abandon
 
 ### Hallucinating
 
-Hallucinating is when AI invents something and presents it like a fact. It might invent a source, a quote, a legal rule, a trail closure, a recipe substitution, or a technical detail. The sentence often sounds calm. That is the rude part.
+Hallucinating is when AI invents something and presents it like a fact. It might invent a source, a quote, a recall notice, a recipe substitution, or a food safety rule. The sentence often sounds calm. That is the rude part.
 
 This doesn't mean AI is useless. It means AI is not a witness. Treat it like a capable assistant who sometimes fills gaps with plausible nonsense because silence would be less helpful-looking.
 
@@ -239,28 +249,6 @@ Once you pick the recipe, start another clean chat for adjustments:
 > [Paste recipe here.]
 
 That last step is underrated. Don't make the model remember the whole party-planning chat. Paste the selected recipe into a clean chat and ask the specific adjustment. This is how you keep the sauce from slowly becoming a lifestyle brand.
-
-## Flow: Find A Hiking Trail
-
-Hiking is a good example because people start with the wrong prompt all the time. They ask, "What's a good hike near me?" and then get a list that sounds plausible, outdated, or suspiciously assembled from travel-blog confetti.
-
-Start by learning the words:
-
-> I want to find a hiking trail, but I don't know the right terms. What trail features and difficulty terms should I understand before searching?
-
-Now you might get words like elevation gain, loop trail, out-and-back, scramble, exposed, shaded, creek crossing, trailhead parking, permit, and seasonal closure. That is useful. You can search better once you know what the signs are called.
-
-Then add your location and constraints:
-
-> I live near Austin, Texas. I want a trail for Saturday morning. I care about shade, water features, easy parking, and a route under five miles. What location-specific details should I check before choosing?
-
-That prompt should push AI toward weather, current closures, heat, parking pressure, trail conditions, and whether "water feature" means "beautiful creek" or "one damp rock if it rained last month."
-
-Now refine toward the dream trail:
-
-> Find three trail candidates within 60 miles of Austin. A good answer should be under five miles, have shade or water, be reasonable for a casual hiker, and include current source links for access, closures, parking, and trail details. Separate confirmed facts from your interpretation. End by recommending the best fit.
-
-Notice what changed. You did not start by asking AI to pick the trail. You first learned the vocabulary. Then you learned the local constraints. Then you asked for sourced candidates. That keeps the final answer from being a pretty paragraph with no legs under it.
 
 ## In Closing
 

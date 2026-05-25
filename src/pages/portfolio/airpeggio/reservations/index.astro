@@ -32,13 +32,97 @@ const tailColors: Record<string, string> = {
   lime: "#c7d533",
   blue: "#565bc4",
 };
+
+// --- Calendar view --------------------------------------------------------
+// Anchored to the demo "now" (same value the dashboard uses) so the grid lands
+// on the month where the seeded flight data actually lives.
+const NOW = new Date("2026-05-14T12:00:00Z");
+
+const legsWithContext = RESERVATIONS.flatMap((reservation) =>
+  reservation.legs.map((leg) => ({
+    reservation,
+    leg,
+    aircraft: reservationAircraft(reservation),
+  })),
+);
+type LegEntry = (typeof legsWithContext)[number];
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+// Bucket by UTC day so a leg's cell is stable regardless of build-machine TZ.
+const dayKeyOf = (date: Date) =>
+  `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`;
+const monthKeyOf = (date: Date) =>
+  `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}`;
+
+const legsByDay = new Map<string, LegEntry[]>();
+for (const entry of legsWithContext) {
+  const key = dayKeyOf(entry.leg.departure);
+  const bucket = legsByDay.get(key);
+  if (bucket) bucket.push(entry);
+  else legsByDay.set(key, [entry]);
+}
+for (const bucket of legsByDay.values()) {
+  bucket.sort((a, b) => a.leg.departure.getTime() - b.leg.departure.getTime());
+}
+
+const monthLabelFmt = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+const todayKey = dayKeyOf(NOW);
+
+interface MonthCell {
+  day: number;
+  inMonth: boolean;
+  isToday: boolean;
+  key: string;
+}
+
+// Fixed 6×7 grid starting on the Sunday on/before the 1st of the month.
+const buildMonthGrid = (year: number, month0: number): MonthCell[] => {
+  const first = new Date(Date.UTC(year, month0, 1));
+  const start = new Date(first);
+  start.setUTCDate(start.getUTCDate() - first.getUTCDay());
+  return Array.from({ length: 42 }, (_, i) => {
+    const date = new Date(start);
+    date.setUTCDate(start.getUTCDate() + i);
+    const key = dayKeyOf(date);
+    return {
+      day: date.getUTCDate(),
+      inMonth: date.getUTCMonth() === month0,
+      isToday: key === todayKey,
+      key,
+    };
+  });
+};
+
+const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+// One grid per month that contains legs, sorted ascending.
+const monthKeys = [
+  ...new Set(legsWithContext.map((e) => monthKeyOf(e.leg.departure))),
+].sort();
+const months = monthKeys.map((key) => {
+  const [year, month] = key.split("-").map(Number);
+  return {
+    key,
+    label: monthLabelFmt.format(new Date(Date.UTC(year, month - 1, 1))),
+    cells: buildMonthGrid(year, month - 1),
+  };
+});
+
+const nowMonthKey = monthKeyOf(NOW);
+const defaultMonthKey = months.some((m) => m.key === nowMonthKey)
+  ? nowMonthKey
+  : (months[0]?.key ?? nowMonthKey);
 ---
 
 <AirpeggioLayout
   title="Airpeggio Reservations | Samuel Dillow"
   active="reservations"
 >
-  <div class="reservations-view">
+  <div class="reservations-view" data-reservations-view="list">
     <PageHeader
       search
       searchLabel="Search reservations"
@@ -77,7 +161,8 @@ const tailColors: Record<string, string> = {
       </Fragment>
     </PageHeader>
 
-    <section class="reservations-table-wrap" aria-label="Reservations list">
+    <section data-reservations-panel="list">
+      <div class="reservations-table-wrap" aria-label="Reservations list">
       <table id="reservations-table" class="datatable reservations-table">
         <colgroup>
           <col data-name="Trip" />
@@ -282,9 +367,9 @@ const tailColors: Record<string, string> = {
           }
         </tbody>
       </table>
-    </section>
+      </div>
 
-    <footer class="reservations-pagination" aria-label="Pagination">
+      <footer class="reservations-pagination" aria-label="Pagination">
       <div class="reservations-page-size">
         <span>Items per page</span>
         <button type="button">20 <Icon name="chevron-down" /></button>
@@ -301,7 +386,74 @@ const tailColors: Record<string, string> = {
         <button type="button" disabled><Icon name="arrow-left" /></button>
         <button type="button"><Icon name="arrow-right" /></button>
       </nav>
-    </footer>
+      </footer>
+    </section>
+
+    <section data-reservations-panel="calendar" aria-label="Reservations calendar" hidden>
+      <header class="rcal__nav">
+        <button type="button" data-month-prev aria-label="Previous month">
+          <Icon name="arrow-left" />
+        </button>
+        <strong data-month-label></strong>
+        <button type="button" data-month-next aria-label="Next month">
+          <Icon name="arrow-right" />
+        </button>
+      </header>
+
+      <div class="rcal__scroll">
+        {
+          months.map((month) => (
+            <div
+              class="rcal"
+              data-month={month.key}
+              data-month-label={month.label}
+              hidden={month.key !== defaultMonthKey}
+            >
+              <div class="rcal__weekdays">
+                {weekdayNames.map((name) => (
+                  <span>{name}</span>
+                ))}
+              </div>
+              <div class="rcal__days">
+                {month.cells.map((cell) => (
+                  <div
+                    class:list={[
+                      "rcal__cell",
+                      { "is-out": !cell.inMonth, "is-today": cell.isToday },
+                    ]}
+                  >
+                    <span class="rcal__date">{cell.day}</span>
+                    {legsByDay.has(cell.key) && (
+                      <ul class="rcal__legs">
+                        {legsByDay.get(cell.key)!.map(({ reservation, leg, aircraft }) => (
+                          <li>
+                            <a
+                              class="rcal__leg"
+                              data-status={reservation.lifecycle}
+                              href={`/portfolio/airpeggio/reservations/${reservation.id}/`}
+                            >
+                              <span class="rcal__leg-trip">
+                                Trip #{reservation.tripNumber}
+                              </span>
+                              <span class="rcal__leg-time">
+                                {formatLegTime(leg.departure)} · {aircraft?.tail ?? "—"}
+                              </span>
+                              <span class="rcal__leg-route">
+                                {leg.origin} → {leg.destination}
+                              </span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
 
     <ReserveAircraftModal id="add-reservation" />
   </div>
@@ -562,4 +714,250 @@ const tailColors: Record<string, string> = {
       color: var(--air-purple);
     }
   }
+
+  /* --- Calendar view ----------------------------------------------------- */
+  .rcal__nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 6px 0 14px;
+
+    strong {
+      min-width: 11ch;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--air-ink);
+    }
+
+    button {
+      display: inline-grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--air-line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--air-ink);
+      cursor: pointer;
+
+      &:hover:not([disabled]) {
+        background: var(--air-panel-soft);
+      }
+
+      &[disabled] {
+        color: #b4bdca;
+        background: #fbfcfe;
+        cursor: default;
+      }
+
+      :global(.air-icon) {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  .rcal__scroll {
+    overflow-x: auto;
+  }
+
+  .rcal {
+    min-width: 760px;
+  }
+
+  .rcal__weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 6px;
+
+    span {
+      padding: 4px 8px;
+      color: color-mix(in srgb, var(--air-ink) 55%, white);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  .rcal__days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  .rcal__cell {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-height: 112px;
+    padding: 6px;
+    border: 1px solid var(--air-line);
+    border-radius: 8px;
+    background: #fff;
+
+    &.is-out {
+      background: #f6f8fb;
+
+      .rcal__date {
+        color: #b4bdca;
+      }
+    }
+
+    &.is-today {
+      border-color: var(--air-purple);
+      box-shadow: inset 0 0 0 1px var(--air-purple);
+
+      .rcal__date {
+        background: var(--air-purple);
+        color: #fff;
+      }
+    }
+  }
+
+  .rcal__date {
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--air-ink);
+  }
+
+  .rcal__legs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .rcal__leg {
+    --status-color: #6b7280;
+    display: grid;
+    gap: 1px;
+    padding: 4px 6px;
+    border: 1px solid transparent;
+    border-left: 3px solid var(--status-color);
+    border-radius: 5px;
+    background: color-mix(in srgb, var(--status-color) 8%, white);
+    color: var(--air-ink);
+    text-decoration: none;
+    font-size: 11.5px;
+    line-height: 1.25;
+
+    &:hover {
+      background: color-mix(in srgb, var(--status-color) 16%, white);
+    }
+
+    &[data-status="scheduled"] {
+      --status-color: #2550ad;
+    }
+    &[data-status="flown"] {
+      --status-color: #510c62;
+    }
+    &[data-status="cancelled"] {
+      --status-color: #bd2f20;
+    }
+    /* Planned reads as an outline so its blue stays distinct from scheduled. */
+    &[data-status="planned"] {
+      --status-color: #1d4fb4;
+      background: #fff;
+      border-color: color-mix(in srgb, var(--status-color) 30%, white);
+
+      &:hover {
+        background: color-mix(in srgb, var(--status-color) 10%, white);
+      }
+    }
+  }
+
+  .rcal__leg-trip {
+    font-weight: 700;
+  }
+
+  .rcal__leg-time {
+    color: color-mix(in srgb, var(--air-ink) 70%, white);
+    font-weight: 600;
+  }
+
+  .rcal__leg-route {
+    font-weight: 600;
+    white-space: nowrap;
+  }
 </style>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-reservations-view]");
+  const viewButtons = Array.from(
+    document.querySelectorAll<HTMLButtonElement>("[data-view-option]"),
+  );
+  const panels = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-reservations-panel]"),
+  );
+
+  function setView(view: string, updateUrl = true) {
+    const next = view === "calendar" ? "calendar" : "list";
+    if (root) root.dataset.reservationsView = next;
+
+    for (const panel of panels) {
+      panel.hidden = panel.dataset.reservationsPanel !== next;
+    }
+    for (const button of viewButtons) {
+      const active = button.dataset.viewOption === next;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
+
+    if (updateUrl) {
+      const url = new URL(window.location.href);
+      if (next === "calendar") url.searchParams.set("view", "calendar");
+      else url.searchParams.delete("view");
+      history.replaceState(null, "", url);
+    }
+  }
+
+  for (const button of viewButtons) {
+    button.addEventListener("click", () =>
+      setView(button.dataset.viewOption ?? "list"),
+    );
+  }
+
+  // Month navigation: only one [data-month] grid is shown at a time.
+  const grids = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-month]"),
+  );
+  const monthLabel = document.querySelector<HTMLElement>("[data-month-label]");
+  const prevBtn = document.querySelector<HTMLButtonElement>("[data-month-prev]");
+  const nextBtn = document.querySelector<HTMLButtonElement>("[data-month-next]");
+  let activeMonth = Math.max(
+    0,
+    grids.findIndex((grid) => !grid.hidden),
+  );
+
+  function setMonth(index: number) {
+    if (grids.length === 0) return;
+    activeMonth = Math.min(Math.max(index, 0), grids.length - 1);
+    grids.forEach((grid, i) => {
+      grid.hidden = i !== activeMonth;
+    });
+    if (monthLabel) {
+      monthLabel.textContent = grids[activeMonth].dataset.monthLabel ?? "";
+    }
+    if (prevBtn) prevBtn.disabled = activeMonth === 0;
+    if (nextBtn) nextBtn.disabled = activeMonth === grids.length - 1;
+  }
+
+  prevBtn?.addEventListener("click", () => setMonth(activeMonth - 1));
+  nextBtn?.addEventListener("click", () => setMonth(activeMonth + 1));
+  setMonth(activeMonth);
+
+  setView(
+    new URLSearchParams(window.location.search).get("view") ?? "list",
+    false,
+  );
+</script>

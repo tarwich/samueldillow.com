@@ -1,5 +1,6 @@
 ---
 import './_styles.css';
+import SeoHead from '../../../components/SeoHead.astro';
 import TopNav from './_components/TopNav.astro';
 import CustomerModal from './customers/_components/CustomerModal.astro';
 import CompanyModal from './companies/_components/CompanyModal.astro';
@@ -25,11 +26,15 @@ const {
 <html lang="en" class="portfolio--airpeggio">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
-    <meta name="robots" content="noindex" />
+    <SeoHead
+      title={title}
+      description={description}
+      image="/entries/airpeggio.png"
+      imageAlt="Airpeggio inbox dashboard reconstruction."
+      noindex={true}
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title}</title>
     <script>
       import Alpine from 'alpinejs';
       import type { Account, Aircraft, Customer, Company, Reservation } from './_data';

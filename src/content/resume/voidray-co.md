@@ -13,7 +13,11 @@ bullets:
   - Partnered with BrainSpace to build a computer forensics visualization platform for network data exploration and suspicious-activity detection.
 tags:
   - SaaS
+  - Software Architecture
+  - Full-Stack Development
+  - API Design
   - healthcare
+  - HIPAA
   - analytics
   - e-commerce
   - fintech

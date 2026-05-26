@@ -11,9 +11,18 @@ bullets:
   - Built a full network monitoring system in React, Next.js, and PostgreSQL that surfaces node health and performance metrics, with predictive analytics for early detection of network degradation and service interruptions.
   - Hold current Tower Climber and Rescue certifications for elevated infrastructure maintenance and equipment installations.
 tags:
+  - TypeScript
+  - JavaScript
+  - React
+  - Next.js
+  - Node.js
+  - PostgreSQL
+  - Network Monitoring
+  - Observability
+  - Performance Metrics
+  - Full-Stack Development
+  - Cybersecurity
   - network
   - hosting
-  - React
-  - PostgreSQL
 emphasis: normal
 ---

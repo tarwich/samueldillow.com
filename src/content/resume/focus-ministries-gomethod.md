@@ -14,7 +14,10 @@ tags:
   - React
   - C#
   - .NET
+  - Full-Stack Development
+  - API Design
   - OCR
   - AI
+  - Computer Vision (CV/OCV)
 emphasis: normal
 ---

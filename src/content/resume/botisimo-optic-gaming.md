@@ -11,12 +11,29 @@ bullets:
   - Built the analytics and ad-targeting work behind an aggregated-audience ad product that pooled viewers across thousands of small streams into a single buy, giving creators who were too small to sell their own ads a real share of ad revenue.
   - Built customer analytics and marketing data pipelines that informed product and growth decisions across the platform.
 tags:
-  - streaming
+  - TypeScript
+  - JavaScript
+  - React
   - Node.js
   - PostgreSQL
   - AWS
-  - AI
-  - analytics
+  - Docker
+  - CI/CD
+  - OAuth2
+  - JSON Web Token (JWT)
+  - Generative AI
+  - API Design
+  - Full-Stack Development
+  - SaaS
+  - Operational Software
+  - Distributed Systems
+  - Observability
+  - Network Monitoring
+  - Performance Metrics
+  - Software Architecture
+  - Technical Leadership
+  - Streaming
+  - Analytics
 emphasis: normal
 ---
 

@@ -12,7 +12,9 @@ bullets:
 tags:
   - SaaS
   - AWS
-  - cybersecurity
+  - Cloud Infrastructure
+  - Full-Stack Development
+  - Cybersecurity
   - education
 emphasis: normal
 ---

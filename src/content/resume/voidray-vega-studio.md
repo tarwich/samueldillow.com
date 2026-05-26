@@ -15,11 +15,31 @@ bullets:
   - Designed and built an omnichannel retail platform integrating online and brick-and-mortar inventory management.
   - Established a CI/CD pipeline with automated testing and a structured QA environment, enabling reliable weekly releases.
 tags:
-  - leadership
-  - DoD
-  - security
+  - TypeScript
+  - JavaScript
+  - React
+  - Node.js
+  - PostgreSQL
   - AWS
-  - WebGL
+  - Docker
   - CI/CD
+  - JSON Web Token (JWT)
+  - Jira
+  - API Design
+  - Full-Stack Development
+  - SaaS
+  - Operational Software
+  - Distributed Systems
+  - Observability
+  - Network Monitoring
+  - Performance Metrics
+  - Cybersecurity
+  - Software Architecture
+  - Technical Leadership
+  - Team Leadership
+  - Mentoring
+  - Product Engineering
+  - WebGL
+  - DoD
 emphasis: normal
 ---

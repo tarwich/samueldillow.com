@@ -140,11 +140,40 @@ function renderEntry(e: Entry): string {
   }
   if (e.tags.length > 0) {
     lines.push(
-      `  #text(size: 8.5pt, fill: rgb("#555"))[Tools: ${esc(e.tags.join(", "))}]`,
+      `  #text(size: 8.5pt, fill: rgb("#555"))[Skills: ${esc(e.tags.join(", "))}]`,
     );
   }
   lines.push(`]`);
   return lines.join("\n");
+}
+
+// Aggregated, categorized skill summary for the top of the resume. This is the
+// block ATS and recruiters scan first, so it carries the exact standard terms.
+const skillGroups: { label: string; items: string[] }[] = [
+  { label: "Languages", items: ["TypeScript", "JavaScript", "C#", "C++", "Swift", "Objective-C", "Java", "Python"] },
+  { label: "Frontend", items: ["React", "Next.js", "Angular", "WebGL"] },
+  { label: "Backend & APIs", items: ["Node.js", ".NET", "PostgreSQL", "API Design", "Distributed Systems"] },
+  { label: "Cloud & DevOps", items: ["AWS", "Docker", "Kubernetes", "CI/CD", "Observability", "Network Monitoring", "Performance Metrics"] },
+  { label: "AI", items: ["Generative AI", "LangChain", "Computer Vision", "AI-assisted Software Development"] },
+  { label: "Security", items: ["Cybersecurity", "OAuth2", "JSON Web Token (JWT)"] },
+  { label: "Leadership & Delivery", items: ["Software Architecture", "Technical Leadership", "Team Leadership", "Mentoring", "Product Engineering", "Full-Stack Development", "SaaS", "Operational Software"] },
+];
+
+function renderSkills(): string {
+  const rows = skillGroups
+    .map(
+      (g) =>
+        `  [#text(weight: "bold")[${esc(g.label)}]], [${esc(g.items.join(", "))}],`,
+    )
+    .join("\n");
+  return [
+    `#grid(`,
+    `  columns: (auto, 1fr),`,
+    `  row-gutter: 0.5em,`,
+    `  column-gutter: 1em,`,
+    rows,
+    `)`,
+  ].join("\n");
 }
 
 function renderDocument(entries: Entry[]): string {
@@ -178,6 +207,10 @@ function renderDocument(entries: Entry[]): string {
 ${esc(lead1)}
 
 ${esc(lead2)}
+
+= Core Skills
+
+${renderSkills()}
 
 = Current Work
 

@@ -12,10 +12,22 @@ bullets:
   - Delivered scheduling and pricing features, including drag-and-drop reordering of trip legs and pricing, schedule-conflict detection, and a demo-data system used for sales and conferences.
 tags:
   - TypeScript
+  - JavaScript
   - React
-  - LangChain
+  - Next.js
+  - Node.js
   - PostgreSQL
   - AWS
-  - AI
+  - Docker
+  - CI/CD
+  - JSON Web Token (JWT)
+  - LangChain
+  - Generative AI
+  - AI-assisted Software Development
+  - API Design
+  - Full-Stack Development
+  - SaaS
+  - Performance Metrics
+  - Software Architecture
 emphasis: normal
 ---

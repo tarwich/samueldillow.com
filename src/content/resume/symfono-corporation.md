@@ -14,9 +14,12 @@ bullets:
   - Built an iOS GUI prototype that accelerated iPhone interface development for the team.
   - Built GameView, a real-time soccer analytics platform that tracked plays and player statistics with playbook-style visualizations for coaches.
 tags:
-  - leadership
+  - Technical Leadership
+  - Team Leadership
+  - Software Architecture
   - augmented reality
   - iOS
+  - Objective-C
   - C++
   - streaming
 emphasis: normal

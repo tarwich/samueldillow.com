@@ -27,6 +27,7 @@ import {
   Inbox,
   List,
   Mail,
+  Minus,
   ListFilter,
   MapPin,
   MoreHorizontal,
@@ -41,6 +42,8 @@ import {
   Users,
   Wrench,
   X,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-static";
 
 interface Props {
@@ -51,6 +54,7 @@ const { name } = Astro.props;
 const icons: Record<string, string> = {
   inbox: Inbox,
   mail: Mail,
+  minus: Minus,
   customer: IdCard,
   account: Building2,
   aircraft: Plane,
@@ -90,6 +94,8 @@ const icons: Record<string, string> = {
   briefcase: BriefcaseBusiness,
   hash: Hash,
   home: Home,
+  "zoom-in": ZoomIn,
+  "zoom-out": ZoomOut,
 };
 
 const svg = (icons[name] ?? "").replace(

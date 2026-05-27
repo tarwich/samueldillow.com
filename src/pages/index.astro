@@ -1,6 +1,6 @@
 ---
-import { getCollection } from "astro:content";
-import type { CollectionEntry } from "astro:content";
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
 import {
   BookOpen,
   CodeXml,
@@ -8,59 +8,56 @@ import {
   Gamepad2,
   Hammer,
   Pencil,
-} from "lucide-static";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import type { Entry, WritingEntry } from "../content.config";
-import { isWritingEntry } from "../lib/writing";
+} from 'lucide-static';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { Entry, WritingEntry } from '../content.config';
+import { isWritingEntry } from '../lib/writing';
 
-const sortedEntries = (await getCollection("entries")).sort(
+const sortedEntries = (await getCollection('entries')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
 
-const featuredEntries = sortedEntries
-  .filter((entry) => entry.data.featured)
-  .slice(0, 6);
-
+const featuredEntries = sortedEntries.filter((entry) => entry.data.featured);
 const featuredProjects = featuredEntries
   .filter((entry) => !isWritingEntry(entry))
   .slice(0, 3);
-const latestWriting = sortedEntries
-  .filter((entry): entry is WritingEntry => entry.data.type === "writing")
-  .filter((entry) => entry.data.locale === "en")
+const latestWriting = featuredEntries
+  .filter((entry): entry is WritingEntry => entry.data.type === 'writing')
+  .filter((entry) => entry.data.locale === 'en')
   .slice(0, 5);
 
 function entryLabel(entry: (typeof featuredEntries)[number]) {
-  if (entry.data.type === "writing") return entry.data.category;
-  if (entry.data.type === "portfolio") return entry.data.role;
+  if (entry.data.type === 'writing') return entry.data.category;
+  if (entry.data.type === 'portfolio') return entry.data.role;
   return entry.data.status;
 }
 
 function entryHref(entry: (typeof featuredEntries)[number]) {
-  if (entry.data.type === "writing") return `/writing/${entry.id}/`;
-  if (entry.data.type === "portfolio")
-    return entry.data.caseStudyUrl ?? "/portfolio/";
+  if (entry.data.type === 'writing') return `/writing/${entry.id}/`;
+  if (entry.data.type === 'portfolio')
+    return entry.data.caseStudyUrl ?? '/portfolio/';
   return entry.data.playUrl;
 }
 
-const dateFormatter = new Intl.DateTimeFormat("en", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-  timeZone: "UTC",
+const dateFormatter = new Intl.DateTimeFormat('en', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
 });
 
 const isDst =
-  new Date().getTimezoneOffset() < new Date("2024-11-03").getTimezoneOffset();
-const timezone = isDst ? "CDT" : "CST";
+  new Date().getTimezoneOffset() < new Date('2024-11-03').getTimezoneOffset();
+const timezone = isDst ? 'CDT' : 'CST';
 
 const statusItems: { label: string; value: string }[] = [
-  { label: "name", value: "Samuel Dillow" },
-  { label: "role", value: "Senior Software Engineer" },
-  { label: "builder", value: "AI, SaaS, Early Teams" },
-  { label: "location", value: "Norman, Arkansas" },
-  { label: "timezone", value: timezone },
-  { label: "languages", value: "English, Spanish" },
-  { label: "work", value: "Remote. Travel ready" },
+  { label: 'name', value: 'Samuel Dillow' },
+  { label: 'role', value: 'Senior Software Engineer' },
+  { label: 'builder', value: 'AI, SaaS, Early Teams' },
+  { label: 'location', value: 'Norman, Arkansas' },
+  { label: 'timezone', value: timezone },
+  { label: 'languages', value: 'English, Spanish' },
+  { label: 'work', value: 'Remote. Travel ready' },
 ];
 ---
 
@@ -77,7 +74,7 @@ const statusItems: { label: string; value: string }[] = [
         <a class="button button--sage" href="/writing/">
           <Fragment
             set:html={BookOpen.replace(
-              "<svg",
+              '<svg',
               '<svg class="button-icon" aria-hidden="true"',
             )}
           />
@@ -86,7 +83,7 @@ const statusItems: { label: string; value: string }[] = [
         <a class="button button--steel" href="/#projects">
           <Fragment
             set:html={CodeXml.replace(
-              "<svg",
+              '<svg',
               '<svg class="button-icon" aria-hidden="true"',
             )}
           />
@@ -95,7 +92,7 @@ const statusItems: { label: string; value: string }[] = [
         <a class="button button--rust" href="/resume/">
           <Fragment
             set:html={FileText.replace(
-              "<svg",
+              '<svg',
               '<svg class="button-icon" aria-hidden="true"',
             )}
           />

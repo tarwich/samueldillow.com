@@ -1,13 +1,13 @@
 ---
-import AirpeggioLayout from "../_layout.astro";
-import Badge from "../_components/Badge.astro";
-import Button from "../_components/Button.astro";
-import ColumnsPopover from "../_components/ColumnsPopover.astro";
-import Icon from "../_components/Icon.astro";
-import IconButton from "../_components/IconButton.astro";
-import PageHeader from "../_components/PageHeader.astro";
-import ViewToggle from "../_components/ViewToggle.astro";
-import ReserveAircraftModal from "./_components/ReserveAircraftModal.astro";
+import AirpeggioLayout from '../_layout.astro';
+import Badge from '../_components/Badge.astro';
+import Button from '../_components/Button.astro';
+import ColumnsPopover from '../_components/ColumnsPopover.astro';
+import Icon from '../_components/Icon.astro';
+import IconButton from '../_components/IconButton.astro';
+import PageHeader from '../_components/PageHeader.astro';
+import ViewToggle from '../_components/ViewToggle.astro';
+import ReserveAircraftModal from './_components/ReserveAircraftModal.astro';
 import {
   RESERVATIONS,
   formatLegDate,
@@ -21,22 +21,22 @@ import {
   reservationCompany,
   reservationInitials,
   reservationTagStyle,
-} from "../_data";
-import CustomerHoverCard from "../_components/CustomerHoverCard.astro";
-import CompanyHoverCard from "../_components/CompanyHoverCard.astro";
-import AircraftHoverCard from "../_components/AircraftHoverCard.astro";
-import AccountHoverCard from "../_components/AccountHoverCard.astro";
+} from '../_data';
+import CustomerHoverCard from '../_components/CustomerHoverCard.astro';
+import CompanyHoverCard from '../_components/CompanyHoverCard.astro';
+import AircraftHoverCard from '../_components/AircraftHoverCard.astro';
+import AccountHoverCard from '../_components/AccountHoverCard.astro';
 
 const tailColors: Record<string, string> = {
-  red: "#b24b4a",
-  lime: "#c7d533",
-  blue: "#565bc4",
+  red: '#b24b4a',
+  lime: '#c7d533',
+  blue: '#565bc4',
 };
 
 // --- Calendar view --------------------------------------------------------
 // Anchored to the demo "now" (same value the dashboard uses) so the grid lands
 // on the month where the seeded flight data actually lives.
-const NOW = new Date("2026-05-14T12:00:00Z");
+const NOW = new Date('2026-05-14T12:00:00Z');
 
 const legsWithContext = RESERVATIONS.flatMap((reservation) =>
   reservation.legs.map((leg) => ({
@@ -47,7 +47,7 @@ const legsWithContext = RESERVATIONS.flatMap((reservation) =>
 );
 type LegEntry = (typeof legsWithContext)[number];
 
-const pad2 = (n: number) => String(n).padStart(2, "0");
+const pad2 = (n: number) => String(n).padStart(2, '0');
 // Bucket by UTC day so a leg's cell is stable regardless of build-machine TZ.
 const dayKeyOf = (date: Date) =>
   `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`;
@@ -65,10 +65,10 @@ for (const bucket of legsByDay.values()) {
   bucket.sort((a, b) => a.leg.departure.getTime() - b.leg.departure.getTime());
 }
 
-const monthLabelFmt = new Intl.DateTimeFormat("en-US", {
-  month: "long",
-  year: "numeric",
-  timeZone: "UTC",
+const monthLabelFmt = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
 });
 const todayKey = dayKeyOf(NOW);
 
@@ -97,14 +97,14 @@ const buildMonthGrid = (year: number, month0: number): MonthCell[] => {
   });
 };
 
-const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // One grid per month that contains legs, sorted ascending.
 const monthKeys = [
   ...new Set(legsWithContext.map((e) => monthKeyOf(e.leg.departure))),
 ].sort();
 const months = monthKeys.map((key) => {
-  const [year, month] = key.split("-").map(Number);
+  const [year, month] = key.split('-').map(Number);
   return {
     key,
     label: monthLabelFmt.format(new Date(Date.UTC(year, month - 1, 1))),
@@ -130,7 +130,6 @@ const defaultMonthKey = months.some((m) => m.key === nowMonthKey)
     >
       <h1 slot="title">Reservations</h1>
       <Fragment slot="actions">
-        <Button>Embed Booking Form</Button>
         <Button variant="primary" icon="plus" data-open-modal="add-reservation">
           Reserve Aircraft
         </Button>
@@ -142,19 +141,19 @@ const defaultMonthKey = months.some((m) => m.key === nowMonthKey)
         <ViewToggle
           label="Reservations view"
           options={[
-            { icon: "list", label: "List view", value: "list", active: true },
-            { icon: "calendar", label: "Calendar view", value: "calendar" },
+            { icon: 'list', label: 'List view', value: 'list', active: true },
+            { icon: 'calendar', label: 'Calendar view', value: 'calendar' },
           ]}
         />
         <ColumnsPopover
           columns={[
-            "Trip",
-            "Customer",
-            "Itinerary",
-            "Crew",
-            "Status",
-            "Assigned",
-            "Tags",
+            'Trip',
+            'Customer',
+            'Itinerary',
+            'Crew',
+            'Status',
+            'Assigned',
+            'Tags',
           ]}
         />
         <IconButton icon="download" aria-label="Export reservations" />
@@ -163,233 +162,242 @@ const defaultMonthKey = months.some((m) => m.key === nowMonthKey)
 
     <section data-reservations-panel="list">
       <div class="reservations-table-wrap" aria-label="Reservations list">
-      <table id="reservations-table" class="datatable reservations-table">
-        <colgroup>
-          <col data-name="Trip" />
-          <col data-name="Customer" />
-          <col data-name="Itinerary" />
-          <col data-name="Crew" />
-          <col data-name="Status" />
-          <col data-name="Assigned" />
-          <col data-name="Tags" />
-          <col data-name="Actions" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th>Trip</th>
-            <th>Customer</th>
-            <th>Itinerary</th>
-            <th>Crew</th>
-            <th>Status</th>
-            <th>Assigned</th>
-            <th>Tags</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            RESERVATIONS.map((reservation) => {
-              const aircraft = reservationAircraft(reservation);
-              const company = reservationCompany(reservation);
-              const customer = reservationCustomer(reservation);
-              const crew = reservationCrewAccounts(reservation);
-              const assigned = reservationAssignedAccount(reservation);
-              return (
-                <tr data-reservation-id={reservation.id}>
-                  <td>
-                    <div class="reservation-trip">
-                      <span class="reservation-trip__number">
-                        Trip #{reservation.tripNumber}
-                      </span>
-                      {aircraft && (
-                        <AircraftHoverCard
-                          aircraft={aircraft}
-                          triggerClass="reservation-trip__tail"
-                        >
-                          <span
-                            slot="trigger"
-                            class="reservation-trip__tail-inner"
-                            style={`--tail-color: ${tailColors[aircraft.color] ?? "var(--air-ink)"}`}
+        <table id="reservations-table" class="datatable reservations-table">
+          <colgroup>
+            <col data-name="Trip" />
+            <col data-name="Customer" />
+            <col data-name="Itinerary" />
+            <col data-name="Crew" />
+            <col data-name="Status" />
+            <col data-name="Assigned" />
+            <col data-name="Tags" />
+            <col data-name="Actions" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Trip</th>
+              <th>Customer</th>
+              <th>Itinerary</th>
+              <th>Crew</th>
+              <th>Status</th>
+              <th>Assigned</th>
+              <th>Tags</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              RESERVATIONS.map((reservation) => {
+                const aircraft = reservationAircraft(reservation);
+                const company = reservationCompany(reservation);
+                const customer = reservationCustomer(reservation);
+                const crew = reservationCrewAccounts(reservation);
+                const assigned = reservationAssignedAccount(reservation);
+                return (
+                  <tr data-reservation-id={reservation.id}>
+                    <td>
+                      <div class="reservation-trip">
+                        <span class="reservation-trip__number">
+                          Trip #{reservation.tripNumber}
+                        </span>
+                        {aircraft && (
+                          <AircraftHoverCard
+                            aircraft={aircraft}
+                            triggerClass="reservation-trip__tail"
                           >
-                            <Icon name="aircraft" />
-                            <strong>{aircraft.tail}</strong>
-                          </span>
-                        </AircraftHoverCard>
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    {customer ? (
-                      <div class="reservation-customer">
-                        {customer ? (
-                          <CustomerHoverCard
-                            customer={customer}
-                            company={company}
-                          >
-                            <strong slot="trigger">{customer.fullName}</strong>
-                          </CustomerHoverCard>
-                        ) : (
-                          <span class="text-muted">—</span>
-                        )}
-                        {company ? (
-                          <CompanyHoverCard company={company}>
-                            <span class="reservation-customer__company" slot="trigger">
-                              {company.name}
+                            <span
+                              slot="trigger"
+                              class="reservation-trip__tail-inner"
+                              style={`--tail-color: ${tailColors[aircraft.color] ?? 'var(--air-ink)'}`}
+                            >
+                              <Icon name="aircraft" />
+                              <strong>{aircraft.tail}</strong>
                             </span>
-                          </CompanyHoverCard>
+                          </AircraftHoverCard>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      {customer ? (
+                        <div class="reservation-customer">
+                          {customer ? (
+                            <CustomerHoverCard
+                              customer={customer}
+                              company={company}
+                            >
+                              <strong slot="trigger">
+                                {customer.fullName}
+                              </strong>
+                            </CustomerHoverCard>
+                          ) : (
+                            <span class="text-muted">—</span>
+                          )}
+                          {company ? (
+                            <CompanyHoverCard company={company}>
+                              <span
+                                class="reservation-customer__company"
+                                slot="trigger"
+                              >
+                                {company.name}
+                              </span>
+                            </CompanyHoverCard>
+                          ) : (
+                            <span class="text-muted">—</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span class="text-muted">—</span>
+                      )}
+                    </td>
+                    <td>
+                      <ul class="reservation-itinerary">
+                        {reservation.legs.map((leg) => (
+                          <li>
+                            <strong>
+                              {leg.origin} - {leg.destination}
+                            </strong>
+                            <span>
+                              {formatLegDate(leg.departure)},{' '}
+                              {formatLegTime(leg.departure)}{' '}
+                              {formatLegTimezone(leg.origin)} | {leg.passengers}{' '}
+                              pax
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td>
+                      <div class="reservation-initials-stack">
+                        {crew.length > 0 ? (
+                          crew.map((account) => (
+                            <AccountHoverCard account={account}>
+                              <span slot="trigger">
+                                {reservationInitials(account)}
+                              </span>
+                            </AccountHoverCard>
+                          ))
                         ) : (
                           <span class="text-muted">—</span>
                         )}
                       </div>
-                    ) : (
-                      <span class="text-muted">—</span>
-                    )}
-                  </td>
-                  <td>
-                    <ul class="reservation-itinerary">
-                      {reservation.legs.map((leg) => (
-                        <li>
-                          <strong>
-                            {leg.origin} - {leg.destination}
-                          </strong>
-                          <span>
-                            {formatLegDate(leg.departure)},{" "}
-                            {formatLegTime(leg.departure)}{" "}
-                            {formatLegTimezone(leg.origin)} | {leg.passengers}{" "}
-                            pax
+                    </td>
+                    <td>
+                      <div class="reservation-status">
+                        {reservation.lifecycle === 'planned' && (
+                          <Badge variant="manual">Planned</Badge>
+                        )}
+                        {reservation.lifecycle === 'scheduled' && (
+                          <Badge variant="scheduled">Scheduled</Badge>
+                        )}
+                        {reservation.lifecycle === 'flown' && (
+                          <Badge variant="flown">Flown</Badge>
+                        )}
+                        {reservation.lifecycle === 'cancelled' && (
+                          <Badge variant="error">Cancelled</Badge>
+                        )}
+                        {reservation.approval === 'pending' && (
+                          <Badge variant="unqualified">Pending</Badge>
+                        )}
+                        {reservation.approval === 'quoted' && (
+                          <Badge variant="quoted">Quoted</Badge>
+                        )}
+                        {reservation.approval === 'approved' && (
+                          <Badge variant="approved">Approved</Badge>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      {assigned ? (
+                        <AccountHoverCard
+                          account={assigned}
+                          triggerClass="reservation-assigned"
+                        >
+                          <span slot="trigger">
+                            {reservationInitials(assigned)}
                           </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </td>
-                  <td>
-                    <div class="reservation-initials-stack">
-                      {crew.length > 0 ? (
-                        crew.map((account) => (
-                          <AccountHoverCard account={account}>
-                            <span slot="trigger">
-                              {reservationInitials(account)}
-                            </span>
-                          </AccountHoverCard>
-                        ))
+                        </AccountHoverCard>
                       ) : (
-                        <span class="text-muted">—</span>
+                        <span class="reservation-assigned">—</span>
                       )}
-                    </div>
-                  </td>
-                  <td>
-                    <div class="reservation-status">
-                      {reservation.lifecycle === "planned" && (
-                        <Badge variant="manual">Planned</Badge>
+                    </td>
+                    <td>
+                      {reservation.tags.length > 0 ? (
+                        <ul class="reservation-tags">
+                          {reservation.tags.map((tag) => {
+                            const style = reservationTagStyle(tag);
+                            return (
+                              <li
+                                class="reservation-tag"
+                                style={`--tag-bg: ${style.background}; --tag-fg: ${style.color}`}
+                              >
+                                {tag}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      ) : (
+                        <span class="text-muted">-</span>
                       )}
-                      {reservation.lifecycle === "scheduled" && (
-                        <Badge variant="scheduled">Scheduled</Badge>
-                      )}
-                      {reservation.lifecycle === "flown" && (
-                        <Badge variant="flown">Flown</Badge>
-                      )}
-                      {reservation.lifecycle === "cancelled" && (
-                        <Badge variant="error">Cancelled</Badge>
-                      )}
-                      {reservation.approval === "pending" && (
-                        <Badge variant="unqualified">Pending</Badge>
-                      )}
-                      {reservation.approval === "quoted" && (
-                        <Badge variant="quoted">Quoted</Badge>
-                      )}
-                      {reservation.approval === "approved" && (
-                        <Badge variant="approved">Approved</Badge>
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    {assigned ? (
-                      <AccountHoverCard
-                        account={assigned}
-                        triggerClass="reservation-assigned"
-                      >
-                        <span slot="trigger">
-                          {reservationInitials(assigned)}
-                        </span>
-                      </AccountHoverCard>
-                    ) : (
-                      <span class="reservation-assigned">—</span>
-                    )}
-                  </td>
-                  <td>
-                    {reservation.tags.length > 0 ? (
-                      <ul class="reservation-tags">
-                        {reservation.tags.map((tag) => {
-                          const style = reservationTagStyle(tag);
-                          return (
-                            <li
-                              class="reservation-tag"
-                              style={`--tag-bg: ${style.background}; --tag-fg: ${style.color}`}
-                            >
-                              {tag}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    ) : (
-                      <span class="text-muted">-</span>
-                    )}
-                  </td>
-                  <td style={{ verticalAlign: "middle" }}>
-                    <div class="datatable-actions">
-                      <a
-                        class="reservation-row-action"
-                        href={`/portfolio/airpeggio/reservations/${reservation.id}/`}
-                        aria-label={`View trip ${reservation.tripNumber}`}
-                      >
-                        <Icon name="eye" />
-                      </a>
-                      <button
-                        type="button"
-                        class="reservation-row-action"
-                        aria-label={`Edit trip ${reservation.tripNumber}`}
-                        @click={`$store.reservationModal.open(${formatReservationForModal(reservation)})`}
-                      >
-                        <Icon name="edit" />
-                      </button>
-                      <button
-                        type="button"
-                        class="reservation-row-action"
-                        aria-label={`Duplicate trip ${reservation.tripNumber}`}
-                      >
-                        <Icon name="copy" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })
-          }
-        </tbody>
-      </table>
+                    </td>
+                    <td style={{ verticalAlign: 'middle' }}>
+                      <div class="datatable-actions">
+                        <a
+                          class="reservation-row-action"
+                          href={`/portfolio/airpeggio/reservations/${reservation.id}/`}
+                          aria-label={`View trip ${reservation.tripNumber}`}
+                        >
+                          <Icon name="eye" />
+                        </a>
+                        <button
+                          type="button"
+                          class="reservation-row-action"
+                          aria-label={`Edit trip ${reservation.tripNumber}`}
+                          @click={`$store.reservationModal.open(${formatReservationForModal(reservation)})`}
+                        >
+                          <Icon name="edit" />
+                        </button>
+                        <button
+                          type="button"
+                          class="reservation-row-action"
+                          aria-label={`Duplicate trip ${reservation.tripNumber}`}
+                        >
+                          <Icon name="copy" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            }
+          </tbody>
+        </table>
       </div>
 
       <footer class="reservations-pagination" aria-label="Pagination">
-      <div class="reservations-page-size">
-        <span>Items per page</span>
-        <button type="button">20 <Icon name="chevron-down" /></button>
-        <strong>
-          Records 1 - {Math.min(20, RESERVATIONS.length)} of {
-            RESERVATIONS.length
-          }
-        </strong>
-      </div>
-      <nav class="reservations-page-nav" aria-label="Reservation pages">
-        <button type="button" disabled>First</button>
-        <button type="button">Last</button>
-        <button type="button" class="is-current">1</button>
-        <button type="button" disabled><Icon name="arrow-left" /></button>
-        <button type="button"><Icon name="arrow-right" /></button>
-      </nav>
+        <div class="reservations-page-size">
+          <span>Items per page</span>
+          <button type="button">20 <Icon name="chevron-down" /></button>
+          <strong>
+            Records 1 - {Math.min(20, RESERVATIONS.length)} of {
+              RESERVATIONS.length
+            }
+          </strong>
+        </div>
+        <nav class="reservations-page-nav" aria-label="Reservation pages">
+          <button type="button" disabled>First</button>
+          <button type="button">Last</button>
+          <button type="button" class="is-current">1</button>
+          <button type="button" disabled><Icon name="arrow-left" /></button>
+          <button type="button"><Icon name="arrow-right" /></button>
+        </nav>
       </footer>
     </section>
 
-    <section data-reservations-panel="calendar" aria-label="Reservations calendar" hidden>
+    <section
+      data-reservations-panel="calendar"
+      aria-label="Reservations calendar"
+      hidden
+    >
       <header class="rcal__nav">
         <button type="button" data-month-prev aria-label="Previous month">
           <Icon name="arrow-left" />
@@ -418,32 +426,35 @@ const defaultMonthKey = months.some((m) => m.key === nowMonthKey)
                 {month.cells.map((cell) => (
                   <div
                     class:list={[
-                      "rcal__cell",
-                      { "is-out": !cell.inMonth, "is-today": cell.isToday },
+                      'rcal__cell',
+                      { 'is-out': !cell.inMonth, 'is-today': cell.isToday },
                     ]}
                   >
                     <span class="rcal__date">{cell.day}</span>
                     {legsByDay.has(cell.key) && (
                       <ul class="rcal__legs">
-                        {legsByDay.get(cell.key)!.map(({ reservation, leg, aircraft }) => (
-                          <li>
-                            <a
-                              class="rcal__leg"
-                              data-status={reservation.lifecycle}
-                              href={`/portfolio/airpeggio/reservations/${reservation.id}/`}
-                            >
-                              <span class="rcal__leg-trip">
-                                Trip #{reservation.tripNumber}
-                              </span>
-                              <span class="rcal__leg-time">
-                                {formatLegTime(leg.departure)} · {aircraft?.tail ?? "—"}
-                              </span>
-                              <span class="rcal__leg-route">
-                                {leg.origin} → {leg.destination}
-                              </span>
-                            </a>
-                          </li>
-                        ))}
+                        {legsByDay
+                          .get(cell.key)!
+                          .map(({ reservation, leg, aircraft }) => (
+                            <li>
+                              <a
+                                class="rcal__leg"
+                                data-status={reservation.lifecycle}
+                                href={`/portfolio/airpeggio/reservations/${reservation.id}/`}
+                              >
+                                <span class="rcal__leg-trip">
+                                  Trip #{reservation.tripNumber}
+                                </span>
+                                <span class="rcal__leg-time">
+                                  {formatLegTime(leg.departure)} ·{' '}
+                                  {aircraft?.tail ?? '—'}
+                                </span>
+                                <span class="rcal__leg-route">
+                                  {leg.origin} → {leg.destination}
+                                </span>
+                              </a>
+                            </li>
+                          ))}
                       </ul>
                     )}
                   </div>
@@ -507,7 +518,7 @@ const defaultMonthKey = months.some((m) => m.key === nowMonthKey)
     @media (max-width: 1295px) {
       min-width: 1125px;
 
-      col[data-name="Crew"],
+      col[data-name='Crew'],
       th:nth-child(4),
       td:nth-child(4) {
         display: none;
@@ -855,17 +866,17 @@ const defaultMonthKey = months.some((m) => m.key === nowMonthKey)
       background: color-mix(in srgb, var(--status-color) 16%, white);
     }
 
-    &[data-status="scheduled"] {
+    &[data-status='scheduled'] {
       --status-color: #2550ad;
     }
-    &[data-status="flown"] {
+    &[data-status='flown'] {
       --status-color: #510c62;
     }
-    &[data-status="cancelled"] {
+    &[data-status='cancelled'] {
       --status-color: #bd2f20;
     }
     /* Planned reads as an outline so its blue stays distinct from scheduled. */
-    &[data-status="planned"] {
+    &[data-status='planned'] {
       --status-color: #1d4fb4;
       background: #fff;
       border-color: color-mix(in srgb, var(--status-color) 30%, white);
@@ -892,16 +903,16 @@ const defaultMonthKey = months.some((m) => m.key === nowMonthKey)
 </style>
 
 <script>
-  const root = document.querySelector<HTMLElement>("[data-reservations-view]");
+  const root = document.querySelector<HTMLElement>('[data-reservations-view]');
   const viewButtons = Array.from(
-    document.querySelectorAll<HTMLButtonElement>("[data-view-option]"),
+    document.querySelectorAll<HTMLButtonElement>('[data-view-option]'),
   );
   const panels = Array.from(
-    document.querySelectorAll<HTMLElement>("[data-reservations-panel]"),
+    document.querySelectorAll<HTMLElement>('[data-reservations-panel]'),
   );
 
   function setView(view: string, updateUrl = true) {
-    const next = view === "calendar" ? "calendar" : "list";
+    const next = view === 'calendar' ? 'calendar' : 'list';
     if (root) root.dataset.reservationsView = next;
 
     for (const panel of panels) {
@@ -909,31 +920,33 @@ const defaultMonthKey = months.some((m) => m.key === nowMonthKey)
     }
     for (const button of viewButtons) {
       const active = button.dataset.viewOption === next;
-      button.classList.toggle("is-active", active);
-      button.setAttribute("aria-pressed", String(active));
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
     }
 
     if (updateUrl) {
       const url = new URL(window.location.href);
-      if (next === "calendar") url.searchParams.set("view", "calendar");
-      else url.searchParams.delete("view");
-      history.replaceState(null, "", url);
+      if (next === 'calendar') url.searchParams.set('view', 'calendar');
+      else url.searchParams.delete('view');
+      history.replaceState(null, '', url);
     }
   }
 
   for (const button of viewButtons) {
-    button.addEventListener("click", () =>
-      setView(button.dataset.viewOption ?? "list"),
+    button.addEventListener('click', () =>
+      setView(button.dataset.viewOption ?? 'list'),
     );
   }
 
   // Month navigation: only one [data-month] grid is shown at a time.
   const grids = Array.from(
-    document.querySelectorAll<HTMLElement>("[data-month]"),
+    document.querySelectorAll<HTMLElement>('[data-month]'),
   );
-  const monthLabel = document.querySelector<HTMLElement>("[data-month-label]");
-  const prevBtn = document.querySelector<HTMLButtonElement>("[data-month-prev]");
-  const nextBtn = document.querySelector<HTMLButtonElement>("[data-month-next]");
+  const monthLabel = document.querySelector<HTMLElement>('[data-month-label]');
+  const prevBtn =
+    document.querySelector<HTMLButtonElement>('[data-month-prev]');
+  const nextBtn =
+    document.querySelector<HTMLButtonElement>('[data-month-next]');
   let activeMonth = Math.max(
     0,
     grids.findIndex((grid) => !grid.hidden),
@@ -946,18 +959,18 @@ const defaultMonthKey = months.some((m) => m.key === nowMonthKey)
       grid.hidden = i !== activeMonth;
     });
     if (monthLabel) {
-      monthLabel.textContent = grids[activeMonth].dataset.monthLabel ?? "";
+      monthLabel.textContent = grids[activeMonth].dataset.monthLabel ?? '';
     }
     if (prevBtn) prevBtn.disabled = activeMonth === 0;
     if (nextBtn) nextBtn.disabled = activeMonth === grids.length - 1;
   }
 
-  prevBtn?.addEventListener("click", () => setMonth(activeMonth - 1));
-  nextBtn?.addEventListener("click", () => setMonth(activeMonth + 1));
+  prevBtn?.addEventListener('click', () => setMonth(activeMonth - 1));
+  nextBtn?.addEventListener('click', () => setMonth(activeMonth + 1));
   setMonth(activeMonth);
 
   setView(
-    new URLSearchParams(window.location.search).get("view") ?? "list",
+    new URLSearchParams(window.location.search).get('view') ?? 'list',
     false,
   );
 </script>

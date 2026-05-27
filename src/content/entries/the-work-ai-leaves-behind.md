@@ -13,7 +13,7 @@ tags:
   - work
   - automation
   - jobs
-featured: false
+featured: true
 ---
 
 I was seventeen when I got laid off for the first time.

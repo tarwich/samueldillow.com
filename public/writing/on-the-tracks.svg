@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Quiet railroad tracks</title>
+  <desc id="desc">A quiet set of railroad tracks with wooden ties and uneven rocks between the rails.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0d7ad" />
+      <stop offset="0.46" stop-color="#d9b17d" />
+      <stop offset="1" stop-color="#8c6c4d" />
+    </linearGradient>
+    <linearGradient id="rail" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#faf2dc" />
+      <stop offset="0.22" stop-color="#8c8174" />
+      <stop offset="0.58" stop-color="#3d3d3d" />
+      <stop offset="1" stop-color="#171715" />
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#77614a" />
+      <stop offset="1" stop-color="#342d28" />
+    </linearGradient>
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#201712" flood-opacity="0.28" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#sky)" />
+  <path d="M0 262 C170 234 318 224 488 222 C708 219 922 235 1200 278 L1200 630 L0 630 Z" fill="url(#ground)" />
+  <path d="M0 332 C224 294 420 278 600 278 C780 278 976 296 1200 338 L1200 630 L0 630 Z" fill="#3a322d" opacity="0.55" />
+
+  <g opacity="0.2" fill="none" stroke="#f7e7c6" stroke-width="3">
+    <path d="M0 278 C210 252 380 244 588 244 C806 244 1004 258 1200 286" />
+    <path d="M0 314 C218 280 402 266 600 266 C798 266 982 282 1200 318" />
+  </g>
+
+  <g filter="url(#soft-shadow)">
+    <g fill="#5d3824" stroke="#2e211a" stroke-width="3" opacity="0.98">
+      <path d="M544 242 L656 242 L679 253 L521 253 Z" />
+      <path d="M502 270 L698 270 L728 285 L472 285 Z" />
+      <path d="M455 305 L745 305 L784 326 L416 326 Z" />
+      <path d="M397 352 L803 352 L858 382 L342 382 Z" />
+      <path d="M318 417 L882 417 L962 464 L238 464 Z" />
+      <path d="M210 511 L990 511 L1114 589 L86 589 Z" />
+    </g>
+
+    <g fill="none" stroke-linecap="round">
+      <path d="M518 238 C478 310 423 411 352 608" stroke="url(#rail)" stroke-width="34" />
+      <path d="M682 238 C722 310 777 411 848 608" stroke="url(#rail)" stroke-width="34" />
+      <path d="M529 238 C489 310 435 411 366 608" stroke="#c8bdad" stroke-width="6" opacity="0.78" />
+      <path d="M671 238 C711 310 765 411 834 608" stroke="#c8bdad" stroke-width="6" opacity="0.78" />
+      <path d="M504 250 C462 328 409 433 340 608" stroke="#151312" stroke-width="7" opacity="0.5" />
+      <path d="M696 250 C738 328 791 433 860 608" stroke="#151312" stroke-width="7" opacity="0.5" />
+    </g>
+  </g>
+
+  <g fill="#cab083" opacity="0.86">
+    <ellipse cx="576" cy="277" rx="8" ry="4" transform="rotate(-8 576 277)" />
+    <ellipse cx="621" cy="292" rx="11" ry="5" transform="rotate(15 621 292)" />
+    <ellipse cx="553" cy="317" rx="12" ry="6" transform="rotate(-18 553 317)" />
+    <ellipse cx="635" cy="335" rx="8" ry="4" transform="rotate(22 635 335)" />
+    <ellipse cx="581" cy="366" rx="14" ry="7" transform="rotate(9 581 366)" />
+    <ellipse cx="650" cy="389" rx="12" ry="6" transform="rotate(-13 650 389)" />
+    <ellipse cx="523" cy="420" rx="16" ry="8" transform="rotate(18 523 420)" />
+    <ellipse cx="601" cy="451" rx="20" ry="9" transform="rotate(-6 601 451)" />
+    <ellipse cx="691" cy="478" rx="17" ry="8" transform="rotate(17 691 478)" />
+    <ellipse cx="487" cy="524" rx="22" ry="10" transform="rotate(-16 487 524)" />
+    <ellipse cx="591" cy="562" rx="28" ry="12" transform="rotate(8 591 562)" />
+    <ellipse cx="735" cy="548" rx="24" ry="11" transform="rotate(-10 735 548)" />
+  </g>
+
+  <g fill="none" stroke="#d8c094" stroke-linecap="round" opacity="0.36">
+    <path d="M492 296 C526 284 557 285 590 298" stroke-width="5" />
+    <path d="M568 342 C604 329 645 333 682 352" stroke-width="5" />
+    <path d="M441 394 C505 369 590 376 662 411" stroke-width="6" />
+    <path d="M523 495 C583 476 670 482 748 522" stroke-width="7" />
+  </g>
+
+  <g fill="#201b18" opacity="0.55">
+    <circle cx="430" cy="281" r="4" />
+    <circle cx="759" cy="302" r="5" />
+    <circle cx="340" cy="345" r="6" />
+    <circle cx="862" cy="374" r="5" />
+    <circle cx="290" cy="458" r="7" />
+    <circle cx="915" cy="496" r="7" />
+    <circle cx="172" cy="574" r="8" />
+    <circle cx="1028" cy="578" r="9" />
+  </g>
+</svg>

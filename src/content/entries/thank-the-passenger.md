@@ -11,7 +11,7 @@ tags:
   - anxiety
   - rumination
   - attention
-featured: false
+featured: true
 ---
 
 I do not like standing on sewer grates.

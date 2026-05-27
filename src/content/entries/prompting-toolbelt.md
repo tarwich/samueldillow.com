@@ -12,7 +12,7 @@ tags:
   - prompting
   - research
   - writing
-featured: false
+featured: true
 ---
 
 There's a joke online about mushrooms and AI. I don't know who started it, so I'm going to tell it as a story instead of pretending it's mine.

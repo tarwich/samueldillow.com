@@ -54,7 +54,7 @@ const nav = [
     icon: "aircraft",
     menu: [
       { label: "Aircraft", href: "/portfolio/airpeggio/aircraft/" },
-      { label: "Schedule", href: "#" },
+      { label: "Schedule", href: "/portfolio/airpeggio/dashboard/schedule/" },
       { label: "Pricing Profiles", href: "#" },
     ],
   },
@@ -132,8 +132,9 @@ const nav = [
     padding: 0 28px;
     background: var(--air-purple);
     color: #fff;
-    position: relative;
-    z-index: var(--z-popover, 3);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 
     @media (max-width: 1180px) {
       grid-template-columns: 1fr;

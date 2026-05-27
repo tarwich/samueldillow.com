@@ -1,0 +1,810 @@
+---
+import AirpeggioLayout from "../../_layout.astro";
+import Icon from "../../_components/Icon.astro";
+import Popover from "../../_components/Popover.astro";
+import { AIRCRAFT, PILOTS } from "../../_data";
+
+const monthLabel = "May 2026";
+const dayWidth = 200;
+const initialDayIndex = 13;
+const monthStart = new Date(Date.UTC(2026, 4, 1));
+const days = Array.from({ length: 31 }, (_, index) => {
+  const date = new Date(monthStart);
+  date.setUTCDate(index + 1);
+  return {
+    date: `May ${index + 1}`,
+    weekday: date.toLocaleDateString("en-US", {
+      weekday: "short",
+      timeZone: "UTC",
+    }),
+    muted: date.getUTCDay() === 0 || date.getUTCDay() === 6,
+  };
+});
+
+const timelineColumns = `repeat(${days.length}, ${dayWidth}px)`;
+const displayName = (pilot: (typeof PILOTS)[number]) =>
+  `${pilot.firstName} ${pilot.lastName[0]}.`;
+const crewNames = [
+  ["Chris H.", "Chris O."],
+  ["Chip A.", "Chris H.", "Samuel D."],
+  ["Louie H.", "Avery S.", "Taylor M."],
+];
+
+const crew = PILOTS.slice(0, 7);
+const displayTails = ["N20AS", "N765PM", "N441SD"];
+const displayModels = ["S22T", "C25B", "PC-12"];
+const displayClasses = ["Single Engine Land", "Midsize Cabin Jet", "Turboprop"];
+const displayLocations = ["KADS", "SBJD", "KDAL"];
+const displayBases = ["KADS", "KDAL", "KDAL"];
+
+const aircraftTone = [
+  {
+    border: "#b24b4a",
+    wash: "#f5dddd",
+    block: "#ff5a66",
+    stripe: "#f2c0c4",
+  },
+  {
+    border: "#c7d533",
+    wash: "#fbfbdc",
+    block: "#510c62",
+    stripe: "#9d83a8",
+  },
+  {
+    border: "#565bc4",
+    wash: "#e4eeff",
+    block: "#4248c3",
+    stripe: "#a4a9f0",
+  },
+];
+
+const groups = AIRCRAFT.slice(0, 3).map((item, index) => ({
+  aircraft: {
+    ...item,
+    tail: displayTails[index] ?? item.tail,
+    model: displayModels[index] ?? item.model,
+    class: displayClasses[index] ?? item.class,
+    location: displayLocations[index] ?? item.location,
+    baseAirport: displayBases[index] ?? item.baseAirport,
+  },
+  tone: aircraftTone[index],
+  crew:
+    index === 0
+      ? crew.slice(0, 2)
+      : index === 1
+        ? crew.slice(2, 5)
+        : crew.slice(4, 7),
+}));
+
+interface FlightBlock {
+  day: number;
+  start: number;
+  width: number;
+  from: string;
+  to: string;
+  tone: number;
+  time?: string;
+}
+
+const flights: Record<number, FlightBlock[]> = {
+  0: [
+    { day: 14, start: 50, width: 34, from: "KLAX", to: "KMDW", tone: 0 },
+    { day: 15, start: 50, width: 34, from: "KMDW", to: "KLAX", tone: 0 },
+  ],
+  1: [
+    { day: 14, start: 46, width: 36, from: "KLAX", to: "KMDW", tone: 1 },
+    { day: 15, start: 46, width: 36, from: "KMDW", to: "KLAX", tone: 1, time: "12:00 CDT" },
+    { day: 17, start: 10, width: 1, from: "", to: "", tone: 1, time: "02:00 CDT" },
+  ],
+  2: [
+    { day: 14, start: 46, width: 36, from: "KDAL", to: "KJAC", tone: 2 },
+    { day: 16, start: 18, width: 34, from: "KJAC", to: "KDAL", tone: 2, time: "06:00 CDT" },
+  ],
+};
+
+const rowFlight = (groupIndex: number, crewIndex = 0) =>
+  flights[groupIndex]?.map((flight) => ({
+    ...flight,
+    start: Math.min(80, flight.start + crewIndex * 2),
+  })) ?? [];
+
+const tags = ["VIP", "Owner", "Training"];
+---
+
+<AirpeggioLayout
+  title="Airpeggio Schedule | Samuel Dillow"
+  active="aircraft"
+>
+  <section
+    class="schedule-page"
+    style={`--schedule-days: ${days.length}; --schedule-columns: ${timelineColumns}; --day-width: ${dayWidth}px; --initial-scroll: ${initialDayIndex * dayWidth}px;`}
+    x-data="{ groupBy: 'aircraft', timezone: 'local', crewOpen: true, zoom: 'normal', pinHeader: false, syncHeader() { this.pinHeader = window.scrollY > this.$refs.board.offsetTop - 92; } }"
+    x-init="$nextTick(() => { $refs.board.scrollLeft = Number(getComputedStyle($el).getPropertyValue('--initial-scroll').replace('px', '')); syncHeader(); window.addEventListener('scroll', () => syncHeader(), { passive: true }); })"
+    :class="[`is-${zoom}`, crewOpen ? 'has-crew' : 'is-crew-collapsed']"
+  >
+    <header class="schedule-heading">
+      <a class="schedule-back" href="/portfolio/airpeggio/aircraft/" aria-label="Back to aircraft">
+        <Icon name="arrow-left" />
+      </a>
+      <h1>Schedule</h1>
+    </header>
+
+    <div class="schedule-toolbar" aria-label="Schedule controls">
+      <div class="schedule-group">
+        <span>Group By</span>
+        <div class="schedule-segment" role="group" aria-label="Group schedule by">
+          <button type="button" :class="groupBy === 'aircraft' && 'is-active'" @click="groupBy = 'aircraft'">Aircraft</button>
+          <button type="button" :class="groupBy === 'tag' && 'is-active'" @click="groupBy = 'tag'">Tag</button>
+          <button type="button" :class="groupBy === 'none' && 'is-active'" @click="groupBy = 'none'">None</button>
+        </div>
+      </div>
+
+      <Popover icon="filter" label="Filter" orientation="bottom">
+        <div class="schedule-filter">
+          <h2>Filter Schedule</h2>
+          <label>
+            <span>Activity</span>
+            <select>
+              <option>All activity</option>
+              <option>Charter Flight</option>
+              <option>Aircraft Owner Flight</option>
+              <option>Training Flight</option>
+            </select>
+          </label>
+          <label>
+            <span>Crew status</span>
+            <select>
+              <option>All assignments</option>
+              <option>Assigned crew</option>
+              <option>Qualified pilots</option>
+              <option>Conflicts only</option>
+            </select>
+          </label>
+        </div>
+      </Popover>
+
+      <div class="schedule-month">
+        <button type="button" aria-label="Previous month"><Icon name="chevron-up" /></button>
+        <button type="button" aria-label="Next month"><Icon name="chevron-down" /></button>
+        <strong>{monthLabel}</strong>
+        <button class="schedule-month__picker" type="button" aria-label="Open month picker">
+          <Icon name="chevron-down" />
+        </button>
+      </div>
+
+      <div class="schedule-timezone" role="group" aria-label="Timezone">
+        <button type="button" :class="timezone === 'local' && 'is-active'" @click="timezone = 'local'">Local</button>
+        <button type="button" :class="timezone === 'utc' && 'is-active'" @click="timezone = 'utc'">UTC</button>
+      </div>
+
+      <div class="schedule-zoom" role="group" aria-label="Zoom">
+        <button type="button" aria-label="Zoom out" @click="zoom = zoom === 'roomy' ? 'normal' : 'compact'">
+          <Icon name="zoom-out" />
+        </button>
+        <button type="button" aria-label="Zoom in" @click="zoom = zoom === 'compact' ? 'normal' : 'roomy'">
+          <Icon name="zoom-in" />
+        </button>
+      </div>
+    </div>
+
+    <p class="schedule-mode" x-show="groupBy !== 'aircraft'" x-cloak>
+      Showing the same reservations grouped by <span x-text="groupBy"></span> for demo comparison.
+    </p>
+
+    <div class="schedule-board" x-ref="board" aria-label="Aircraft and crew schedule">
+      <div
+        class="schedule-grid schedule-grid--header"
+        :style="pinHeader ? 'top: var(--air-topbar)' : 'top: 0'"
+      >
+        <div class="schedule-corner">Aircraft</div>
+        <div class="schedule-gutter"></div>
+        {
+          days.map((day) => (
+            <div class:list={["schedule-day", day.muted && "is-muted"]}>
+              <strong>{day.date}</strong>
+              <span>{day.weekday}</span>
+            </div>
+          ))
+        }
+      </div>
+
+      {
+        groups.map((group, groupIndex) => (
+          <>
+            <section
+              class="schedule-aircraft-band"
+              style={`--aircraft-color: ${group.tone.border}; --aircraft-wash: ${group.tone.wash};`}
+            >
+              <div class="schedule-aircraft-band__label">
+                <Icon name="aircraft" />
+                <span>{group.aircraft.tail}</span>
+              </div>
+            </section>
+
+            <div class="schedule-grid schedule-grid--aircraft-row">
+              <div class="schedule-row-label schedule-row-label--aircraft">
+                <strong>
+                  <Icon name="aircraft" />
+                  {group.aircraft.tail}
+                </strong>
+                <span><Icon name="pin" /> {group.aircraft.location}</span>
+                <span><Icon name="home" /> {group.aircraft.baseAirport}</span>
+                <span><Icon name="briefcase" /> {group.aircraft.model}</span>
+                <span><Icon name="hash" /> {group.aircraft.class}</span>
+              </div>
+              <div class="schedule-gutter"></div>
+              {
+                days.map((day, dayIndex) => (
+                  <div class:list={["schedule-cell", day.muted && "is-muted"]}>
+                    {(groupIndex === 0 ? [] : rowFlight(groupIndex)).filter((flight) => flight.day === dayIndex).map((flight) => (
+                      <div
+                        class="schedule-flight"
+                        style={`--flight-start: ${flight.start}%; --flight-width: ${flight.width}%; --flight-color: ${aircraftTone[flight.tone].block}; --flight-stripe: ${aircraftTone[flight.tone].stripe};`}
+                      >
+                        {flight.time && <b class="schedule-flight__time"><Icon name="refresh" /> {flight.time}</b>}
+                        {flight.from && <span>{flight.from}</span>}
+                        <i></i>
+                        {flight.to && <span>{flight.to}</span>}
+                      </div>
+                    ))}
+                  </div>
+                ))
+              }
+            </div>
+
+            <button type="button" class="schedule-crew-toggle" @click="crewOpen = !crewOpen">
+              <Icon name="chevron-up" />
+              <span x-text="crewOpen ? 'Hide crew rows' : 'Show crew rows'"></span>
+              <Icon name="chevron-up" />
+            </button>
+
+            <div class="schedule-assignment-count">
+              {groupIndex === 2 ? "3 qualified pilots" : `${group.crew.length} assigned crew`}
+            </div>
+
+            <div class="schedule-crew-rows" x-show="crewOpen">
+              {
+                group.crew.map((pilot, crewIndex) => (
+                  <div class="schedule-grid schedule-grid--crew-row">
+                    <div class="schedule-row-label">
+                      <strong>
+                        <Icon name="account" />
+                        {crewNames[groupIndex]?.[crewIndex] ?? displayName(pilot)}
+                        {crewIndex === 0 && <small>PIC</small>}
+                      </strong>
+                      {crewIndex === 0 && groupIndex === 1 && <em>Dallas</em>}
+                      {crewIndex === 1 && groupIndex === 2 && <em>{tags[crewIndex]}</em>}
+                    </div>
+                    <div class="schedule-gutter"></div>
+                    {
+                      days.map((day, dayIndex) => (
+                        <div
+                          class:list={[
+                            "schedule-cell",
+                            day.muted && "is-muted",
+                            groupIndex === 1 && crewIndex === 0 && dayIndex >= 13 && dayIndex <= 15 && "is-available",
+                            groupIndex === 1 && crewIndex === 2 && dayIndex >= 17 && "is-soft-blue",
+                          ]}
+                        >
+                          {rowFlight(groupIndex, crewIndex).filter((flight) => flight.day === dayIndex).map((flight) => (
+                            <div
+                              class:list={["schedule-flight", crewIndex === 0 && groupIndex === 1 && "has-alert"]}
+                              style={`--flight-start: ${flight.start}%; --flight-width: ${flight.width}%; --flight-color: ${aircraftTone[flight.tone].block}; --flight-stripe: ${aircraftTone[flight.tone].stripe};`}
+                            >
+                              {flight.time && <b class="schedule-flight__time"><Icon name="refresh" /> {flight.time}</b>}
+                              {flight.from && <span>{flight.from}</span>}
+                              <i></i>
+                              {flight.to && <span>{flight.to}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      ))
+                    }
+                  </div>
+                ))
+              }
+            </div>
+          </>
+        ))
+      }
+    </div>
+  </section>
+</AirpeggioLayout>
+
+<style>
+  .schedule-page {
+    --row-label-width: 170px;
+    --gutter-width: 48px;
+    --crew-row-height: 78px;
+    --aircraft-row-height: 108px;
+    display: grid;
+    gap: 22px;
+    min-width: 0;
+  }
+
+  .schedule-page.is-compact {
+    --crew-row-height: 64px;
+    --aircraft-row-height: 88px;
+  }
+
+  .schedule-page.is-roomy {
+    --crew-row-height: 92px;
+    --aircraft-row-height: 122px;
+  }
+
+  .schedule-heading {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    h1 {
+      font-size: 20px;
+      line-height: 1.1;
+    }
+  }
+
+  .schedule-back {
+    width: 24px;
+    height: 24px;
+    display: inline-grid;
+    place-items: center;
+    color: var(--air-ink);
+    text-decoration: none;
+    border-radius: 6px;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--air-panel-soft);
+      outline: none;
+    }
+  }
+
+  .schedule-toolbar {
+    display: grid;
+    grid-template-columns: max-content max-content 1fr max-content max-content;
+    grid-template-areas:
+      "group filter . . ."
+      "month month . timezone zoom";
+    align-items: center;
+    gap: 12px;
+    row-gap: 24px;
+
+    @media (max-width: 1180px) {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "group filter"
+        "month timezone"
+        ". zoom";
+      align-items: start;
+    }
+
+    @media (max-width: 680px) {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "group"
+        "filter"
+        "month"
+        "timezone"
+        "zoom";
+    }
+  }
+
+  .schedule-group {
+    grid-area: group;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    > span {
+      font-size: 14px;
+    }
+  }
+
+  .schedule-toolbar > :nth-child(2) {
+    grid-area: filter;
+  }
+
+  .schedule-segment,
+  .schedule-timezone {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px;
+    border: 1px solid #ccd5e2;
+    border-radius: 6px;
+    background: #fff;
+
+    button {
+      min-height: 32px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: #4b5565;
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+
+      &.is-active {
+        background: var(--air-purple);
+        color: #fff;
+      }
+    }
+  }
+
+  .schedule-month {
+    grid-area: month;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+
+    strong {
+      min-width: 150px;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    button {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--air-ink);
+      cursor: pointer;
+
+      &:hover,
+      &:focus-visible {
+        background: var(--air-panel-soft);
+        outline: none;
+      }
+    }
+
+    button:first-child,
+    button:nth-child(2) {
+      transform: rotate(-90deg);
+    }
+  }
+
+  .schedule-timezone {
+    grid-area: timezone;
+    justify-self: center;
+  }
+
+  .schedule-zoom {
+    grid-area: zoom;
+    justify-self: end;
+    display: flex;
+    gap: 8px;
+
+    button {
+      width: 32px;
+      height: 32px;
+      display: inline-grid;
+      place-items: center;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--air-ink);
+      cursor: pointer;
+
+      &:hover,
+      &:focus-visible {
+        background: var(--air-panel-soft);
+        outline: none;
+      }
+    }
+  }
+
+  .schedule-filter {
+    width: 260px;
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+
+    h2 {
+      font-size: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--air-muted);
+      font-size: 12px;
+    }
+
+    select {
+      min-height: 34px;
+      border: 1px solid var(--air-line);
+      border-radius: 6px;
+      padding: 0 10px;
+      color: var(--air-ink);
+      font: inherit;
+      font-size: 13px;
+      background: #fff;
+    }
+  }
+
+  .schedule-mode {
+    margin-top: -10px;
+    color: var(--air-muted);
+    font-size: 13px;
+  }
+
+  .schedule-board {
+    overflow: auto;
+    border: 1px solid var(--air-line);
+    background: #fff;
+  }
+
+  .schedule-grid {
+    min-width: calc(var(--row-label-width) + var(--gutter-width) + var(--schedule-days) * var(--day-width));
+    display: grid;
+    grid-template-columns: var(--row-label-width) var(--gutter-width) var(--schedule-columns);
+  }
+
+  .schedule-grid--header {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: #fff;
+  }
+
+  .schedule-corner,
+  .schedule-gutter,
+  .schedule-day,
+  .schedule-row-label,
+  .schedule-cell {
+    border-right: 1px solid var(--air-line);
+    border-bottom: 1px solid var(--air-line);
+  }
+
+  .schedule-corner,
+  .schedule-row-label {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #fff;
+  }
+
+  .schedule-corner {
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 18px;
+  }
+
+  .schedule-gutter {
+    background: #fbfcfe;
+  }
+
+  .schedule-day {
+    min-height: 56px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 2px;
+    font-size: 12px;
+
+    strong {
+      font-size: 13px;
+    }
+
+    span {
+      color: var(--air-ink);
+    }
+
+    &.is-muted {
+      background: #eef2f6;
+    }
+  }
+
+  .schedule-aircraft-band {
+    min-width: calc(var(--row-label-width) + var(--gutter-width) + var(--schedule-days) * var(--day-width));
+    display: grid;
+    grid-template-columns: var(--row-label-width) var(--gutter-width) var(--schedule-columns);
+    background: var(--aircraft-wash);
+    color: var(--aircraft-color);
+    border-bottom: 2px solid var(--aircraft-color);
+  }
+
+  .schedule-aircraft-band__label {
+    grid-column: 3 / -1;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 14px;
+
+    :global(.air-icon) {
+      width: 22px;
+      height: 22px;
+      padding: 3px;
+      border-radius: 6px;
+      background: #fff;
+    }
+  }
+
+  .schedule-assignment-count {
+    min-width: calc(var(--row-label-width) + var(--gutter-width) + var(--schedule-days) * var(--day-width));
+    min-height: 26px;
+    display: grid;
+    place-items: center;
+    border-bottom: 1px solid var(--air-line);
+    background: #fbfcfe;
+    font-size: 13px;
+  }
+
+  .schedule-grid--aircraft-row {
+    min-height: var(--aircraft-row-height);
+  }
+
+  .schedule-grid--crew-row {
+    min-height: var(--crew-row-height);
+  }
+
+  .schedule-row-label {
+    display: grid;
+    align-content: center;
+    gap: 4px;
+    padding: 10px 14px;
+    font-size: 14px;
+
+    strong,
+    span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    span {
+      width: max-content;
+      max-width: 100%;
+      min-height: 18px;
+      padding: 0 6px;
+      border: 1px solid #ccd5e2;
+      border-radius: 999px;
+      color: #1f2937;
+      font-size: 11px;
+      background: #fff;
+    }
+
+    small {
+      padding: 2px 5px;
+      border-radius: 999px;
+      background: #080b10;
+      color: #fff;
+      font-size: 10px;
+      line-height: 1;
+    }
+
+    em {
+      justify-self: start;
+      min-height: 20px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #0b56c6;
+      color: #fff;
+      font-size: 12px;
+      font-style: normal;
+      line-height: 1.2;
+    }
+  }
+
+  .schedule-row-label--aircraft {
+    align-content: center;
+
+    strong {
+      font-size: 14px;
+    }
+  }
+
+  .schedule-cell {
+    position: relative;
+    min-height: inherit;
+    background: #fff;
+
+    &.is-muted {
+      background: #fbfcfe;
+    }
+
+    &.is-available {
+      background: #dcfce7;
+    }
+
+    &.is-soft-blue {
+      background: #e7f0ff;
+    }
+  }
+
+  .schedule-flight {
+    position: absolute;
+    top: 50%;
+    left: var(--flight-start);
+    width: var(--flight-width);
+    min-width: 128px;
+    min-height: 24px;
+    display: grid;
+    grid-template-columns: max-content 38px max-content;
+    align-items: center;
+    gap: 4px;
+    transform: translateY(-50%);
+    color: var(--flight-color);
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
+
+    i {
+      height: 16px;
+      min-width: 38px;
+      border-radius: 5px;
+      background:
+        repeating-linear-gradient(
+          45deg,
+          color-mix(in srgb, var(--flight-color) 86%, #fff 14%) 0 8px,
+          color-mix(in srgb, var(--flight-stripe) 84%, #fff 16%) 8px 16px
+        );
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.16);
+    }
+
+    &.has-alert i {
+      background:
+        repeating-linear-gradient(
+          45deg,
+          #f2404e 0 8px,
+          #ffb0b5 8px 16px
+        );
+    }
+  }
+
+  .schedule-flight__time {
+    position: absolute;
+    left: -10px;
+    top: -28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 24px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--air-ink);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+    font-size: 12px;
+
+    :global(.air-icon) {
+      color: var(--air-purple);
+    }
+  }
+
+  .schedule-crew-toggle {
+    min-width: calc(var(--row-label-width) + var(--gutter-width) + var(--schedule-days) * var(--day-width));
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 0;
+    border-bottom: 1px solid var(--air-line);
+    background: #fff;
+    color: var(--air-ink);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: #fbfcfe;
+      outline: none;
+    }
+  }
+
+  [x-cloak] {
+    display: none !important;
+  }
+</style>

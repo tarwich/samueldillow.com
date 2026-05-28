@@ -5,55 +5,51 @@ description: New tools solve old pain and bring their own. Find the tradeoffs be
 pubDate: 2026-05-26
 image:
   src: /writing/three-things-you-cant-stand.svg
-  alt: Two software stacks on a workbench with warning flags marking the tradeoffs in each.
+  alt: Two pale rock stacks, one with three dark stones on top and one with three dark stones visible at the bottom.
 category: Technology
 tags:
   - writing
 featured: true
 ---
 
-Every tech stack has one tool that makes you mutter at your monitor.
+## The Three Things Rule
 
-It is somehow critical to the process, but it has three<sup>[[1]](#1)</sup> things you can't stand. I notice this most often in programming languages:
+It seems like in every tech stack there's one tool that frustrates you. It's somehow critical to the process, but it has three<sup>[[1]](#1)</sup> things you just can't stand. I often find this in programming languages:
 
-- JavaScript has [floating point weirdness](https://0.30000000000000004.com/)
-- Objective-C uses entire essays as function names
-- PHP can make performance feel like a personal dispute
+- JavaScript [can't handle floating point numbers](https://0.30000000000000004.com/)
+- Objective C uses entire essays as function names
+- PHP tends to have irritating performance issues
 
-Then someone shows up with a shiny new tool or programming language, and it fixes those three problems. You breathe a deep sigh of relief. You adopt it as quickly as possible. You start rolling it through the ecosystem and, for a brief and beautiful moment, you think the industry may have finally learned its lesson.
+So then someone comes along with a new shiny tool or programming language and it solves those three issues. You breathe a deep sigh of relief and snatch up that new shiny as quickly as possible. As you start massively deploying it throughout your ecosystem you practically giggle with delight. Until it happens:
 
-Then the new tool shows you its teeth.
+You discover something you hate about this new tool. It had so much promise! As
+it turns out, you end up finding as many intolerable things about the new tool
+as you couldn't stand with the old tool. I call this "the three things" rule.
 
-It has problems too. Sometimes they are smaller. Sometimes they are worse. Sometimes they are just different enough that you do not recognize them until they are already wired into your deployment pipeline. I call this the three things rule: every tool has a short list of things you will eventually hate about it.
+So what do you do? Do you just never adopt new technology? Do you become a technology hermit and always use the old and proven technology, preventing the update headaches? It certainly sounds tempting -- especially in this world when new security concerns pop up every few minutes.
 
-That does not mean you should become a technology hermit and refuse every new thing. It does mean you should find the tradeoffs before you bet the system on them.
+### Find the three things first
 
-## Find the three things first
+The biggest problem with the three things is deploying a solution without knowing what those three things are going to be. There's no way to plan for them or know which parts of your system should stay on the old tech and what should move to the new tech.
 
-The biggest mistake is deploying the new solution before you know what its three things are. Until you know them, you cannot plan around them. You cannot tell which parts of the system should move and which parts should stay boring.
+Find a way to kick the tires of the new tool before you gut the old system. Don't rip out the old stuff yet, but maybe spend a [spike](<https://en.wikipedia.org/wiki/Spike_(software_development)>) on using the new thing. Maybe run it on a side project at home. Get to know it until you can figure out what the three things are first.
 
-Find a way to kick the tires before you gut the old system. Spend a [spike](<https://en.wikipedia.org/wiki/Spike_(software_development)>) on the new thing. Use it for a side project. Put it through a task that looks like your real work, not the happy-path demo from the homepage.
+Once you find the three things with the new tech you might find they're unbearable but would never surface in your current stack. You discover they'd affect you but be less painful than what you have now. Or you might find they're worse and you dodged a bullet.
 
-Once you find the three things, you can make a real decision. Maybe the problems are ugly, but they would never show up in your system. Maybe they would affect you, but they are still less painful than what you have now. Or maybe they are worse, and you just saved yourself six months of pretending the migration is almost done.
+### Use it in low-risk areas
 
-## Use it in low-risk areas
+Deploy the new tech in an area you only touch once a month. Or you could deploy it in an area where there's a large tolerance for failure. This allows you to get familiar with the new tech and discover the shortcomings organically without shooting yourself in the foot.
 
-If you do adopt the new thing, start where failure is annoying instead of catastrophic. Use it in an area you only touch once a month. Use it behind an internal tool. Use it where the blast radius is small and the rollback story is not "everyone panic."
+For the critical infrastructure, you definitely want to wait before applying the new tech. You might never apply it. Sometimes the pain of the old frustrating thing is better than the pain of unknown failure. There are areas where you just stick with the old.
 
-That gives you room to learn the tool honestly. You can discover the sharp edges while they are still just sharp edges, not production incidents with calendar invites.
+### Keep track of the things
 
-For critical infrastructure, wait. You might never move it. Sometimes the old frustrating thing is still better than a new failure mode you do not understand yet.
+You really ought to somehow keep track of the things you can't stand. Be it in a journal, email, or social media post. We have a way of romanticizing the unfamiliar, which means you could easily forget the problems and go back to something that ends up being a thorn in your side.
 
-## Keep track of the things
+In the same way, you might check back in on old tech that used to frustrate you. You might find they've fixed one of the three things, and it's worth checking in on again. If you do choose to go that route, you still want to court it as you would with a brand new tech.
 
-Keep track of what you hate.
+As much as it seems obvious what those three things were, time has a way of making you forget the times you wanted to slam your head into a wall. So do something to help you keep track of them for later.
 
-That sounds petty, but it is useful. Write it in a note, an email, a ticket, or a private rant you have the wisdom not to publish. The format matters less than the memory. We romanticize unfamiliar tools, and we also romanticize old tools once the bruises fade.
-
-The record also gives you a reason to check back later. An old tool may have fixed one of the things that drove you away. A new tool may have made one of its tradeoffs worse. Either way, you are judging the tool you actually have now, not the version that annoyed you three years ago.
-
-As obvious as those problems feel in the moment, time has a way of making you forget the exact shape of the pain. Keep the list. Future you is going to be tempted by a migration deck with clean diagrams.
-
-## Footnotes
+### Footnotes
 
 <a id="1"></a>1: It's not always exactly three, but it's usually a small number.

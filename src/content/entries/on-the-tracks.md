@@ -13,6 +13,7 @@ tags:
   - suicide
   - writing
 featured: false
+hidden: true
 ---
 
 I stand on the tracks, admiring the strength of the steel. For years, heavy trains have rolled and ground along these rails, which stand still today. Aside from a mark or two they're none the less for wear. I can feel the heat radiating from the searing metal glistening in the sun.

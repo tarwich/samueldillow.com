@@ -5,7 +5,7 @@ const baseEntry = z.object({
   title: z.string(),
   description: z.string(),
   pubDate: z.date(),
-  locale: z.enum(["en", "es"]).default("en"),
+  locale: z.enum(['en', 'es']).default('en'),
   translationOf: z.string().optional(),
   image: z.object({
     src: z.string(),
@@ -13,6 +13,7 @@ const baseEntry = z.object({
   }),
   tags: z.array(z.string()).default([]),
   featured: z.boolean().default(false),
+  hidden: z.boolean().default(false).optional(),
 });
 
 const writingEntry = baseEntry.extend({

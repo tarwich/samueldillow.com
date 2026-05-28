@@ -1,11 +1,12 @@
 ---
-import { getCollection } from "astro:content";
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import { isWritingEntry, writingHref, writingLocale } from "../../lib/writing";
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { isWritingEntry, writingHref, writingLocale } from '../../lib/writing';
 
-const posts = (await getCollection("entries"))
+const posts = (await getCollection('entries'))
   .filter(isWritingEntry)
-  .filter((post) => writingLocale(post) === "en")
+  .filter((post) => writingLocale(post) === 'en')
+  .filter((post) => !post.data.hidden)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
@@ -16,7 +17,10 @@ const posts = (await getCollection("entries"))
   <section class="site-shell page-title page-title--with-actions">
     <div>
       <h1>Writing</h1>
-      <p>Technical notes, Christian essays, Bible reflections, and project write-ups.</p>
+      <p>
+        Technical notes, Christian essays, Bible reflections, and project
+        write-ups.
+      </p>
     </div>
     <nav class="language-switch" aria-label="Writing language">
       <a class="is-active" href="/writing/" aria-current="page">English</a>
@@ -24,8 +28,15 @@ const posts = (await getCollection("entries"))
     </nav>
   </section>
   <section class="site-shell list-page writing-book-feature">
-    <a class="list-card list-card--with-image book-list-card" href="/books/why-be-happy/">
-      <img src="/books/why-be-happy/cover.webp" alt="Why Be Happy book cover mockup" loading="lazy" />
+    <a
+      class="list-card list-card--with-image book-list-card"
+      href="/books/why-be-happy/"
+    >
+      <img
+        src="/books/why-be-happy/cover.webp"
+        alt="Why Be Happy book cover mockup"
+        loading="lazy"
+      />
       <div>
         <div class="mono-label">Featured book</div>
         <h2>Why Be Happy?</h2>
@@ -45,13 +56,19 @@ const posts = (await getCollection("entries"))
     {
       posts.map((post) => (
         <a class="list-card list-card--with-image" href={writingHref(post)}>
-          <img src={post.data.image.src} alt={post.data.image.alt} loading="lazy" />
+          <img
+            src={post.data.image.src}
+            alt={post.data.image.alt}
+            loading="lazy"
+          />
           <div>
             <div class="mono-label">{post.data.category}</div>
             <h2>{post.data.title}</h2>
             <p>{post.data.description}</p>
             <div class="tag-row">
-              {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+              {post.data.tags.map((tag) => (
+                <span class="tag">{tag}</span>
+              ))}
             </div>
           </div>
         </a>

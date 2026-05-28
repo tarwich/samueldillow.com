@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import { readdir, readFile, mkdir, writeFile, stat, chmod } from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import { spawn } from "node:child_process";
@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { parse as parseYaml } from "yaml";
 
 const TYPST_VERSION = "0.14.2";
-const PROJECT_ROOT = resolve(import.meta.dir, "..");
+const PROJECT_ROOT = resolve(import.meta.dirname, "..");
 const RESUME_DIR = join(PROJECT_ROOT, "src/content/resume");
 const OUTPUT_PDF = join(PROJECT_ROOT, "public/resume/samuel-dillow-resume.pdf");
 const CACHE_DIR = join(PROJECT_ROOT, "node_modules/.cache/typst", TYPST_VERSION);

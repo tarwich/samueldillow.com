@@ -4,7 +4,7 @@ title: The Three Things Rule
 description: Every tool has problems. Find the ones you can't live with before you bet the system on it.
 pubDate: 2026-05-26
 image:
-  src: /writing/three-things-you-cant-stand.png
+  src: /writing/three-things-rule.png
   alt: Two piles of white rocks, one with three dark rocks on top and one with three dark rocks buried inside.
 category: Technology
 tags:

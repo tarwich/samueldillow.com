@@ -4,8 +4,8 @@ title: Three Things You Can't Stand
 description: New tools solve old pain and bring their own. Find the tradeoffs before you bet the system on them.
 pubDate: 2026-05-26
 image:
-  src: /writing/three-things-you-cant-stand.svg
-  alt: Two pale rock stacks, one with three dark stones on top and one with three dark stones visible at the bottom.
+  src: /writing/three-things-you-cant-stand.png
+  alt: Two piles of white rocks, one with three dark rocks on top and one with three dark rocks buried inside.
 category: Technology
 tags:
   - writing

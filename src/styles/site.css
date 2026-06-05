@@ -727,6 +727,7 @@ a.lane:focus-visible {
 }
 
 .article-prose {
+  max-width: 900px;
   border-color: rgba(199, 186, 165, 0.86);
   padding: clamp(24px, 4vw, 46px);
   background:

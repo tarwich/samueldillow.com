@@ -3,10 +3,10 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 const highlights = [
-  "Part-time and freelance availability",
+  "Full-time senior and staff roles",
+  "Fractional staff engineering",
   "Senior product engineering",
   "AI workflow implementation",
-  "Infrastructure and hosting operations",
 ];
 
 const recruiterStats = [
@@ -80,8 +80,8 @@ const skillFilters = [
 
 const engagementTypes = [
   {
-    title: "Fractional senior engineer",
-    body: "Part-time product delivery, code review, architecture direction, and execution support for small teams.",
+    title: "Fractional staff engineer",
+    body: "Technical direction, code review, product delivery, and execution support for small teams that need senior help before, beside, or instead of a full-time hire.",
   },
   {
     title: "Freelance builds",
@@ -221,19 +221,20 @@ const currentRange = currentStartYear ? `${currentStartYear} - Present` : "";
 
 <BaseLayout
   title="Resume | Samuel Dillow"
-  description="Resume for Samuel Dillow: senior software engineer available for part-time and freelance product engineering, AI workflows, SaaS, hosting, and infrastructure work."
+  description="Resume for Samuel Dillow: senior and fractional staff engineer for AI, SaaS, operational software, product engineering, hosting, and infrastructure work."
 >
   <section class="site-shell resume-hero">
     <div>
-      <div class="identity-line">// Available for part-time and freelance tech work</div>
-      <h1>Senior engineer for practical systems.</h1>
+      <div class="identity-line">// Available for full-time, fractional, and freelance tech work</div>
+      <h1>Fractional staff engineer for AI, SaaS, and operational software.</h1>
       <p class="lead">
         I help small teams ship practical software, AI workflows, SaaS features,
-        automation, and infrastructure fixes without needing a full-time hire.
+        automation, and infrastructure fixes, whether as a full-time senior
+        engineer or fractional technical lead.
       </p>
       <p class="resume-brief">
-        Most useful when the work crosses product code, backend systems, hosting,
-        and real operational constraints.
+        Most useful when the work crosses product code, backend systems,
+        hosting, and real operational constraints.
       </p>
       <div class="actions">
         <a class="button primary-button" href="mailto:samuel@samueldillow.com">Start a conversation</a>
@@ -249,7 +250,7 @@ const currentRange = currentStartYear ? `${currentStartYear} - Present` : "";
       <dl>
         <div>
           <dt>Looking for</dt>
-          <dd>Part-time, freelance, and fractional senior engineering work</dd>
+          <dd>Full-time senior or staff engineering, fractional staff engineering, and focused freelance builds</dd>
         </div>
         <div>
           <dt>Best fit</dt>

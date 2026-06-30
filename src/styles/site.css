@@ -134,6 +134,17 @@ a {
   line-height: 1.16;
 }
 
+.hero-statement {
+  max-width: 650px;
+  margin: 22px 0 0;
+  border-left: 3px solid var(--sage);
+  padding-left: 18px;
+  color: var(--muted);
+  font-family: var(--serif);
+  font-size: clamp(1.15rem, 1.45vw, 1.42rem);
+  line-height: 1.28;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

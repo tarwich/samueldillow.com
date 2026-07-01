@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1536" role="img" aria-labelledby="title desc">
+  <title id="title">AI-first workflow with separate escape hatch</title>
+  <desc id="desc">A polished workflow diagram showing bugs and features going to AI first, then through explanation, drafting, human review, updated guidance, and a separate escape hatch route where a human takes over.</desc>
+  <image href="ai-first-workflow-diagram-base.png" width="1024" height="1536" />
+  <style>
+    text {
+      fill: #1d2a33;
+      font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .node {
+      font-size: 34px;
+      dominant-baseline: middle;
+    }
+
+    .center {
+      text-anchor: middle;
+    }
+
+    .route {
+      fill: #9d4f1e;
+      font-size: 30px;
+      font-weight: 850;
+      text-anchor: middle;
+    }
+
+    .right-node {
+      font-size: 27px;
+      text-anchor: start;
+    }
+
+    .caption {
+      fill: #51606a;
+      font-size: 23px;
+      font-weight: 650;
+      text-anchor: middle;
+    }
+  </style>
+  <text class="node" x="250" y="184">Bug</text>
+  <text class="node" x="648" y="184">Feature</text>
+  <text class="node center" x="526" y="435">AI explains</text>
+  <text class="node center" x="505" y="651">
+    <tspan x="505" dy="-20">AI-first</tspan>
+    <tspan x="505" dy="46">draft</tspan>
+  </text>
+  <text class="node center" x="498" y="891">
+    <tspan x="498" dy="-20">Human</tspan>
+    <tspan x="498" dy="46">review</tspan>
+  </text>
+  <text class="node right-node" x="852" y="577">Guidance</text>
+  <text class="node right-node" x="852" y="882">
+    <tspan x="852" dy="-17">Update</tspan>
+    <tspan x="852" dy="38">guidance</tspan>
+  </text>
+  <text class="node" x="468" y="1335">
+    <tspan x="468" dy="-20">Finish it</tspan>
+    <tspan x="468" dy="46">myself</tspan>
+  </text>
+  <text class="route" x="105" y="938" transform="rotate(-18 105 938)">
+    <tspan x="105" dy="-18">Escape</tspan>
+    <tspan x="105" dy="40">hatch</tspan>
+  </text>
+  <text class="caption" x="512" y="1486">AI goes first. Review improves guidance. The escape hatch is always available.</text>
+</svg>

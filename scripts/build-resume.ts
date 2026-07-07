@@ -201,7 +201,7 @@ function renderDocument(entries: Entry[]): string {
 #text(size: 12pt, weight: "bold")[Senior engineer for practical systems.]
 
 #v(0.4em)
-#text(size: 9pt)[samuel\\@samueldillow.com #h(0.5em) | #h(0.5em) samueldillow.com/resume #h(0.5em) | #h(0.5em) github.com/tarwich]
+#text(size: 9pt)[samuel\\@samueldillow.com #h(0.5em) | #h(0.5em) samueldillow.com/resume #h(0.5em) | #h(0.5em) 501-551-4868 #h(0.5em) | #h(0.5em) linkedin.com/in/samueldillow]
 
 #v(0.9em)
 ${esc(lead1)}

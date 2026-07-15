@@ -25,6 +25,15 @@ type Entry = {
   tags: string[];
   emphasis: "promoted" | "normal" | "subdued";
   location?: string;
+  hideFromResume: boolean;
+  clientEngagements: {
+    company: string;
+    role: string;
+    dateLabel?: string;
+    summary: string;
+    bullets: string[];
+    tags: string[];
+  }[];
 };
 
 const exists = async (path: string) => {
@@ -95,6 +104,8 @@ function parseFrontmatter(raw: string): Entry {
     tags: data.tags ?? [],
     emphasis: data.emphasis ?? "normal",
     location: data.location,
+    hideFromResume: data.hideFromResume ?? false,
+    clientEngagements: data.clientEngagements ?? [],
   };
 }
 
@@ -103,7 +114,9 @@ async function loadEntries(): Promise<Entry[]> {
   const entries = await Promise.all(
     files.map(async (f: string) => parseFrontmatter(await readFile(join(RESUME_DIR, f), "utf8"))),
   );
-  return entries.sort((a: Entry, b: Entry) => b.startDate.valueOf() - a.startDate.valueOf());
+  return entries
+    .filter((entry: Entry) => !entry.hideFromResume)
+    .sort((a: Entry, b: Entry) => b.startDate.valueOf() - a.startDate.valueOf());
 }
 
 const formatRange = (start: Date, end?: Date) =>
@@ -130,6 +143,31 @@ function renderEntry(e: Entry): string {
   lines.push(``);
   lines.push(`  ${esc(e.summary)}`);
   lines.push(``);
+  if (e.clientEngagements.length > 0) {
+    lines.push(`  #text(size: 8.5pt, weight: "bold")[Selected client engagements]`);
+    lines.push(``);
+    for (const engagement of e.clientEngagements) {
+      const date = engagement.dateLabel
+        ? ` #h(0.45em) | #h(0.45em) ${esc(engagement.dateLabel)}`
+        : "";
+      lines.push(`  #block(below: 0.7em, inset: (left: 0.65em))[`);
+      lines.push(`    #text(size: 9.5pt, weight: "bold")[${esc(engagement.company)}]#text(size: 8.5pt)[${date}] \\`);
+      lines.push(`    #text(size: 8.5pt)[${esc(engagement.role)}] \\`);
+      lines.push(`    #text(size: 9pt)[${esc(engagement.summary)}]`);
+      if (engagement.bullets.length > 0) {
+        lines.push(`    #list(spacing: 0.35em,`);
+        for (const bullet of engagement.bullets) {
+          lines.push(`      [#text(size: 8.7pt)[${esc(bullet)}]],`);
+        }
+        lines.push(`    )`);
+      }
+      if (engagement.tags.length > 0) {
+        lines.push(`    #text(size: 7.7pt, fill: rgb("#555"))[Skills: ${esc(engagement.tags.join(", "))}]`);
+      }
+      lines.push(`  ]`);
+    }
+    lines.push(``);
+  }
   if (e.bullets.length > 0) {
     lines.push(`  #list(spacing: 0.7em,`);
     for (const b of e.bullets) {

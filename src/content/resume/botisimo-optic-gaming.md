@@ -35,6 +35,7 @@ tags:
   - Streaming
   - Analytics
 emphasis: normal
+hideFromResume: true
 ---
 
 Chip Armstrong had a problem. He was an online streamer who wanted to broadcast on multiple platforms at once — Twitch and YouTube at the same time — but Twitch didn't support that. He also wanted to talk to viewers on every platform without juggling tabs, and he wanted his Twitch viewers to see what people on YouTube were saying, and vice versa. On top of that, he wanted to run promotions, raffles, and giveaways across all of his channels at the same time.

@@ -25,4 +25,5 @@ tags:
   - network
   - hosting
 emphasis: normal
+hideFromResume: true
 ---

@@ -76,6 +76,19 @@ const resume = defineCollection({
     tags: z.array(z.string()).default([]),
     emphasis: z.enum(["promoted", "normal", "subdued"]).default("normal"),
     location: z.string().optional(),
+    hideFromResume: z.boolean().default(false),
+    clientEngagements: z
+      .array(
+        z.object({
+          company: z.string(),
+          role: z.string(),
+          dateLabel: z.string().optional(),
+          summary: z.string(),
+          bullets: z.array(z.string()).default([]),
+          tags: z.array(z.string()).default([]),
+        }),
+      )
+      .default([]),
   }),
 });
 

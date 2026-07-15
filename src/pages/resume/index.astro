@@ -144,6 +144,13 @@ const jobText = (job: {
   summary: string;
   bullets: string[];
   tags: string[];
+  clientEngagements: {
+    company: string;
+    role: string;
+    summary: string;
+    bullets: string[];
+    tags: string[];
+  }[];
 }) =>
   normalize([
     job.company,
@@ -151,6 +158,13 @@ const jobText = (job: {
     job.summary,
     ...job.bullets,
     ...job.tags,
+    ...job.clientEngagements.flatMap((engagement) => [
+      engagement.company,
+      engagement.role,
+      engagement.summary,
+      ...engagement.bullets,
+      ...engagement.tags,
+    ]),
   ].join(" "));
 
 const getMatchingSkills = (job: {
@@ -159,6 +173,13 @@ const getMatchingSkills = (job: {
   summary: string;
   bullets: string[];
   tags: string[];
+  clientEngagements: {
+    company: string;
+    role: string;
+    summary: string;
+    bullets: string[];
+    tags: string[];
+  }[];
 }) => {
   const text = jobText(job);
   const searchableText = ` ${text} `;
@@ -177,6 +198,7 @@ const formatDateRange = (start: Date, end?: Date) => {
 };
 
 const sorted = allEntries
+  .filter((entry) => !entry.data.hideFromResume)
   .map((entry) => ({
     ...entry.data,
     id: entry.id,
@@ -352,6 +374,31 @@ const currentRange = currentStartYear ? `${currentStartYear} - Present` : "";
                     {job.bullets.map((bullet) => <li>{bullet}</li>)}
                   </ul>
                 )}
+                {job.clientEngagements.length > 0 && (
+                  <div class="client-engagements">
+                    <div class="mono-label">Selected client engagements</div>
+                    {job.clientEngagements.map((engagement) => (
+                      <section class="client-engagement">
+                        <div class="client-engagement-heading">
+                          <h4>{engagement.company}</h4>
+                          {engagement.dateLabel && <span>{engagement.dateLabel}</span>}
+                        </div>
+                        <div class="client-engagement-role">{engagement.role}</div>
+                        <p>{engagement.summary}</p>
+                        {engagement.bullets.length > 0 && (
+                          <ul>
+                            {engagement.bullets.map((bullet) => <li>{bullet}</li>)}
+                          </ul>
+                        )}
+                        {engagement.tags.length > 0 && (
+                          <div class="tag-row">
+                            {engagement.tags.map((tag) => <span class="tag">{tag}</span>)}
+                          </div>
+                        )}
+                      </section>
+                    ))}
+                  </div>
+                )}
                 {job.tags.length > 0 && (
                   <div class="tag-row">
                     {job.tags.map((tag) => <span class="tag">{tag}</span>)}
@@ -393,6 +440,31 @@ const currentRange = currentStartYear ? `${currentStartYear} - Present` : "";
                     <ul>
                       {job.bullets.map((bullet) => <li>{bullet}</li>)}
                     </ul>
+                  )}
+                  {job.clientEngagements.length > 0 && (
+                    <div class="client-engagements">
+                      <div class="mono-label">Selected client engagements</div>
+                      {job.clientEngagements.map((engagement) => (
+                        <section class="client-engagement">
+                          <div class="client-engagement-heading">
+                            <h4>{engagement.company}</h4>
+                            {engagement.dateLabel && <span>{engagement.dateLabel}</span>}
+                          </div>
+                          <div class="client-engagement-role">{engagement.role}</div>
+                          <p>{engagement.summary}</p>
+                          {engagement.bullets.length > 0 && (
+                            <ul>
+                              {engagement.bullets.map((bullet) => <li>{bullet}</li>)}
+                            </ul>
+                          )}
+                          {engagement.tags.length > 0 && (
+                            <div class="tag-row">
+                              {engagement.tags.map((tag) => <span class="tag">{tag}</span>)}
+                            </div>
+                          )}
+                        </section>
+                      ))}
+                    </div>
                   )}
                   {showcased && job.tags.length > 0 && (
                     <div class="tag-row">

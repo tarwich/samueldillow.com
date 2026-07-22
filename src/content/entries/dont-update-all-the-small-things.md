@@ -12,7 +12,7 @@ tags:
   - state management
   - programming
   - frontend
-featured: false
+featured: true
 ---
 
 I've been seeing people struggle with reactive coding a lot lately and I totally

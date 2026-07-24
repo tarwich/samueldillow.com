@@ -50,36 +50,30 @@ just professionally themed Netflix.
   ></iframe>
 </div>
 
-Start here because the rest of the advice isn't much use if nobody finds you.
-Sharghi explains how recruiters search LinkedIn. They don't know your name, so
-they combine a role, location, skills, tools, industries, and employers until
-the right people appear.
+This was the part that let me stop applying for jobs. Once my LinkedIn profile
+was set up properly, I started getting about one recruiter call a week.
 
-That means your profile needs the words a recruiter would actually search for.
-Put the relevant technologies, tools, and skills in your About, Experience,
-and Skills sections. LinkedIn also lets you upload a résumé under its job
-application settings, which can give the system another source of keywords.
+Sharghi explains that recruiters search by combining a role, location, skills,
+tools, industries, and employers. Use the terms they would actually search for
+in your About, Experience, and Skills sections, then give them a reason to stop
+by describing results instead of listing duties. She also covers keeping your
+public activity professional: recruiters can see the argument you had with a
+stranger at 1:14 a.m..
 
-Keywords get you into the results. Your results get the recruiter to stop.
-Replace duty statements such as "managed a team of 10" with what changed
-because you managed them. Use numbers when you have honest ones: revenue,
-time saved, costs reduced, defects caught, customers served, or whatever
-success looked like in that job.
+One setting I would add is **Open to → Finding a new job**. Fill in the roles
+and locations you want, then set **Visibility → Recruiters only**. This avoids
+the public #OpenToWork photo frame. LinkedIn tries to hide the signal from your
+current company, but it [can't guarantee complete
+privacy](https://www.linkedin.com/help/linkedin/answer/a507593).
 
-The video also covers the parts people skip:
+Once the calls start, use them as feedback. Pay attention to the positions
+recruiters bring you. If they are close but not quite right, change one or two
+words in your headline, about section, or skills, then see how the next few
+calls change. Small adjustments make it easier to tell which words are
+steering recruiters toward which jobs.
 
-- Build a relevant network through groups, events, and useful conversations.
-- Treat public comments as part of your professional profile. Recruiters can
-  see the argument you had with a stranger at 1:14 a.m.
-- Fix spelling and grammar. A typo is a very small reason to lose a very large
-  opportunity.
-- Check your privacy and message settings so recruiters can actually contact
-  you.
-
-The promise that recruiters will bring job offers while you sleep is a little
-optimistic. What this gives you is a searchable, credible profile that can
-start conversations without an application. That happened for me, and it is a
-much better place to begin.
+Not every call will be worth taking. The important part is that the job search
+starts coming to you.
 
 ## 2. Explain what you do in 20 words
 

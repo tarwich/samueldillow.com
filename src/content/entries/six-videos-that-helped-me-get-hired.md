@@ -35,14 +35,14 @@ just professionally themed Netflix.
 
 ## 1. Make your LinkedIn profile findable
 
-### [6 LinkedIn Mistakes Keeping You In Your Sh\*y Job](https://youtu.be/RDjwaXnToes)
+### [6 LinkedIn Mistakes Keeping You In Your Old Job](https://youtu.be/RDjwaXnToes)
 
 **Farah Sharghi · 6 minutes**
 
 <div class="video-embed video-embed--left">
   <iframe
     src="https://www.youtube-nocookie.com/embed/RDjwaXnToes"
-    title="Ex-Google Recruiter Explains: 6 LinkedIn Mistakes Keeping You In Your Shy Job"
+    title="Ex-Google Recruiter Explains: 6 LinkedIn Mistakes Keeping You In Your Old Job"
     loading="lazy"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
     referrerpolicy="strict-origin-when-cross-origin"

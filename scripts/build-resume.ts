@@ -219,7 +219,7 @@ function renderDocument(entries: Entry[]): string {
   const earlier = entries.filter((e) => !isCurrent(e));
 
   const lead1 =
-    "I help small teams ship practical software, AI workflows, SaaS features, automation, and infrastructure fixes without needing a full-time hire.";
+    "I'm the Lead Software Engineer for FMG Connect at FMG Suite. I build practical software, AI workflows, SaaS features, automation, and infrastructure.";
   const lead2 =
     "Most useful when the work crosses product code, backend systems, hosting, and real operational constraints.";
 
@@ -236,7 +236,7 @@ function renderDocument(entries: Entry[]): string {
 
 #text(size: 22pt, weight: "bold")[Samuel Dillow] \\
 #v(0.2em)
-#text(size: 12pt, weight: "bold")[Senior engineer for practical systems.]
+#text(size: 12pt, weight: "bold")[Lead Software Engineer | Product Engineering, AI, and SaaS]
 
 #v(0.4em)
 #text(size: 9pt)[samuel\\@samueldillow.com #h(0.5em) | #h(0.5em) samueldillow.com/resume #h(0.5em) | #h(0.5em) 501-551-4868 #h(0.5em) | #h(0.5em) linkedin.com/in/samueldillow]

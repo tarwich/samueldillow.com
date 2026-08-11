@@ -42,7 +42,9 @@ Underneath is a LangChain assistant grounded in each customer's own data, which 
 
 ## The Work
 
-My work has been on the product software behind those operational surfaces. The inbox is the clearest example: requests are searchable, filterable, and tied to real aviation constraints like route, passenger count, date, aircraft profile, and trip qualification. The work is not glamorous in the marketing sense. It is the kind of software where the button placement matters because someone is trying to quote a flight before another operator gets there first.
+My work included the product software behind those operational surfaces. The inbox is the clearest example: requests are searchable, filterable, and tied to real aviation constraints like route, passenger count, date, aircraft profile, and trip qualification. The work is not glamorous in the marketing sense. It is the kind of software where the button placement matters because someone is trying to quote a flight before another operator gets there first.
+
+I also added iCal integration so flight schedules can stay in sync with the external calendar apps crews and coordinators already use.
 
 The reconstruction here focuses on the inbox workflow because that is the part I have current visual references for. It shows the request table, saved inbox filters, the quick-quote modal, and the reusable shell that holds the rest of the application together.
 

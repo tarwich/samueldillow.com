@@ -22,16 +22,88 @@ board with the same résumé and hoping somebody eventually developed poor
 judgment. I followed advice from several videos, rewrote how I presented
 myself, and practiced how I would handle the conversations.
 
-These are those videos.
+Here's what I ended up doing:
 
-They aren't six versions of the same interview tips. Together, they cover the
-whole trip: make your LinkedIn profile easy for recruiters to find, give them a
-reason to keep reading, handle the first call, explain what you can do, and
-turn the interview into a conversation about the company's problems.
+1. Stop applying for jobs
 
-Watch them in this order if you're starting from scratch. More importantly, do
-the work after each one. Watching career videos without changing anything is
-just professionally themed Netflix.
+   This probably sounds counterintuitive, but I was spending all my time and
+   energy applying for jobs. Filter jobs until I find one that fits, check to
+   see if it's still valid. Fill out their form. Wait to be rejected.
+
+2. Set up my LinkedIn
+
+   The videos I watched showed what a recruiter sees when they view your 
+   LinkedIn, which helped me tailor that information to ultimately bring me
+   the recruiters I was interested in without screaming "I'm unemployed!"
+
+3. Create a presence
+
+   For me this was as simple as making a website. You need a landing page
+   to drive people to. It can be a personal website, a YouTube or Instagram
+   channel, or a LinkTree. You just need a one-stop shop for people to snag
+   your résumé, phone, and email.
+
+4. Learn to talk to recruiters
+
+   Don't talk to a recruiter like an employer. A recruiter is hunting, so
+   they're trying to get you to WIN, whereas an employer is trying to filter you
+   out. Two very different conversations.
+
+   I learned from Lucy that when a recruiter calls, they're already betting on
+   you. All you have to do is not screw it up. Be someone the recruiter enjoys
+   talking to, which means be happy, optimistic, and answer questions quickly.
+   This doesn't mean talk about your dog and make jokes. The recruiter is doing
+   a job, and you need to help them get it done quickly and cheerily.
+   
+   I call this playing tennis. The recruiter asks a question, and you send back
+   an answer. If you get an answer wrong you'll know pretty quickly and that's
+   okay. Just take note for the next time a recruiter calls.
+   
+   However, each recruiter has certain filter questions. I received about three
+   recruiter calls a week, which helped me learn by trial and error. For example
+   I learned when they ask "What is your favorite AI" the answer should be
+   Claude. It doesn't matter what AI you've used or you think is best. Just make
+   sure you say Claude and you can move on to the next round.
+   
+   The only exception is about one in five will give you a question like "tell
+   me about yourself". That's when I'll use the same answer I would for an
+   employer with one exception. I don't talk about the business goals because
+   the recruiter doesn't know them. 
+   
+5. Learn to talk to employers
+
+   The main thing I keep in my mind when talking to a potential employer is to
+   drive the conversation myself. I try to conduct myself as if I were already
+   employed in the role I'm seeking. I tell them what I want to accomplish in
+   this meeting, and how I'd like to structure it. All the while holding focus
+   on what their needs are and how I can help them meet those needs. 
+
+   Invariably an employer says "tell me about yourself" and in my experience
+   it's one of the first things they ask. For that I start with the business
+   card answer I learned from Rebecca Okamoto: _"I specialize in helping small
+   teams solve complex problems without compromising their personal goals."_ 
+   
+   Then I follow with the chronology I learned from Bill
+   (https://www.youtube.com/watch?v=TQHW7gGjrCQ). I list the items from my
+   resume that are relevant to my current job. Later they're going to ask why
+   I'm leaving my current job or why I left it, so I cut this question off at
+   the chase. At the end of my chronology I tell them _"I'm looking to grow
+   by..."_ (gaining experience with larger teams, expanding into the customer
+   service industry, delving into the new AI craze) and I end with Bill's "and
+   that's what brings me here today."
+
+   One thing I do differently from Bill is I try to imagine I've scheduled this
+   call to help out a coworker or boss. I try to ask: what's the problem you're
+   trying to solve, and what have you done so far to resolve it? This question
+   shifts the interview from "is Samuel the right person" to "what are you
+   getting into" which is ultimately the things we all kinda want to know. What
+   if the role isn't right for ME? Once the employer has shifted their focus
+   onto their problems, I start strategizing right there in the interview with
+   how to solve it. This gives me an idea of what it would be like to work with
+   the employer (are they combative, progressive, ADHD). It also gives the
+   employer the confidence to know I'm ready to start helping them with their
+   problem.
+
 
 ## 1. Make your LinkedIn profile findable
 

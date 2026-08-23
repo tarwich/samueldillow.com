@@ -151,8 +151,17 @@ export class TowersGame {
     }
   }
 
-  // Naked-single propagation: any empty cell with exactly one possible value
-  // (given current row/column placements) is filled in. Iterates until no
+  // Return whether placing a value leaves at least one legal solution. This
+  // keeps an incorrect pencil-mark deduction from becoming an answer.
+  private isValidAutoAnswer(r: number, c: number, v: number): boolean {
+    if (!this.computedCandidates(r, c).has(v)) return false;
+
+    const grid = this.grid.map((row) => row.slice());
+    grid[r][c] = v;
+    return countSolutions(grid, this.clues, 1) === 1;
+  }
+
+  // Fill row/column singles and valid single pencil marks. Iterates until no
   // more deductions are available, all within `batch`.
   private runAutoAnswer(batch: Batch): void {
     let changed = true;
@@ -162,8 +171,15 @@ export class TowersGame {
         for (let c = 0; c < SIZE; c++) {
           if (this.grid[r][c] !== 0 || this.givens[r][c]) continue;
           const possible = this.computedCandidates(r, c);
-          if (possible.size === 1) {
-            this.placeValue(batch, r, c, [...possible][0]);
+          const pencilMarks = this.displayCandidates(r, c);
+          const value =
+            possible.size === 1
+              ? [...possible][0]
+              : pencilMarks.size === 1
+                ? [...pencilMarks][0]
+                : 0;
+          if (value !== 0 && this.isValidAutoAnswer(r, c, value)) {
+            this.placeValue(batch, r, c, value);
             changed = true;
           }
         }
@@ -212,18 +228,34 @@ export class TowersGame {
       if (!this.computedCandidates(r, c).has(v)) return false;
       const batch = this.startBatch();
       this.recordCell(batch, r, c);
+      const restoringCandidate = this.removedCandidates[r][c].has(v);
       if (this.removedCandidates[r][c].has(v)) {
         this.removedCandidates[r][c].delete(v);
       } else {
         this.removedCandidates[r][c].add(v);
       }
-      return this.commitBatch(batch);
+      if (!restoringCandidate && this.autoAnswer && !this.editing) {
+        this.runAutoAnswer(batch);
+      }
+      if (this.commitBatch(batch)) {
+        if (!this.editing) this.checkWin();
+        return true;
+      }
+      return false;
     }
     const batch = this.startBatch();
     this.recordCell(batch, r, c);
-    if (this.candidates[r][c].has(v)) this.candidates[r][c].delete(v);
+    const removingCandidate = this.candidates[r][c].has(v);
+    if (removingCandidate) this.candidates[r][c].delete(v);
     else this.candidates[r][c].add(v);
-    return this.commitBatch(batch);
+    if (removingCandidate && this.autoAnswer && !this.editing) {
+      this.runAutoAnswer(batch);
+    }
+    if (this.commitBatch(batch)) {
+      if (!this.editing) this.checkWin();
+      return true;
+    }
+    return false;
   }
 
   eraseCell(r: number, c: number): boolean {

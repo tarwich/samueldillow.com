@@ -76,6 +76,20 @@ const resume = defineCollection({
     tags: z.array(z.string()).default([]),
     emphasis: z.enum(["promoted", "normal", "subdued"]).default("normal"),
     location: z.string().optional(),
+    employerContact: z
+      .object({
+        phone: z.string().optional(),
+        mailingAddress: z
+          .object({
+            street: z.string(),
+            suite: z.string().optional(),
+            city: z.string(),
+            state: z.string(),
+            postalCode: z.string(),
+          })
+          .optional(),
+      })
+      .optional(),
     hideFromResume: z.boolean().default(false),
     clientEngagements: z
       .array(

@@ -7,6 +7,7 @@ image:
   src: /writing/thankfulness-changes-everything.webp
   alt: A single Oreo and a few crumbs on a cream saucer.
 category: Mental Health
+featured: true
 tags:
   - gratitude
   - habits

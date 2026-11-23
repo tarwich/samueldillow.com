@@ -21,9 +21,10 @@ const featuredEntries = sortedEntries.filter((entry) => entry.data.featured);
 const featuredProjects = featuredEntries
   .filter((entry) => !isWritingEntry(entry))
   .slice(0, 3);
-const latestWriting = featuredEntries
+const latestWriting = sortedEntries
   .filter((entry): entry is WritingEntry => entry.data.type === 'writing')
   .filter((entry) => entry.data.locale === 'en')
+  .filter((entry) => !entry.data.hidden)
   .slice(0, 5);
 
 function entryLabel(entry: (typeof featuredEntries)[number]) {

@@ -4,8 +4,8 @@ title: Pray for Your Enemies
 description: I started out asking God to fix the people who made me miserable. Praying for their good changed what I wanted for them.
 pubDate: 2026-11-23
 image:
-  src: /writing/pray-for-your-enemies.svg
-  alt: Two cups of water waiting on opposite sides of a small table.
+  src: /writing/pray-for-your-enemies.webp
+  alt: A raised fist gripping a sword beneath dark clouds, with the words Vengeance Is Mine.
 category: Faith
 tags:
   - prayer

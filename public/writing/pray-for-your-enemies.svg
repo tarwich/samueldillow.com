@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">A place for both of us</title>
+  <desc id="desc">Two cups of water sit on opposite sides of a round table in warm afternoon light.</desc>
+  <rect width="1200" height="675" fill="#f6f1e8"/>
+  <path d="M760 0H1030L620 675H350Z" fill="#e8dfcc"/>
+  <path d="M0 510H1200V675H0Z" fill="#d6ded5"/>
+  <ellipse cx="600" cy="548" rx="350" ry="50" fill="#25342d" opacity=".1"/>
+  <path d="M440 404L406 603M760 404L794 603" fill="none" stroke="#3f4f46" stroke-width="24" stroke-linecap="round"/>
+  <ellipse cx="600" cy="369" rx="365" ry="144" fill="#8f6b49"/>
+  <ellipse cx="600" cy="349" rx="365" ry="144" fill="#c4a982"/>
+  <ellipse cx="402" cy="357" rx="84" ry="30" fill="#8f6b49" opacity=".25"/>
+  <ellipse cx="798" cy="357" rx="84" ry="30" fill="#8f6b49" opacity=".25"/>
+  <g fill="#fff8ec" stroke="#597164" stroke-width="6">
+    <path d="M345 255L355 345Q402 379 449 345L459 255Z"/>
+    <path d="M741 255L751 345Q798 379 845 345L855 255Z"/>
+  </g>
+  <g fill="#c8d4cb" stroke="#597164" stroke-width="5">
+    <ellipse cx="402" cy="255" rx="57" ry="21"/>
+    <ellipse cx="798" cy="255" rx="57" ry="21"/>
+  </g>
+  <path d="M373 286L378 333M769 286L774 333" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".7"/>
+</svg>
